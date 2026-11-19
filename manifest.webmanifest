@@ -1,0 +1,52 @@
+{
+  "id": "/",
+  "name": "BioStudy",
+  "short_name": "BioStudy",
+  "description": "Outils de biologie et de chimie pour étudiants : conversions, solutions, PCR, dilutions…",
+  "lang": "fr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#f2f2f7",
+  "categories": [
+    "education",
+    "utilities"
+  ],
+  "icons": [
+    {
+      "src": "/Pictures/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/Pictures/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/Pictures/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "BioCampus",
+      "short_name": "BioCampus",
+      "description": "Cours, TD, TP et annales par université et niveau",
+      "url": "/BioCampus/",
+      "icons": [
+        {
+          "src": "/Pictures/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}

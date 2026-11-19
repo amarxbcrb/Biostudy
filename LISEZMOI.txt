@@ -1,0 +1,44 @@
+BIOSTUDY (www.biostudy.xyz) : CONTENU DU DÉPÔT
+================================================
+Site statique d'outils de biologie et de chimie pour étudiants, par Amar Bouchareb.
+Hébergé sur Cloudflare Pages : chaque push sur la branche main est mis en ligne
+automatiquement. Tout le dépôt est public : ne jamais y mettre de mot de passe.
+
+Chaque outil = un dossier avec un seul fichier index.html (HTML, CSS et JS
+ensemble, sans framework ni étape de compilation).
+
+DOSSIERS
+  BioCampus/        Cours, TD, TP et examens partagés, classés par université
+  BioChem/          Molarité, molalité, masse volumique, solutions commerciales
+  BioConvert/       Conversions : masse, volume, concentration, moles ↔ grammes
+  BioDilu/          Dilutions : C1V1, au 1/n, en série, UFC/mL, gamme
+  BioMicro/         Microbiologie : UFC/mL, DO → cellules, ajuster une DO, croissance
+  BioPCR/           Mélange réactionnel et master mix de PCR
+  BioPrep/          Préparer solutions et milieux (recettes, check-list, PDF, IA)
+  BioBand/          Simulation de gel d'agarose (migration de l'ADN)
+  BioStat/          Biostatistique avec R pas à pas : quel test, code R, lire une
+                    sortie, tableau 2×2, réviser (plusieurs fichiers + data/*.json)
+  studio/           Espace d'administration (mot de passe) : contenus mis en avant,
+                    logo, favicon, outils masqués ou en maintenance
+  functions/        Code serveur Cloudflare (API, maintenance, icônes)
+  Pictures/         Logo et icônes de l'application
+
+FICHIERS À LA RACINE
+  index.html            Page d'accueil (référencement, liste des outils, FAQ)
+  menu-flottant.js      Menu des outils, chargé par toutes les pages
+  footer-global.js      Pied de page commun
+  liquid-glass.js       Barre d'onglets en verre (effet « Liquid Glass »)
+  haptique.js           Petite vibration à chaque clic (pages sans haptique propre)
+  verre.css, verre.js   Design de BioConvert partage par les autres outils (verre sur les cartes, theme sombre AMOLED / clair neutre, reflet, animations du resultat et des unites)
+  vitrine.js            Affiche les contenus mis en avant depuis le studio
+  sw.js                 Service worker unique (cache « réseau d'abord »)
+  manifest.webmanifest  Application installable « BioStudy » (depuis l'accueil)
+  favicon.png           Icône de l'onglet (copie de Pictures/favicon.png)
+  robots.txt, sitemap.xml   Référencement (ajouter chaque nouvel outil au sitemap)
+  _routes.json          Pages qui passent par le code serveur (voir functions/)
+  CLAUDE.md             Notes techniques détaillées pour les prochaines modifications
+
+AJOUTER UN OUTIL
+  1. Créer Dossier/index.html.  2. L'ajouter dans menu-flottant.js (mf_toolsData),
+  dans index.html (TOOLS), dans sitemap.xml, dans _routes.json, dans
+  functions/_middleware.js (OUTILS) et dans la liste du studio (OUTILS).

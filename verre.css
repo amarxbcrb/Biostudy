@@ -1,0 +1,71 @@
+/* verre.css : design de BioConvert, partagé par les autres outils.
+   Lié dans le <head> de chaque outil APRÈS son <style> (même spécificité, il gagne).
+   html[data-verre] : "calc" = outils de calcul (fenêtre d'unités en grille), "lib" = autres outils.
+   BioConvert (data-verre="own") garde ses propres règles et ne lie pas ce fichier. */
+
+/* ===== 1. Verre sur toutes les cartes (même verre que la barre) + reflet qui suit le doigt ===== */
+:is(#bc,#bg) :is(.grp,.rg,.cta,.fold),
+#bg :is(.out,.fcard,.aa-card,.pmap){position:relative;background:rgba(var(--lg-rgb),var(--lg-a));-webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);
+box-shadow:0 0 0 .5px rgba(255,255,255,.1)}
+:is(#bc,#bg) :is(.grp,.rg,.cta,.fold,.seg.cal)::after,
+#bg :is(.out,.fcard,.aa-card,.pmap)::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;
+background:radial-gradient(circle 110px at var(--mx,50%) var(--my,50%),rgba(255,255,255,.26),transparent 70%)}
+:is(#bc,#bg) :is(.grp,.rg,.cta,.fold,.seg.cal).lit::after,
+#bg :is(.out,.fcard,.aa-card,.pmap).lit::after{opacity:1}
+@media(prefers-reduced-transparency:reduce){:is(#bc,#bg) :is(.grp,.rg,.cta,.fold),#bg :is(.out,.fcard,.aa-card,.pmap){background:var(--grp);-webkit-backdrop-filter:none;backdrop-filter:none}}
+
+/* ===== 2. Sombre AMOLED : noir pur, cartes en verre translucide ===== */
+[data-theme=dark] :is(#bc,#bg){--blob:0;--grp:#0c0c0e;--lg-rgb:14,14,16;--lg-a:.72;--sep:rgba(84,84,88,.45)}
+[data-theme=dark] :is(#bc,#bg) :is(.grp,.rg,.cta,.fold),[data-theme=dark] #bg :is(.out,.fcard,.aa-card,.pmap){background:rgba(255,255,255,.065)}
+
+/* ===== 3. Clair : palette affinée, fond neutre ===== */
+html[data-theme=light]{background:#f4f4f6}
+[data-theme=light] :is(#bc,#bg){--blob:0;--tx:#0e0e10;--tx2:#5e5e66;--tx3:#8b8f9c;--sep:rgba(60,60,67,.16);--fill:rgba(118,118,128,.12);--fb:rgba(60,60,67,.26);--hair:rgba(0,0,0,.07);--lg-sh:rgba(0,0,0,.07);
+--acc-tx:color-mix(in srgb,var(--acc) 68%,#111);--brand:#0a62d6;
+--c-blue:#0a7cff;--c-indigo:#5b5bd6;--c-purple:#9b51e0;--c-pink:#f0305a;--c-orange:#f58a00;--c-green:#2fb457;--c-teal:#1fa5b8;--c-cyan:#1e9fdc;--c-mint:#0fbfb2;
+--ok:#1b8a3a;--err:#d1122b;--lg-rgb:255,255,255;--lg-a:.76;--lg-hi:rgba(255,255,255,.95)}
+[data-theme=light] :is(#bc,#bg) :is(.grp,.rg,.cta,.fold),[data-theme=light] #bg :is(.out,.fcard,.aa-card,.pmap){background:rgba(255,255,255,.86);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);box-shadow:0 0 0 .5px rgba(0,0,0,.06),0 2px 14px rgba(0,0,0,.05)}
+[data-theme=light] :is(#bc,#bg) :is(.val,.exp,.inp){background:rgba(255,255,255,.55)}
+[data-theme=light] :is(#bc,#bg) :is(.val,.exp,.inp):focus{background:#fff}
+[data-theme=light] :is(#bc,#bg) .sel{background-color:rgba(118,118,128,.12)}
+[data-theme=light] #bc .sym{box-shadow:0 2px 6px color-mix(in srgb,var(--sc) 38%,transparent)}
+[data-theme=light] #bc .num{color:#0c0d12}
+
+/* ===== 4. « Grandeur recherchée » : même verre et même lentille que la barre de navigation ===== */
+#bc .seg.cal{position:relative;padding:5px;border-radius:999px;background:rgba(var(--lg-rgb),var(--lg-a));-webkit-backdrop-filter:blur(var(--blur)) saturate(190%);backdrop-filter:blur(var(--blur)) saturate(190%);
+box-shadow:inset 0 1px 0 var(--lg-hi),0 0 0 .5px var(--hair),0 12px 30px var(--lg-sh)}
+#bc .cal .th{top:5px;bottom:5px;left:5px;width:calc((100% - 10px)/var(--n));border-radius:999px;z-index:1;
+background:var(--lens);border:1px solid var(--lens-line);box-shadow:inset 0 1px 1px rgba(255,255,255,.5),0 4px 14px rgba(0,0,0,.14);
+transition:transform .6s var(--spring),scale .3s var(--spring)}
+#bc .cal:active .th{scale:1.06 1.1}
+#bc .cal button{z-index:2;border-radius:999px;height:52px}
+#bc .cal button.on small{color:var(--acc-tx);font-weight:600}
+
+/* ===== 5. Fenêtre d'unité : grille régulière de capsules (outils de calcul) ===== */
+html[data-verre=calc] #bc .upop{width:min(316px,calc(100vw - 16px));padding:14px;border-radius:26px}
+html[data-verre=calc] #bc .upf{padding-bottom:14px;margin-bottom:14px}
+html[data-verre=calc] #bc .up-n{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding-bottom:14px;margin-bottom:10px}
+html[data-verre=calc] #bc .up-n button{min-height:40px;height:40px;padding:0 4px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:14.5px;font-weight:600;white-space:nowrap;
+transition:transform .3s var(--spring),background .2s,color .2s}
+html[data-verre=calc] #bc .up-n button:active{transform:scale(.92)}
+html[data-verre=calc] #bc .up-n button.on{background:var(--acc);color:#fff;box-shadow:0 2px 8px color-mix(in srgb,var(--acc) 40%,transparent)}
+html[data-verre=calc][data-theme=dark] #bc .up-n button.on{color:#000}
+html[data-verre=calc] #bc .up-n button[data-u*=" "]{grid-column:span 2}
+
+/* ===== 6. Formule et aide repliées, comme BioConvert (« Afficher la formule », « Comment ça marche ? ») ===== */
+#bc .fold{display:block;margin:12px 0 0;padding:0;border:0;border-radius:22px;overflow:hidden;font:inherit;font-size:15px;font-style:normal;color:var(--tx)}
+#bc .fh{width:100%;min-height:48px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;font:600 15px/1.25 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--acc-tx);transition:opacity .2s}
+#bc .fh:active{opacity:.55}
+#bc .fh svg{width:18px;height:18px;flex:none;transition:transform .45s var(--spring)}
+#bc .fold.open .fh svg{transform:rotate(90deg)}
+#bc .fx{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .5s var(--ease),opacity .35s}
+#bc .fold.open .fx{grid-template-rows:1fr;opacity:1}
+#bc .fx>div{overflow:hidden;min-height:0}
+#bc .fl .fx span{display:block;padding:2px 18px 16px;font-family:inherit;font-style:normal;font-weight:600;white-space:pre-line;text-align:left;color:var(--tx);line-height:1.45}
+#bc .how{padding:4px 18px 18px;display:flex;flex-direction:column;gap:18px;font-size:14.5px;line-height:1.45}
+#bc .how ol{margin:0;padding:0;list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:10px}
+#bc .how li{counter-increment:s;display:flex;gap:10px;align-items:flex-start}
+#bc .how li::before{content:counter(s);flex:0 0 22px;height:22px;border-radius:50%;background:var(--acc);color:#fff;font-size:12px;font-weight:800;display:grid;place-items:center;margin-top:1px}
+#bc .how .ex{width:100%;height:42px;padding:0 20px;border-radius:999px;background:var(--acc);color:#fff;font-size:14.5px;font-weight:600;display:flex;align-items:center;justify-content:center;transition:transform .2s}
+#bc .how .ex:active{transform:scale(.97)}
+[data-theme=dark] #bc :is(.how li::before,.how .ex){color:#000}
