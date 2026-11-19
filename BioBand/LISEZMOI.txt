@@ -1,0 +1,10 @@
+BIOBAND : simulation de gel d'agarose
+========================================
+index.html   L'outil (refait sur le moteur commun BioMicro/BioDilu : même design, barre
+             d'onglets, thème, haptique). 3 onglets :
+             - Gel : gel animé (dépôt puis migration), toucher une bande = taille lue avec le
+               marqueur ; réglages agarose / tension / durée en capsules ; conseil du bon %
+               d'agarose et du marqueur pour vos fragments ; échantillons (nom + tailles en bp).
+             - Marqueur : 6 marqueurs courants ou personnalisé, puits et nom de la piste.
+             - Comprendre : courbe d'étalonnage, tableau des % d'agarose, bon à savoir.
+             Tests : BioBand/?tests (9).

@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="fr" data-verre="lib" data-haptic="own" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-visual">
+<meta name="theme-color" content="#f2f2f7" id="metaTheme">
+<title>BioBand | Simulation de gel d'agarose et choix du pourcentage</title>
+<meta name="description" content="BioBand : simulez la migration de fragments d'ADN sur gel d'agarose, choisissez le pourcentage d'agarose et le marqueur de taille, et estimez la taille des bandes.">
+<link rel="canonical" href="https://www.biostudy.xyz/BioBand/">
+<link rel="icon" type="image/png" href="/Pictures/favicon.png">
+<link rel="apple-touch-icon" href="/Pictures/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="BioStudy">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script>
+/* thème avant le premier rendu : choix mémorisé pour la période (jour / nuit) en cours, sinon celui du système */
+(()=>{const g=k=>{try{return localStorage.getItem(k)}catch(e){return null}},h=new Date().getHours(),th=g('bioBandTheme');
+document.documentElement.dataset.theme=th&&g('bioBandThemePeriod')===(h>=7&&h<20?'day':'night')?th:matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'})();
+</script>
+<style>
+/* ===== 1. Jetons : palette Réglages iOS (clair #f2f2f7 / groupes blancs ; sombre noir / groupes #1c1c1e) ===== */
+#bc{--serif:"Iowan Old Style","Palatino Linotype",Georgia,serif;--ease:cubic-bezier(.22,1,.36,1);--spring:cubic-bezier(.34,1.45,.64,1);
+--top:70px;--gx:14px;--navh:60px;--blur:22px;
+--grp:#fff;--fill:rgba(118,118,128,.12);--thumb:#fff;--tx:#000;--tx2:#6c6c70;--tx3:#8a8a8e;--sep:rgba(60,60,67,.18);
+--acc:var(--c-blue);--acc-tx:color-mix(in srgb,var(--acc) 78%,#000);--brand:#0064d2;
+--c-blue:#007aff;--c-indigo:#5856d6;--c-purple:#af52de;--c-pink:#ff2d55;--c-orange:#ff9500;--c-green:#34c759;--c-teal:#30b0c7;--c-cyan:#32ade6;--c-mint:#00c7be;--c-brown:#a2845e;
+--ok:#1f8a3b;--err:#d70015;--warn:#ff9500;
+--lg-rgb:255,255,255;--lg-a:.68;--lg-hi:#fff;--lg-sh:rgba(0,0,0,.12);--hair:rgba(0,0,0,.09);
+--fb:rgba(60,60,67,.3);--lens:rgba(120,120,128,.16);--lens-line:rgba(255,255,255,.9);--veil:rgba(0,0,0,.22);--blob:.3;
+color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",sans-serif;font-size:16px;line-height:1.4}
+[data-theme=dark] #bc{--grp:#1c1c1e;--fill:#2c2c2e;--thumb:#636366;--tx:#fff;--tx2:#a1a1a6;--tx3:#8e8e93;--sep:rgba(84,84,88,.6);
+--acc-tx:color-mix(in srgb,var(--acc) 72%,#fff);--brand:#4da3ff;
+--c-blue:#0a84ff;--c-indigo:#5e5ce6;--c-purple:#bf5af2;--c-pink:#ff375f;--c-orange:#ff9f0a;--c-green:#30d158;--c-teal:#40cbe0;--c-cyan:#64d2ff;--c-mint:#63e6e2;--c-brown:#ac8e68;
+--ok:#30d158;--err:#ff453a;
+--lg-rgb:28,28,30;--lg-a:.66;--lg-hi:rgba(255,255,255,.34);--lg-sh:rgba(0,0,0,.5);--hair:rgba(255,255,255,.08);
+--fb:rgba(235,235,245,.26);--lens:rgba(255,255,255,.17);--lens-line:rgba(255,255,255,.26);--veil:rgba(0,0,0,.5);--blob:0}
+@media(min-width:600px){#bc{--gx:24px;--top:80px}}
+@media(min-width:900px){#bc{--gx:36px;--top:92px}}
+html{background:#f2f2f7;color-scheme:light;-webkit-text-size-adjust:100%;overflow-x:clip;overscroll-behavior:none;transition:background .4s}
+html[data-theme=dark]{background:#000;color-scheme:dark}
+body{margin:0;min-height:100dvh;overflow-x:clip;overscroll-behavior:none;-webkit-font-smoothing:antialiased}
+#bc::before{content:"";position:fixed;inset:-50%;z-index:-1;pointer-events:none;opacity:var(--blob);filter:blur(60px);animation:flow 20s ease-in-out infinite alternate;
+background:radial-gradient(circle at 20% 30%,rgba(10,132,255,.5),transparent 40%),radial-gradient(circle at 80% 70%,rgba(94,92,230,.25),transparent 40%),radial-gradient(circle at 50% 10%,rgba(142,142,147,.15),transparent 40%)}
+@keyframes flow{to{transform:translate(-4%,3%) rotate(8deg)}}
+:where(#bc) *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:where(#bc) :is(button,input,select){font:inherit;color:inherit}
+:where(#bc) button{border:0;background:none;cursor:pointer;touch-action:manipulation}
+#bc :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+#bc :is(input,select):focus-visible{outline:none}
+#bc [hidden]{display:none!important}
+.ic{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+/* ===== 2. Verre (barres, menus, historique) : un seul style, reflet qui suit la souris ===== */
+.glass{position:relative;background:rgba(var(--lg-rgb),var(--lg-a));-webkit-backdrop-filter:blur(var(--blur)) saturate(190%);backdrop-filter:blur(var(--blur)) saturate(190%);
+box-shadow:inset 0 1px 0 var(--lg-hi),0 0 0 .5px var(--hair),0 12px 30px var(--lg-sh)}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;
+background:radial-gradient(circle 90px at var(--mx,50%) var(--my,50%),rgba(255,255,255,.28),transparent 70%)}
+.glass.lit::after{opacity:1}
+@media(prefers-reduced-transparency:reduce){.glass{background:var(--grp);-webkit-backdrop-filter:none;backdrop-filter:none}}
+
+/* ===== 3. En-tête ===== */
+header{position:fixed;top:0;left:0;right:0;z-index:20;padding-top:env(safe-area-inset-top);pointer-events:none}
+.hin{max-width:1080px;margin:auto;padding:12px var(--gx);display:flex;justify-content:space-between;align-items:center;gap:8px;animation:drop .7s var(--ease)}
+@keyframes drop{from{opacity:0;transform:translateY(-100%)}}
+.logo-c{flex:1;min-width:0;pointer-events:auto}
+.logo{font-size:clamp(1.45rem,6.4vw,1.9rem);font-weight:800;letter-spacing:-.6px;line-height:1;white-space:nowrap}
+.logo i{font-style:normal;color:var(--brand)}
+.sub{font-size:.75rem;font-weight:600;color:var(--tx2);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hact{pointer-events:auto;display:flex;align-items:center;gap:8px;position:relative}
+.tools{height:48px;padding:0 4px;border-radius:999px;display:flex;align-items:center;gap:2px}
+.tb,.mb{display:grid;place-items:center;border-radius:50%;font-size:20px;transition:transform .35s var(--spring),background .3s}
+.tb{width:40px;height:40px;position:relative;z-index:1}
+.mb{width:48px;height:48px}
+.tb:active{transform:scale(.86);background:var(--fill)}
+.mb:active{transform:scale(.88)}
+@media(hover:hover){.tb:hover{background:var(--fill)}.mb:hover{transform:scale(1.06)}}
+.badge{position:absolute;top:7px;right:7px;width:9px;height:9px;border-radius:50%;background:var(--warn);transform:scale(0);transition:transform .35s var(--spring)}
+.badge.on{transform:none;animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,159,10,.8)}70%,to{box-shadow:0 0 0 8px transparent}}
+.pop{position:absolute;top:calc(100% + 10px);right:56px;padding:6px;border-radius:26px;display:none;flex-direction:column;transform-origin:top right}
+.pop.on{display:flex;animation:pop .45s var(--spring)}
+.lmenu{min-width:176px}
+@keyframes pop{from{opacity:0;transform:scale(.86) translateY(-8px)}}
+.lmenu button{position:relative;z-index:1;min-height:44px;padding:11px 16px;border-radius:999px;text-align:left;font-size:15px;font-weight:600}
+.lmenu button:hover,.lmenu button.on{background:var(--fill);color:var(--acc-tx)}
+
+/* ===== 4. Page : saisie puis résultat ===== */
+.shell{min-height:100dvh;max-width:1080px;margin:auto;display:flex;flex-direction:column;
+padding:calc(var(--top) + env(safe-area-inset-top)) var(--gx) calc(var(--navh) + 96px + env(safe-area-inset-bottom))}
+.stage{flex:1 0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:26px;align-content:center;animation:rise .7s var(--ease) backwards}
+@keyframes rise{from{opacity:0;transform:translateY(24px)}}
+@media(min-width:900px){.stage{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:32px}}
+.inputs{display:flex;flex-direction:column;min-width:0}
+.thead{display:flex;align-items:center;gap:10px;margin:0 4px 14px}
+.roll{height:38px;overflow:hidden}
+.roll>div{transition:transform .8s var(--spring)}
+.roll span{height:38px;display:grid;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rnb{width:30px;flex-shrink:0;font-size:27px;color:var(--acc-tx)}
+.rnb span{place-items:center}
+.rttl{flex:1;min-width:0;font-size:clamp(22px,5vw,27px);font-weight:800;letter-spacing:-.6px}
+.view{display:none}
+.view.on{display:block}
+/* en-têtes de groupe façon Réglages */
+.gh{margin:20px 16px 7px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--tx2)}
+/* segments : la pastille se place en CSS (--i : index, --n : nombre) */
+.seg{position:relative;display:flex;padding:3px;border-radius:999px;background:var(--fill);--i:0;--n:2}
+.seg .th{position:absolute;top:3px;bottom:3px;left:3px;width:calc((100% - 6px)/var(--n));border-radius:999px;background:var(--thumb);box-shadow:0 2px 6px rgba(0,0,0,.18);
+transform:translateX(calc(var(--i)*100%));transition:transform .5s var(--spring)}
+.seg button{flex:1;min-width:0;height:34px;position:relative;z-index:1;border-radius:999px;font-size:14px;font-weight:600;color:var(--tx2);white-space:nowrap;transition:color .3s,transform .35s var(--spring)}
+.seg button:active{transform:scale(.94)}
+.seg button.on{color:var(--tx)}
+/* « Calculer » : symbole + nom court ; la grandeur choisie disparaît des valeurs connues */
+.cal button{height:52px;padding:0 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.cal b,.sym,.fl{font-family:var(--serif);font-style:italic;color:var(--acc-tx)}
+.cal b{font-size:20px;line-height:1}
+.cal small{max-width:100%;font-size:11px;overflow:hidden;text-overflow:ellipsis}
+:is(.cal b,.sym,.fl) sub{font-size:.6em}
+/* valeurs connues : un groupe, une ligne par grandeur ; seule l'unité est en capsule */
+.grp{background:var(--grp);border-radius:22px;overflow:hidden}
+.vr{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;min-height:58px;padding:8px 12px 8px 16px;transition:background .25s}
+.vr:not([hidden])~.vr::before{content:"";position:absolute;top:0;left:16px;right:0;height:.5px;background:var(--sep)}
+.vr:focus-within{background:color-mix(in srgb,var(--grp) 94%,var(--acc))}
+.lb{flex:1 1 96px;min-width:0;display:flex;align-items:baseline;gap:10px;font-size:15px;font-weight:600;line-height:1.25}
+.lb .ls{display:none}
+@media(max-width:599px){.lb .ln{display:none}.lb .ls{display:inline}}
+/* scientifique sur mobile : tout tient sur la ligne (champs plus compacts) */
+@media(max-width:599px){.vr:has(>.ctl.sci) .lb{flex-basis:56px}.ctl.sci{gap:5px}.ctl.sci .val{flex-basis:78px;width:78px;padding:0 10px;font-size:17px}
+.ctl.sci .exp{flex-basis:42px;width:42px}.ctl.sci .sel{flex-basis:92px;width:92px;padding:0 22px 0 11px;font-size:14px;background-position:right 8px center}}
+.sym{flex-shrink:0;min-width:28px;height:28px;padding:0 7px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;align-self:center;background:var(--sc);color:#fff;font-size:16px;font-weight:700;line-height:1;white-space:nowrap}
+.lb{align-items:center}
+.ctl{flex:1 0 auto;display:flex;align-items:center;justify-content:flex-end;gap:8px}
+/* champs modifiables : capsule bordée teintée (les unités restent des capsules grises à chevron) */
+.val,.exp{border:1.5px solid var(--fb);background:transparent;border-radius:999px;font-weight:600;cursor:text;
+transition:border-color .2s,box-shadow .2s,background .2s}
+.val{flex:0 0 112px;width:112px;min-width:0;height:42px;padding:0 14px;font-size:19px;text-align:right}
+.ctl.sci .val{flex-basis:92px;width:92px}
+.exp{flex:0 0 52px;width:52px;height:38px;font-size:16px;text-align:center}
+.val:focus,.exp:focus{border-color:var(--acc);background:var(--grp);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 22%,transparent)}
+.val::placeholder,.exp::placeholder{color:var(--tx3);font-weight:500}
+.x10{font-size:13px;font-weight:700;color:var(--tx2)}
+.ctl:not(.sci) :is(.x10,.exp){display:none}
+.sel{flex:0 0 108px;width:108px;height:38px;padding:0 28px 0 14px;border:0;border-radius:999px;appearance:none;-webkit-appearance:none;cursor:pointer;
+background:var(--fill) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a8f9b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e") no-repeat right 10px center/12px;
+font-size:15px;font-weight:600;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:transform .3s var(--spring)}
+.sel:active{transform:scale(.97)}
+.sel:focus-visible{box-shadow:0 0 0 2px var(--acc)}
+.sel option{background:var(--grp);color:var(--tx)}
+.sel.one{background-image:none;padding-right:14px;pointer-events:none}
+.sel.ghost{visibility:hidden}#ru .ghost{display:none}
+.fl{margin:12px 0 0;padding:12px 20px;border-radius:999px;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;
+background:color-mix(in srgb,var(--acc) 12%,transparent);border:1px solid color-mix(in srgb,var(--acc) 28%,transparent);font-size:22px;font-weight:600;font-style:normal}
+.fl small{font:700 11px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;letter-spacing:.5px;text-transform:uppercase;color:var(--acc-tx);opacity:.8}
+.fl span{font-style:italic;white-space:nowrap}
+.fl.hit{animation:lawpop .45s var(--spring)}
+@keyframes lawpop{40%{transform:scale(1.04)}}
+/* résultat : valeur + unité (capsule), équation, actions */
+.results{display:flex;flex-direction:column;min-width:0}
+.results>.gh{margin-top:0}
+.rg{background:var(--grp);border-radius:22px;overflow:hidden;text-align:center}
+.rv{min-height:92px;padding:22px 16px 8px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px}
+.num{font-size:clamp(32px,10vw,44px);font-weight:800;letter-spacing:-1px;line-height:1.1;white-space:nowrap;font-variant-numeric:tabular-nums}
+#ru .sel{flex:none;width:auto;height:42px;padding:0 34px 0 16px;background-position:right 12px center;font-size:20px;font-weight:700;color:var(--acc-tx)}
+.eq{padding:0 16px 16px;font-size:14px;font-weight:500;color:var(--tx2);line-height:1.45;overflow-wrap:anywhere}
+.acts{display:flex;border-top:.5px solid var(--sep)}
+.ab{flex:1;height:50px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:600;color:var(--acc-tx);transition:opacity .2s,color .2s}
+.ab+.ab{border-left:.5px solid var(--sep)}
+.ab .ic{font-size:17px}
+.ab:active{opacity:.5}
+.ab:disabled{opacity:.35;pointer-events:none}
+.ab.ok{color:var(--ok)}
+.bump{animation:bump .55s var(--spring)}
+@keyframes bump{40%{transform:scale(1.07)}}
+.tip{margin:10px 16px 0;display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--tx2);line-height:1.45}
+.tip:empty{display:none}
+.tip .ic{margin-top:2px;font-size:15px}
+.tip.err{color:var(--err);font-weight:600}
+.tip.warn{color:var(--warn);font-weight:600}
+.tip span{white-space:pre-line}
+
+/* ===== 5. Barre d'onglets (façon BioCampus) et résultat flottant ===== */
+.nav{position:fixed;z-index:30;bottom:max(12px,env(safe-area-inset-bottom));left:12px;right:12px;max-width:440px;height:var(--navh);margin-inline:auto;border-radius:999px;
+animation:navin .8s var(--ease) backwards .2s}
+@keyframes navin{from{opacity:0;translate:0 40px;scale:.94}}
+@keyframes navin-d{from{opacity:0;translate:0 -30px;scale:.94}}
+.nav-in{height:100%;padding:5px;border-radius:999px;display:flex;touch-action:pan-y;-webkit-user-select:none;user-select:none;cursor:grab}
+.nav-in.dragging{cursor:grabbing}
+.sl{position:absolute;top:5px;bottom:5px;left:0;width:80px;z-index:1;border-radius:999px;pointer-events:none;translate:5px 0;
+background:var(--lens);border:1px solid var(--lens-line);box-shadow:inset 0 1px 1px rgba(255,255,255,.5),0 4px 14px rgba(0,0,0,.14);
+transition:translate .6s var(--spring),width .3s var(--ease),scale .3s var(--spring)}
+.sl.interacting{scale:1.06 1.12}
+.dragging .sl{transition:scale .25s var(--spring)}
+.nb{flex:1;position:relative;z-index:2;border-radius:999px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+font-size:.66rem;font-weight:500;color:var(--tx2);white-space:nowrap;transition:color .3s,transform .45s var(--spring)}
+.nb:active{transform:scale(.92)}
+.nb .ic{font-size:20px}
+.nb.on{color:var(--acc-tx);font-weight:600}
+.nb .ic{color:var(--nc);opacity:.75;transition:opacity .3s}.nb.on .ic{opacity:1}
+.nb.on .ic{animation:ipop .35s var(--ease)}
+@keyframes ipop{from{transform:scale(.85)}}
+.mini{position:fixed;z-index:29;left:12px;right:12px;max-width:440px;margin-inline:auto;bottom:calc(max(12px,env(safe-area-inset-bottom)) + var(--navh) + 10px);
+min-height:46px;padding:8px 18px;border-radius:999px;display:flex;align-items:baseline;justify-content:center;gap:8px;font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;
+opacity:0;translate:0 16px;pointer-events:none;transition:opacity .3s,translate .45s var(--spring)}
+.mini.on{opacity:1;translate:0;pointer-events:auto}
+#bc.kb .mini{bottom:auto}
+#bc.kb .nav{visibility:hidden}
+.mini span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini .ml{font:italic 700 17px var(--serif);color:var(--acc-tx)}
+.mini .mu{font-size:16px;color:var(--acc-tx)}
+
+/* ===== 6. Historique (verre), choix d'unité composée (molettes façon horloge) ===== */
+.ov{position:fixed;inset:0;z-index:40;display:flex;justify-content:flex-end;visibility:hidden;transition:background .4s,visibility 0s .6s}
+.ov.on{background:var(--veil);visibility:visible;transition:background .4s}
+.sheet{--lg-a:.7;--blur:30px;width:88%;max-width:420px;height:100%;border-radius:32px 0 0 32px;display:flex;flex-direction:column;
+padding:max(20px,env(safe-area-inset-top)) 18px max(20px,env(safe-area-inset-bottom));transform:translateX(104%);transition:transform .6s var(--ease)}
+.ov.on .sheet{transform:none}
+.oh{display:flex;justify-content:space-between;align-items:center;padding:0 4px 12px;border-bottom:.5px solid var(--sep)}
+.ot{font-size:20px;font-weight:800}
+.x,.hdel{width:40px;height:40px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;font-size:17px;transition:transform .45s var(--spring),color .2s}
+.x{background:var(--fill)}
+.x:active{transform:scale(.85) rotate(90deg)}
+.hl{flex:1;overflow-y:auto;overscroll-behavior:contain;padding-bottom:14px}
+.hi{display:flex;align-items:center;gap:8px;padding:12px 0 12px 4px;border-bottom:.5px solid var(--sep);animation:slide .5s var(--ease) backwards}
+@keyframes slide{from{opacity:0;transform:translateY(-8px)}}
+.hi>div{flex:1;min-width:0}
+.ht{font-size:12px;font-weight:700;color:var(--acc-tx)}
+.hd{margin-top:3px;font-size:14px;font-weight:500;line-height:1.45;overflow-wrap:anywhere}
+.hd b{color:var(--acc-tx)}
+.hdel{color:var(--tx2)}
+.hdel:hover{color:var(--err)}
+.hempty{padding:30px 0;text-align:center;font-size:14px;color:var(--tx2)}
+.clr{min-height:48px;margin-top:8px;border-radius:999px;border:1.5px solid var(--err)!important;color:var(--err);font-size:14px;font-weight:700;transition:transform .35s var(--spring)}
+.clr:active{transform:scale(.95)}
+.upop{--lg-a:.86;position:fixed;z-index:60;width:min(300px,calc(100vw - 16px));padding:12px;border-radius:22px}
+.up-n{display:flex;flex-wrap:wrap;gap:6px;padding-bottom:12px;margin-bottom:8px;border-bottom:.5px solid var(--sep)}
+.up-n button{min-height:34px;padding:0 12px;border-radius:999px;background:var(--fill);font-size:14px;font-weight:600}
+.up-n button.on{background:var(--acc);color:#fff}
+.up-h{display:grid;grid-template-columns:1fr 1fr;padding:4px 0 6px;text-align:center;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tx2)}
+.up-c{position:relative;height:200px;display:grid;grid-template-columns:1fr 1fr;
+-webkit-mask-image:linear-gradient(transparent,#000 28%,#000 72%,transparent);mask-image:linear-gradient(transparent,#000 28%,#000 72%,transparent)}
+.up-lens{position:absolute;left:0;right:0;top:80px;height:40px;border-radius:12px;background:var(--fill);pointer-events:none}
+.up-wh{position:relative;padding:80px 0;overflow-y:auto;scroll-snap-type:y mandatory;overscroll-behavior:contain;scrollbar-width:none}
+.up-wh::-webkit-scrollbar{display:none}
+.up-it{height:40px;line-height:40px;text-align:center;scroll-snap-align:center;font-size:19px;font-weight:500;color:var(--tx2);cursor:pointer;transition:color .15s}
+.up-it.on{color:var(--tx);font-weight:700}
+
+/* ===== 7. Pied de page (footer-global.js) : dans le flux, sous le contenu ===== */
+#bc .shell>footer{position:relative!important;z-index:1!important;margin-top:24px!important;padding:24px 0 0!important}
+[data-theme=light] #bc .shell>footer a{background:var(--grp)!important;color:#000!important;border:1px solid rgba(0,0,0,.1)!important}
+[data-theme=light] #bc .shell>footer svg{filter:brightness(0)!important}
+[data-theme=light] #bc .shell>footer :is(span,p){color:#000!important}
+
+/* ===== 8. Adaptations ===== */
+@media(max-width:599px){.sub{display:none}
+#bc .shell>footer{width:100vw!important;max-width:100vw!important;margin-left:calc(50% - 50vw)!important;padding-inline:6px!important}
+#bc .shell>footer div{flex-wrap:nowrap!important;gap:4px!important;justify-content:center!important}
+#bc .shell>footer a{padding-inline:8px!important;font-size:11px!important;white-space:nowrap!important;flex-shrink:1!important}}
+@media(max-width:389px){.tools{height:44px}.tb{width:34px;height:34px;font-size:18px}.mb{width:44px;height:44px}.nb{font-size:.62rem}.sel{flex-basis:104px;width:104px}}
+@media(max-height:480px) and (orientation:landscape) and (min-aspect-ratio:3/2) and (max-width:1023px){#bc{--navh:52px;--top:62px}.stage{grid-template-columns:1fr 1fr}.nb{flex-direction:row;gap:6px}}
+/* PC ≥ 1024 × 600 : barre en haut, saisie à gauche, résultat à droite */
+@media(min-width:1024px) and (min-height:600px){
+#bc{--top:84px;--gx:32px}
+.hin{max-width:none;padding:16px 32px}
+.logo{font-size:1.8rem}.sub{font-size:.85rem}
+.tools{height:52px}.tb{width:44px;height:44px}.mb{width:52px;height:52px}.pop{right:62px}
+.nav{top:calc(env(safe-area-inset-top) + 14px);bottom:auto;left:0;right:0;width:min(700px,calc(100vw - 640px));max-width:none;height:56px;animation-name:navin-d}
+.nb{flex-direction:row;gap:8px;font-size:.78rem}
+.mini{display:none}
+.shell{max-width:none;margin:0;padding:calc(var(--top) + env(safe-area-inset-top)) var(--gx) 24px}
+.stage{width:100%;max-width:1400px;margin:0 auto;padding-top:24px;grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);align-content:start;gap:40px}
+.inputs{display:grid;grid-template-columns:minmax(0,1fr) 250px;align-items:center;column-gap:18px}
+.thead{margin-bottom:0}
+.view{grid-column:1/-1}
+.vr{min-height:62px}
+.val{flex-basis:150px;width:150px}.ctl.sci .val{flex-basis:120px;width:120px}.sel{flex-basis:118px;width:118px}
+.results{padding-top:52px}
+.rv{min-height:170px}
+.num{font-size:clamp(44px,4.4vw,72px)}
+#ru .sel{height:48px;font-size:24px}
+#bc .shell>footer{margin-top:32px!important}}
+@media(min-width:1024px) and (min-height:600px) and (max-width:1279px){.sub{display:none}.nb{flex-direction:column;gap:2px;font-size:11.5px}.nb .ic{font-size:18px}}
+@media(prefers-reduced-motion:reduce){#bc *,#bc ::before,#bc ::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* ===== 9. BioBand : gel, réglages en capsules, échantillons, marqueur, courbe ===== */
+#bc{--acc:var(--c-blue)}#bc[data-tab="1"]{--acc:var(--c-purple)}#bc[data-tab="2"]{--acc:var(--c-orange)}
+#bc .nb:nth-of-type(1){--nc:var(--c-blue)}#bc .nb:nth-of-type(2){--nc:var(--c-purple)}#bc .nb:nth-of-type(3){--nc:var(--c-orange)}
+.stage{align-content:start}
+.vt{display:flex;align-items:center;gap:10px;margin:0 4px 14px}
+.vt .ic{font-size:27px;color:var(--acc-tx)}
+.vt h1{font-size:clamp(22px,5vw,27px);font-weight:800;letter-spacing:-.6px;line-height:1.15}
+.gv{display:grid;grid-template-columns:minmax(0,1fr);gap:4px}
+.gcol{min-width:0}
+/* gel */
+.gelbox{position:relative;border-radius:24px;overflow:hidden;background:#0a1417;box-shadow:0 10px 30px rgba(0,0,0,.18),0 0 0 .5px var(--hair)}
+#gel{display:block;width:100%;height:min(58vh,470px);touch-action:manipulation;cursor:pointer}
+.gctl{display:flex;gap:8px;margin-top:10px}
+.gb{flex:1;min-width:0;height:48px;padding:0 14px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--grp);font-size:15px;font-weight:700;color:var(--acc-tx);white-space:nowrap;transition:transform .35s var(--spring),opacity .2s}
+.gb.pri{flex:1.6;background:var(--acc);color:#fff}
+.gb:active{transform:scale(.95)}
+.gb:disabled{opacity:.4;pointer-events:none}
+.gb .ic{font-size:18px}
+.gb.pri.wait{animation:breathe 2.2s ease-in-out infinite}
+@keyframes breathe{50%{box-shadow:0 0 0 7px color-mix(in srgb,var(--acc) 22%,transparent)}}
+/* bande sélectionnée */
+.bi{margin-top:12px}
+.bi .vr{min-height:50px}
+.bi .k{flex:1;font-size:14.5px;font-weight:600;color:var(--tx2)}
+.bi .v{font-size:16px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.bi .v.acc{color:var(--acc-tx);font-size:19px}
+.bhint{display:flex;align-items:center;gap:10px;padding:16px;font-size:14px;color:var(--tx2)}
+.bhint .ic{font-size:20px;color:var(--acc-tx)}
+.dot{flex-shrink:0;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--sc,var(--acc));color:#fff;font-size:13px;font-weight:800}
+/* capsules de choix (agarose, tension, durée, puits) */
+.vr.col{flex-direction:column;align-items:stretch;gap:10px;padding:12px 12px 14px 16px}
+.vr.col .lb{flex:none}
+.lb small{font-size:12.5px;font-weight:500;color:var(--tx2)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{flex-shrink:0;min-width:52px;height:38px;padding:0 14px;border-radius:999px;background:var(--fill);font-size:15px;font-weight:600;color:var(--tx);white-space:nowrap;transition:background .25s,color .25s,transform .35s var(--spring)}
+.chips button:active{transform:scale(.92)}
+.chips button.on{background:var(--acc);color:#fff}
+.chips button.rec:not(.on){box-shadow:inset 0 0 0 1.5px var(--acc);color:var(--acc-tx)}
+.reco{margin-top:12px;padding:14px 16px;border-radius:22px;background:color-mix(in srgb,var(--c-orange) 13%,var(--grp));border:1px solid color-mix(in srgb,var(--c-orange) 35%,transparent);display:flex;flex-direction:column;gap:8px;animation:rise .5s var(--ease) backwards}
+.reco:empty{display:none}
+.reco .rh{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:color-mix(in srgb,var(--c-orange) 80%,var(--tx))}
+.reco .rh .ic{font-size:18px}
+.reco p{font-size:15.5px;line-height:1.45;color:var(--tx)}
+.reco b{font-weight:800}
+.reco button{align-self:flex-start;min-height:44px;padding:0 18px;border-radius:999px;display:inline-flex;align-items:center;gap:8px;background:var(--c-orange);color:#fff;font-size:15px;font-weight:700;transition:transform .35s var(--spring)}
+.reco button:active{transform:scale(.95)}
+.reco button .ic{font-size:17px}
+.reco.done{background:color-mix(in srgb,var(--c-green) 12%,var(--grp));border-color:color-mix(in srgb,var(--c-green) 32%,transparent)}
+.reco.done .rh{color:color-mix(in srgb,var(--c-green) 80%,var(--tx))}
+/* menus déroulants (agarose, tension, durée) : capsule + fenêtre en verre, valeur personnalisée */
+.dd{flex-shrink:0;min-width:116px;height:40px;padding:0 12px 0 16px;border-radius:999px;display:inline-flex;align-items:center;justify-content:space-between;gap:8px;background:var(--fill);font-size:16px;font-weight:700;color:var(--acc-tx);font-variant-numeric:tabular-nums;transition:transform .3s var(--spring)}
+.dd:active{transform:scale(.96)}
+.dd .ic{font-size:15px;color:var(--tx3);transition:transform .3s var(--ease)}
+.dd.open .ic{transform:rotate(180deg)}
+.ddp{--lg-a:.88;position:fixed;z-index:60;width:min(300px,calc(100vw - 24px));max-height:min(70vh,460px);overflow-y:auto;padding:8px;border-radius:24px;animation:pop .4s var(--spring);transform-origin:top right}
+.ddh{padding:6px 12px 8px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tx2)}
+.ddo{position:relative;z-index:1;width:100%;min-height:44px;padding:0 12px 0 14px;border-radius:999px;display:flex;align-items:center;gap:8px;font-size:16px;font-weight:600;text-align:left}
+.ddo span{flex:1}
+.ddo:hover{background:var(--fill)}
+.ddo.on{color:var(--acc-tx)}
+.ddo .ic{font-size:17px;opacity:0}.ddo.on .ic{opacity:1}
+.ddo em{font-style:normal;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:color-mix(in srgb,var(--acc) 16%,transparent);color:var(--acc-tx)}
+.ddc{position:relative;z-index:1;display:flex;align-items:center;gap:6px;margin-top:6px;padding:10px 4px 2px 10px;border-top:.5px solid var(--sep)}
+.ddc span{flex:1;font-size:14px;font-weight:600;color:var(--tx2)}
+.ddc .fadd{width:78px;text-align:right}
+.ddc b{font-size:14px;color:var(--tx2)}
+.ddok{height:36px;padding:0 14px;border-radius:999px;background:var(--acc);color:#fff;font-size:14px;font-weight:700}
+.ddp .ferr{padding:6px 10px 2px;position:relative;z-index:1}
+.ddo span small{display:block;margin-top:1px;font-size:12px;font-weight:500;color:var(--tx2)}
+.ddo:has(small){padding-top:8px;padding-bottom:8px;border-radius:20px}
+.ddo em{flex-shrink:0}
+.dd.sm{min-width:0;height:34px;padding:0 10px 0 14px;font-size:14px}
+.srx{display:flex;align-items:center;gap:10px;padding-left:38px;font-size:14px;font-weight:600;color:var(--tx2)}
+.qch button{height:34px;min-width:0;padding:0 13px;font-size:14px}
+.qh{font-size:12.5px;color:var(--tx2)}
+/* couleur d'une bande */
+.sws{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.sw{width:30px;height:30px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.15);transition:transform .3s var(--spring)}
+.sw:active{transform:scale(.85)}
+.sw.on{box-shadow:0 0 0 2px var(--grp),0 0 0 4px var(--acc)}
+.fc i{width:10px;height:10px;border-radius:50%;background:var(--bc);box-shadow:0 0 6px var(--bc)}
+/* échantillons */
+.sr{position:relative;display:flex;flex-direction:column;gap:10px;padding:12px 12px 12px 16px}
+.sr+.sr::before{content:"";position:absolute;top:0;left:16px;right:0;height:.5px;background:var(--sep)}
+.srh{display:flex;align-items:center;gap:10px}
+.nm,.fadd,.cin{min-width:0;height:42px;padding:0 16px;border:1.5px solid var(--fb);border-radius:999px;background:transparent;font-size:16px;font-weight:600;transition:border-color .2s,box-shadow .2s}
+.nm{flex:1}
+:is(.nm,.fadd,.cin):focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 22%,transparent)}
+:is(.nm,.fadd,.cin)::placeholder{color:var(--tx3);font-weight:500}
+.del{flex-shrink:0;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--fill);color:var(--err);font-size:17px;transition:transform .35s var(--spring)}
+.del:active{transform:scale(.86)}
+.frs{display:flex;flex-wrap:wrap;gap:6px;padding-left:38px}
+.fc{height:36px;padding:0 6px 0 13px;border-radius:999px;display:inline-flex;align-items:center;gap:4px;background:color-mix(in srgb,var(--sc) 16%,transparent);color:var(--tx);font-size:14.5px;font-weight:700;font-variant-numeric:tabular-nums}
+.fc button{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:var(--tx2);font-size:13px}
+.fc button:hover{color:var(--err)}
+.fc.bad{background:color-mix(in srgb,var(--err) 14%,transparent);color:var(--err)}
+.fadd{width:118px;height:36px;padding:0 12px;font-size:15px}
+.ferr{padding-left:38px;font-size:12.5px;font-weight:600;color:var(--err)}
+.ferr:empty{display:none}
+.adds{width:100%;margin-top:10px;height:50px;border-radius:999px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--grp);color:var(--acc-tx);font-size:15px;font-weight:700;transition:transform .35s var(--spring)}
+.adds:active{transform:scale(.97)}.adds:disabled{opacity:.4;pointer-events:none}
+.adds .ic{font-size:18px}
+/* marqueur */
+.lr{position:relative;display:flex;align-items:center;gap:12px;width:100%;min-height:60px;padding:10px 16px;text-align:left;transition:background .2s}
+.lr+.lr::before{content:"";position:absolute;top:0;left:16px;right:0;height:.5px;background:var(--sep)}
+.lr:active{background:var(--fill)}
+.lr .t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.lr b{font-size:16px;font-weight:600}
+.lr small{font-size:12.5px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lr .ck{font-size:20px;color:var(--acc-tx);opacity:0;transform:scale(.6);transition:opacity .2s,transform .35s var(--spring)}
+.lr.on .ck{opacity:1;transform:none}
+.cin{width:100%}
+.cwrap{padding:0 16px 14px}
+.cwrap:empty{display:none}
+/* comprendre */
+.card{background:var(--grp);border-radius:22px;padding:14px 14px 10px}
+.curve{display:block;width:100%;height:auto}
+.curve .ax{stroke:var(--sep);stroke-width:1}
+.curve .gl{stroke:var(--sep);stroke-width:.6;stroke-dasharray:3 4}
+.curve text{fill:var(--tx2);font:600 10px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.curve .ln{stroke:var(--c-purple);stroke-width:2;fill:none}
+.curve .pt{fill:var(--c-purple)}
+.curve .sp{fill:var(--c-orange)}.curve .sl2{stroke:var(--c-orange);stroke-width:1.4;stroke-dasharray:4 3;fill:none}
+.cap{margin:6px 4px 2px;font-size:13px;color:var(--tx2);line-height:1.45}
+.rt-row{display:flex;align-items:center;gap:12px;min-height:50px;padding:8px 16px;position:relative}
+.rt-row+.rt-row::before{content:"";position:absolute;top:0;left:16px;right:0;height:.5px;background:var(--sep)}
+.rt-row b{width:62px;font-size:16px;font-weight:700;font-variant-numeric:tabular-nums}
+.rt-row span{flex:1;font-size:15px;color:var(--tx2);font-variant-numeric:tabular-nums}
+.rt-row.on{background:color-mix(in srgb,var(--acc) 10%,transparent)}.rt-row.on b,.rt-row.on span{color:var(--acc-tx)}
+.rt-row em{font-style:normal;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--acc);color:#fff}
+.tips{display:flex;flex-direction:column}
+.tips .vr{align-items:flex-start;padding-top:12px;padding-bottom:12px}
+.tips .ic{margin-top:2px;font-size:19px;color:var(--sc)}
+.tips p{flex:1;font-size:14.5px;line-height:1.5}
+.tips p b{font-weight:700}
+.disc{margin:14px 16px 0;font-size:12.5px;color:var(--tx3);line-height:1.45}
+@media(min-width:1024px) and (min-height:600px){
+.stage{max-width:1280px;grid-template-columns:minmax(0,1fr);padding-top:20px}
+.gv{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:40px;align-items:start}
+.gcol.g1{position:sticky;top:calc(var(--top) + 16px)}
+#gel{height:min(calc(100dvh - 260px),620px)}
+.v2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 40px;align-items:start}}
+.fc.br{font-weight:800;box-shadow:inset 0 0 0 1.5px var(--sc)}
+</style>
+<link rel="stylesheet" href="/verre.css">
+</head>
+<body>
+<div id="bc">
+
+<header><div class="hin">
+  <div class="logo-c"><div class="logo">Bio<i>Band</i></div><div class="sub">Électrophorèse sur gel d'agarose</div></div>
+  <div class="hact">
+    <div class="tools glass"><button class="tb" id="themeBtn" type="button" title="Thème clair / sombre" aria-label="Thème clair / sombre"></button></div>
+    <button class="mb glass" id="mb" type="button" data-menu data-ic="menu" title="Menu des outils" aria-label="Menu des outils"></button>
+  </div>
+</div></header>
+
+<div class="shell" id="shell">
+  <main class="stage" id="card">
+    <section class="view" id="view0">
+      <div class="vt" data-ic="gel"><h1>Gel d'agarose</h1></div>
+      <div class="gv">
+        <div class="gcol g1">
+          <div class="gelbox"><canvas id="gel" role="img" aria-label="Gel d'agarose simulé : touchez une bande pour voir sa taille"></canvas></div>
+          <div class="gctl"><button class="gb pri" id="bRun" type="button"></button><button class="gb" id="bSkip" type="button" data-ic="skip" title="Afficher directement le gel final"><span>Direct</span></button><button class="gb" id="bReset" type="button" data-ic="reset" title="Remettre le gel à zéro" aria-label="Remettre le gel à zéro" style="flex:0 0 48px;padding:0"></button></div>
+          <div class="grp bi" id="binfo" aria-live="polite"></div>
+          <div class="tip" id="gtip"></div>
+        </div>
+        <div class="gcol">
+          <p class="gh">Réglages du gel</p>
+          <div class="grp">
+            <div class="vr"><div class="lb">Agarose <small>concentration</small></div><button class="dd" id="dAg" type="button" data-k="agarose" aria-haspopup="listbox"></button></div>
+            <div class="vr"><div class="lb">Tension</div><button class="dd" id="dV" type="button" data-k="volt" aria-haspopup="listbox"></button></div>
+            <div class="vr"><div class="lb">Durée</div><button class="dd" id="dT" type="button" data-k="time" aria-haspopup="listbox"></button></div>
+          </div>
+          <div class="reco" id="reco"></div>
+          <p class="gh">Échantillons <small style="text-transform:none;letter-spacing:0;font-weight:500">· tailles en pb</small></p>
+          <div class="grp" id="samples"></div>
+          <button class="adds" id="addS" type="button" data-ic="plus">Ajouter un échantillon</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view1">
+      <div class="vt" data-ic="ruler"><h1>Marqueur de taille</h1></div>
+      <div class="v2">
+        <div>
+          <p class="gh">Marqueur et position</p>
+          <div class="grp">
+            <div class="vr"><div class="lb">Marqueur</div><button class="dd" id="dL" type="button" aria-haspopup="listbox"></button></div>
+            <div class="vr col" id="custRow" hidden><div class="lb">Tailles <small>en pb, séparées par des virgules</small></div><input class="cin" id="cust" placeholder="ex. : 100, 250, 500, 1000" aria-label="Tailles du marqueur personnalisé (pb)"></div>
+            <div class="vr"><div class="lb">Puits</div><button class="dd" id="dP" type="button" aria-haspopup="listbox"></button></div>
+            <div class="vr col"><div class="lb">Nom de la piste</div><input class="cin" id="lName" maxlength="20" placeholder="Marqueur" aria-label="Nom de la piste du marqueur"></div>
+          </div>
+        </div>
+        <div>
+          <p class="gh">Bandes du marqueur (pb)</p>
+          <div class="card"><div class="frs" id="lSizes" style="padding:0 0 4px"></div></div>
+          <p class="cap">Sur le gel, touchez une bande (marqueur ou échantillon) pour régler son épaisseur, qui dépend de la quantité d'ADN déposée, ou sa couleur.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view2">
+      <div class="vt" data-ic="bulb"><h1>Comprendre</h1></div>
+      <div class="v2">
+        <div>
+          <p class="gh">Courbe d'étalonnage du marqueur</p>
+          <div class="card"><svg class="curve" id="curve" viewBox="0 0 320 210" role="img" aria-label="Courbe d'étalonnage : log₁₀ de la taille en fonction de la distance de migration"></svg></div>
+          <p class="cap" id="ccap"></p>
+          <p class="gh">Quel pourcentage d'agarose ?</p>
+          <div class="grp" id="rtab"></div>
+        </div>
+        <div>
+          <p class="gh">Bon à savoir</p>
+          <div class="grp tips" id="tips"></div>
+          <p class="disc">BioBand simule la migration avec un modèle pédagogique (la distance de migration diminue linéairement avec log₁₀ de la taille) : les positions sont indicatives et ne remplacent pas une mesure expérimentale.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="/footer-global.js"></script>
+</div>
+
+<div class="ddp glass" id="ddp" role="listbox" hidden></div>
+<nav class="nav" id="navWrap" aria-label="Navigation"><div class="nav-in glass" id="nav"><span class="sl" id="sl"></span>
+  <button class="nb" type="button" data-ic="gel"><span>Gel</span></button>
+  <button class="nb" type="button" data-ic="ruler"><span>Marqueur</span></button>
+  <button class="nb" type="button" data-ic="bulb"><span>Comprendre</span></button>
+</div></nav>
+</div>
+
+<script src="/liquid-glass.js"></script>
+<script>
+(()=>{'use strict';
+/* ---------- 1. Outils ---------- */
+const $=id=>document.getElementById(id),BC=$('bc'),root=document.documentElement;
+const $$=(s,c=BC)=>[...c.querySelectorAll(s)];
+const sto={g(k){try{return localStorage.getItem(k)}catch(e){return null}},s(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1;
+/* retour haptique : vibration courte (Android), sinon interrupteur natif caché (iPhone, iOS 18+) */
+function buzz(p=14){try{if(navigator.vibrate){navigator.vibrate(p);return}if(!IOS)return;
+  const l=document.createElement('label'),i=document.createElement('input');i.type='checkbox';i.setAttribute('switch','');
+  l.dataset.hap='';l.style.display='none';l.appendChild(i);document.head.appendChild(l);l.click();l.remove()}catch(e){}}
+const OK=[12,60,18];
+const clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
+const nf=n=>Math.round(n).toLocaleString('fr-FR');
+const bp=n=>nf(n)+' pb';
+const dec=n=>String(n).replace('.',',');
+
+/* ---------- 2. Icônes : Lucide (ISC) ---------- */
+const IC={
+  gel:'<rect width="18" height="18" x="3" y="3" rx="3"/><path d="M7 8h3"/><path d="M14 8h3"/><path d="M7 12h3"/><path d="M14 15h3"/><path d="M7 16h3"/>',
+  ruler:'<path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2"/><path d="m11.5 9.5 2-2"/><path d="m8.5 6.5 2-2"/><path d="m17.5 15.5 2-2"/>',
+  bulb:'<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+  moon:'<path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/>',
+  menu:'<path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/>',
+  play:'<path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/>',
+  pause:'<rect x="14" y="3" width="5" height="18" rx="1"/><rect x="5" y="3" width="5" height="18" rx="1"/>',
+  skip:'<path d="M21 4v16"/><path d="M6.029 4.285A2 2 0 0 0 3 6v12a2 2 0 0 0 3.029 1.715l9.997-5.998a2 2 0 0 0 .003-3.432z"/>',
+  reset:'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+  plus:'<path d="M5 12h14"/><path d="M12 5v14"/>',
+  close:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  trash:'<path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+  info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+  warn:'<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  tap:'<path d="M14 4.1 12 6"/><path d="m5.1 8-2.9-.8"/><path d="m6 12-1.9 2"/><path d="M7.2 2.2 8 5.1"/><path d="M9.037 9.69a.498.498 0 0 1 .653-.653l11 4.5a.5.5 0 0 1-.074.949l-4.349 1.041a1 1 0 0 0-.74.739l-1.04 4.35a.5.5 0 0 1-.95.074z"/>',
+  zap:'<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>',
+  thermo:'<path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/>',
+  eye:'<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/>',
+  drop:'<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>',
+  shield:'<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>'
+};
+const ic=k=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${IC[k]}</svg>`;
+$$('[data-ic]',document).forEach(e=>e.insertAdjacentHTML('afterbegin',ic(e.dataset.ic)));
+
+/* ---------- 3. Données ---------- */
+const LADDERS={
+  '25bp':{name:'25 pb',sizes:[25,50,75,100,125,150,200,250,300,400,500],bright:[100,500]},
+  '50bp':{name:'50 pb',sizes:[50,100,150,200,250,300,400,500,600,800,1000],bright:[150,500]},
+  '100bp':{name:'100 pb',sizes:[100,200,300,400,500,600,700,800,900,1000],bright:[500,1000]},
+  '100bpplus':{name:'100 pb Plus',sizes:[100,200,300,400,500,600,700,800,900,1000,1200,1500,2000,3000],bright:[500,1500]},
+  '1kb':{name:'1 kb',sizes:[250,500,750,1000,1500,2000,3000,4000,5000,6000,8000,10000],bright:[1000,3000]},
+  '1kbplus':{name:'1 kb Plus',sizes:[100,200,300,400,500,650,850,1000,1650,2000,3000,4000,5000,7000,10000,12000],bright:[500,1650]},
+  custom:{name:'Personnalisé',sizes:[],bright:[]}};
+const AGAR=[0.5,0.7,1,1.2,1.5,2,2.5],VOLTS=[50,75,100,120],TIMES=[15,20,30,45,60];
+/* gamme de séparation usuelle selon le pourcentage d'agarose (bp) */
+const RANGE=[[0.5,1000,30000],[0.7,800,12000],[1,500,10000],[1.2,400,7000],[1.5,200,3000],[2,50,2000],[2.5,20,1000]];
+const SWEET=[[0.5,5000,30000],[0.7,2000,12000],[1,800,8000],[1.2,500,5000],[1.5,300,2500],[2,100,1200],[2.5,20,500]];
+/* couleurs possibles pour une bande (vert = couleur habituelle du gel) */
+const BCOL=[['','Vert (habituel)','#a5ffd7'],['#ffd60a','Jaune','#ffd60a'],['#ff9f0a','Orange','#ff9f0a'],['#ff453a','Rouge','#ff453a'],['#ff6ad5','Rose','#ff6ad5'],['#bf5af2','Violet','#bf5af2'],['#5ac8fa','Bleu','#5ac8fa'],['#ffffff','Blanc','#ffffff']];
+const okCol=c=>BCOL.some(x=>x[0]===c&&c);
+const rgba=(h,a)=>`rgba(${parseInt(h.slice(1,3),16)},${parseInt(h.slice(3,5),16)},${parseInt(h.slice(5,7),16)},${a})`;
+/* quantité d'ADN déposée → épaisseur et éclat de la bande */
+const QTY=[[1,'Faible','≈ 20 ng : bande fine et pâle'],[2,'Normale','≈ 100 ng : bande nette'],[3,'Forte','≈ 300 ng : bande épaisse et brillante'],[4,'Saturée','≈ 1 µg : bande large qui traîne vers le bas (surcharge)']];
+const QH=[0,2,3.6,5.6,8.5],QA=[0,.42,.72,.92,1];
+/* smear : traînée continue dans la piste (ADN dégradé ou génomique) */
+const SMEAR=[[0,'Aucun',''],[1,'Léger','ADN un peu dégradé'],[2,'Fort','ADN très dégradé'],[3,'Génomique','ADN génomique (haut poids moléculaire)']];
+const COLS=['blue','orange','pink','teal','indigo','green','cyan','brown','purple'];
+const MAXS=9,MAXF=8,MINBP=20,MAXBP=50000,LOAD_MS=1300,RUN_MS=4800,VISIBLE=.97,GEL_MM=80;
+
+/* ---------- 4. État (mémorisé) ---------- */
+const S={tab:-1,dark:root.dataset.theme==='dark',agarose:1,volt:100,time:30,ladder:'1kb',custom:'100, 250, 500, 1000, 2000, 5000',lpos:0,lname:'',
+  lcol:{},lqty:{},samples:[{name:'Échantillon 1',frags:[500],col:{},qty:{},smear:0},{name:'Échantillon 2',frags:[1500,500],col:{},qty:{},smear:0}],status:'idle',prog:0,el:0,sel:null,bands:[],raf:0,last:0,ran:false};
+try{const o=JSON.parse(sto.g('bbd_state'));if(o){['agarose','volt','time','ladder','custom','lpos','lname'].forEach(k=>{if(o[k]!=null)S[k]=o[k]});
+  const cleanCol=c=>Object.fromEntries(Object.entries(c&&typeof c==='object'?c:{}).filter(([,v])=>okCol(v)));S.lcol=cleanCol(o.lcol);
+  const cleanQ=q=>Object.fromEntries(Object.entries(q&&typeof q==='object'?q:{}).filter(([,v])=>[1,2,3,4].includes(v)));S.lqty=cleanQ(o.lqty);
+  if(Array.isArray(o.samples)&&o.samples.length)S.samples=o.samples.slice(0,MAXS).map(s=>({name:String(s.name||'').slice(0,24),frags:(s.frags||[]).filter(n=>n>=MINBP&&n<=MAXBP).slice(0,MAXF),col:cleanCol(s.col),qty:cleanQ(s.qty),smear:[0,1,2,3].includes(s.smear)?s.smear:0}))}}catch(e){}
+S.samples.forEach(s=>{s.col=s.col||{};s.qty=s.qty||{};s.smear=s.smear||0});
+if(!LADDERS[S.ladder])S.ladder='1kb';
+const save=()=>sto.s('bbd_state',JSON.stringify({agarose:S.agarose,volt:S.volt,time:S.time,ladder:S.ladder,custom:S.custom,lpos:S.lpos,lname:S.lname,lcol:S.lcol,lqty:S.lqty,samples:S.samples}));
+const sCol=i=>`var(--c-${COLS[i%COLS.length]})`;
+const sName=(s,i)=>s.name.trim()||'Échantillon '+(i+1);
+function ladder(){if(S.ladder!=='custom')return LADDERS[S.ladder];
+  const sz=[...new Set(String(S.custom).split(/[,;\s]+/).map(x=>parseInt(x,10)).filter(n=>n>=MINBP&&n<=MAXBP))].sort((a,b)=>a-b);
+  return {name:'Personnalisé',sizes:sz,bright:[]}}
+const lName=()=>S.lname.trim()||'Marqueur';
+function lanes(){const a=S.samples.map((s,i)=>({s,i}));a.splice(Math.min(S.lpos,a.length),0,{ladder:true});return a}
+
+/* ---------- 5. Modèle de migration (approximation pédagogique : distance ≈ −log10(taille)) ---------- */
+function migr(size){
+  const c=S.agarose,logMax=Math.log10(30000/Math.pow(c/0.5,0.9)),logMin=Math.log10(80/Math.pow(c,1.2));
+  const m=clamp((logMax-Math.log10(size))/(logMax-logMin));
+  const front=Math.min(1.25,S.volt*S.time/3600);
+  return front*(0.06+0.94*m)*0.92;                       // fraction de la longueur du gel
+}
+const frontPos=()=>Math.min(.99,Math.min(1.25,S.volt*S.time/3600)*.98);
+function buildBands(){
+  const B=[],L=ladder();
+  lanes().forEach((ln,li)=>{
+    if(ln.ladder)L.sizes.forEach((z,k)=>B.push({key:li+'-'+k,lane:li,size:z,ladder:true,q:S.lqty[z]||(L.bright.includes(z)?3:2),col:S.lcol[z]||''}));
+    else ln.s.frags.forEach((z,k)=>B.push({key:li+'-'+k,lane:li,size:z,ladder:false,q:ln.s.qty[z]||2,s:ln.s,si:ln.i,col:ln.s.col[z]||''}))});
+  B.forEach(b=>{b.dist=migr(b.size);b.vis=b.dist<=VISIBLE});
+  S.bands=B;if(S.sel&&!B.some(b=>b.key===S.sel))S.sel=null;
+}
+/* taille estimée en comparant au marqueur (interpolation log-linéaire entre les 2 bandes voisines) */
+function estimate(b){
+  const lad=S.bands.filter(x=>x.ladder&&x.vis).sort((a,c)=>a.dist-c.dist);
+  if(lad.length<2||!b.vis)return null;
+  let lo=null,hi=null;for(const x of lad){if(x.dist<=b.dist)lo=x;if(x.dist>=b.dist&&!hi)hi=x}
+  if(!lo||!hi)return {out:true};
+  if(lo===hi)return {est:lo.size,lo,hi};
+  const k=(b.dist-lo.dist)/(hi.dist-lo.dist);
+  return {est:Number(Math.pow(10,Math.log10(lo.size)+k*(Math.log10(hi.size)-Math.log10(lo.size))).toPrecision(3)),lo,hi};
+}
+/* pourcentage conseillé pour les fragments saisis */
+function advise(){
+  const all=S.samples.flatMap(s=>s.frags);if(!all.length)return null;
+  const mn=Math.min(...all),mx=Math.max(...all);
+  /* zone où chaque gel sépare le mieux : le plus concentré qui contient tous les fragments, sinon le meilleur recouvrement (échelle log) */
+  const ok=SWEET.filter(([,a,b])=>mn>=a&&mx<=b);
+  const pick=ok.length?ok[ok.length-1]:SWEET.map(r=>({r,cov:(Math.log10(Math.min(mx,r[2]))-Math.log10(Math.max(mn,r[1])))/(Math.log10(mx/mn)||1)})).sort((x,y)=>y.cov-x.cov)[0].r;
+  const lads=Object.entries(LADDERS).filter(([k,l])=>k!=='custom'&&l.sizes[0]<=mn&&l.sizes.at(-1)>=mx).sort((a,b)=>a[1].sizes.at(-1)/a[1].sizes[0]-b[1].sizes.at(-1)/b[1].sizes[0]);
+  return {mn,mx,pct:pick[0],fits:!!ok.length,lad:lads[0]&&lads[0][0]};
+}
+
+/* ---------- 6. Gel (canvas) ---------- */
+const cv=$('gel'),ctx=cv.getContext('2d');
+function geom(){
+  const W=cv.clientWidth,H=cv.clientHeight,n=S.samples.length+1,padL=W<380?36:44,padR=10;
+  ctx.font='700 11px -apple-system,BlinkMacSystemFont,sans-serif';
+  const names=lanes().map(l=>l.ladder?lName():sName(l.s,l.i));
+  const maxW=Math.max(...names.map(t=>ctx.measureText(t).width));
+  return {W,H,n,padL,lw:(W-padL-padR)/n,wellY:clamp(Math.ceil(maxW)+20,52,130),wellH:18,bottom:H-24,names};
+}
+const laneX=(g,i)=>g.padL+g.lw*(i+.5);
+const bandY=(g,d)=>g.wellY+g.wellH-3+(g.bottom-g.wellY-g.wellH+3)*d;
+const ease=p=>p>=1?1:1-Math.pow(1-p,1.6);
+function draw(){
+  const g=geom();if(!g.W)return;const dpr=devicePixelRatio||1;
+  if(cv.width!==Math.round(g.W*dpr)||cv.height!==Math.round(g.H*dpr)){cv.width=Math.round(g.W*dpr);cv.height=Math.round(g.H*dpr)}
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,g.W,g.H);
+  const bg=ctx.createLinearGradient(0,0,0,g.H);bg.addColorStop(0,'#0d1b20');bg.addColorStop(1,'#071012');ctx.fillStyle=bg;ctx.fillRect(0,0,g.W,g.H);
+  wells(g);bands(g);guides(g);
+  if(S.status==='idle'){ctx.save();ctx.font='600 13px -apple-system,BlinkMacSystemFont,sans-serif';ctx.textAlign='center';ctx.fillStyle='rgba(255,255,255,.55)';
+    ctx.fillText('Appuyez sur « Lancer » pour démarrer la migration',g.padL+(g.W-g.padL)/2,(g.wellY+g.bottom)/2);ctx.restore()}
+}
+function fill(i,n){if(S.status==='idle'||S.status==='done'||S.status==='running'&&S.el>=LOAD_MS)return S.status==='idle'?0:1;return clamp((clamp(S.el/LOAD_MS)-.55*i/n)/.45)}
+function wells(g){
+  const ln=lanes();
+  for(let i=0;i<g.n;i++){
+    const x=laneX(g,i),w=g.lw*.76,f=fill(i,g.n);
+    ctx.fillStyle='#02080a';ctx.strokeStyle='rgba(255,255,255,.2)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.roundRect(x-w/2,g.wellY,w,g.wellH,3);ctx.fill();ctx.stroke();
+    if(f>0){const x0=x-w/2+1,x1=x+w/2-1,yb=g.wellY+g.wellH-1,top=yb-(g.wellH-2)*f;ctx.fillStyle='rgba(80,145,255,.85)';ctx.fillRect(x0,top,x1-x0,yb-top)}
+    ctx.save();ctx.translate(x+4,g.wellY-7);ctx.rotate(-Math.PI/2);ctx.textAlign='left';ctx.font='700 11px -apple-system,BlinkMacSystemFont,sans-serif';
+    ctx.fillStyle=ln[i].ladder?'#d6b8ff':'rgba(255,255,255,.82)';ctx.fillText(g.names[i],0,0);ctx.restore();
+  }
+  ctx.save();ctx.font='700 16px -apple-system,sans-serif';ctx.textAlign='center';
+  ctx.fillStyle='#5ac8fa';ctx.fillText('−',13,g.wellY+13);ctx.fillStyle='#ff6b62';ctx.fillText('+',13,g.bottom+4);
+  ctx.strokeStyle='rgba(255,255,255,.22)';ctx.beginPath();ctx.moveTo(13,g.wellY+24);ctx.lineTo(13,g.bottom-16);ctx.moveTo(9,g.bottom-22);ctx.lineTo(13,g.bottom-16);ctx.lineTo(17,g.bottom-22);ctx.stroke();ctx.restore();
+}
+function bands(g){
+  if(S.status==='idle'||S.status==='loading')return;
+  const e=ease(S.prog);
+  ctx.save();ctx.beginPath();ctx.rect(0,g.wellY,g.W,g.bottom-g.wellY+2);ctx.clip();
+  const fy=bandY(g,frontPos()*e),fg=ctx.createLinearGradient(0,fy-8,0,fy+8);
+  fg.addColorStop(0,'rgba(90,120,255,0)');fg.addColorStop(.5,'rgba(90,120,255,.3)');fg.addColorStop(1,'rgba(90,120,255,0)');ctx.fillStyle=fg;ctx.fillRect(g.padL-4,fy-8,g.W,16);
+  lanes().forEach((ln,li)=>{if(ln.ladder||!ln.s.smear)return;
+    const x=laneX(g,li),w=g.lw*.7,y=d=>bandY(g,Math.min(d,VISIBLE)*e),k=ln.s.smear;
+    const y0=y(migr(k===3?40000:20000)),y1=y(migr(k===3?1500:80));if(y1-y0<2)return;
+    const gr=ctx.createLinearGradient(0,y0,0,y1),a=k===1?.2:k===2?.42:.5;
+    gr.addColorStop(0,`rgba(165,255,215,${k===3?a:a*.35})`);gr.addColorStop(k===3?.25:.4,`rgba(165,255,215,${k===3?a*.45:a})`);gr.addColorStop(k===3?.7:.75,`rgba(165,255,215,${a*.5})`);gr.addColorStop(1,'rgba(165,255,215,0)');
+    ctx.shadowColor='rgba(140,255,200,.5)';ctx.shadowBlur=10;ctx.fillStyle=gr;ctx.beginPath();ctx.roundRect(x-w/2,y0,w,y1-y0,4);ctx.fill();
+    if(k===3){const yb=y(migr(25000));ctx.shadowBlur=18;ctx.fillStyle='rgba(185,255,225,.95)';ctx.beginPath();ctx.roundRect(x-w/2,yb-4,w,8,4);ctx.fill()}});
+  S.bands.forEach(b=>{b.px=laneX(g,b.lane);b.py=bandY(g,b.dist*e);if(b.py>g.bottom+4)return;
+    const a=QA[b.q],w=g.lw*(b.q===4?.8:.72),h=QH[b.q],sel=b.key===S.sel,c=b.col||'#a5ffd7';
+    ctx.shadowColor=rgba(b.col||'#8cffc8',.9*a);ctx.shadowBlur=(sel?16:4)+5*b.q;ctx.fillStyle=rgba(c,b.col?Math.max(.55,a):a);
+    ctx.beginPath();ctx.roundRect(b.px-w/2,b.py-h/2,w,h,Math.min(h/2,4));ctx.fill();
+    if(b.q===4){const t=ctx.createLinearGradient(0,b.py,0,b.py+16);t.addColorStop(0,rgba(c,.5));t.addColorStop(1,rgba(c,0));ctx.fillStyle=t;ctx.fillRect(b.px-w/2+2,b.py,w-4,16)}});
+  ctx.restore();
+  if(e>.15){ctx.save();ctx.font='600 9.5px -apple-system,sans-serif';ctx.textAlign='right';ctx.fillStyle='rgba(214,184,255,.9)';let last=-99;
+    S.bands.filter(b=>b.ladder&&b.py<=g.bottom).sort((a,b)=>a.py-b.py).forEach(b=>{if(b.py-last>=11){ctx.fillText(nf(b.size),b.px-g.lw*.37-3,b.py+3);last=b.py}});ctx.restore()}
+}
+function guides(g){
+  const b=S.sel&&S.bands.find(x=>x.key===S.sel);if(!b||S.status!=='done'||!b.vis)return;
+  ctx.save();ctx.setLineDash([4,4]);ctx.strokeStyle='rgba(255,179,64,.75)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(g.padL-6,b.py);ctx.lineTo(g.W-4,b.py);ctx.stroke();ctx.setLineDash([]);
+  const r=!b.ladder&&estimate(b);
+  if(r&&r.lo)[r.lo,r.hi].forEach(x=>{ctx.strokeStyle='#ffb340';ctx.lineWidth=1.5;const w=g.lw*.8;ctx.strokeRect(x.px-w/2,x.py-5,w,10)});
+  ctx.strokeStyle='#ffcc66';ctx.lineWidth=2;const w=g.lw*.86;ctx.beginPath();ctx.roundRect(b.px-w/2,b.py-7,w,14,7);ctx.stroke();ctx.restore();
+}
+/* migration : dépôt dans les puits puis avancée des bandes */
+function run(instant){
+  buzz(OK);cancelAnimationFrame(S.raf);buildBands();S.sel=null;
+  if(instant||RM){S.status='done';S.prog=1;S.el=LOAD_MS;finish();return}
+  S.status='loading';S.prog=0;S.el=0;S.last=performance.now();S.raf=requestAnimationFrame(tick);ui()}
+function tick(now){const dt=Math.min(64,now-S.last);S.last=now;
+  if(S.status==='loading'){S.el+=dt;if(S.el>=LOAD_MS)S.status='running'}
+  else if(S.status==='running'){S.prog=Math.min(1,S.prog+dt/RUN_MS);if(S.prog>=1){finish();return}}
+  else return;
+  draw();S.raf=requestAnimationFrame(tick)}
+function finish(){S.status='done';S.prog=1;S.ran=true;cancelAnimationFrame(S.raf);draw();ui();info();buzz(OK)}
+function pause(){if(S.status==='paused'){S.status=S.el>=LOAD_MS?'running':'loading';S.last=performance.now();S.raf=requestAnimationFrame(tick)}
+  else if(S.status==='running'||S.status==='loading'){S.status='paused';cancelAnimationFrame(S.raf)}buzz();ui()}
+function reset(){cancelAnimationFrame(S.raf);S.status='idle';S.prog=0;S.el=0;S.sel=null;buzz();draw();ui();info()}
+/* après un premier passage, chaque réglage met le gel à jour directement */
+function changed(){save();buildBands();if(S.status==='done'){draw();info()}else if(S.status==='idle')draw();reco();warn();renderLearn()}
+cv.addEventListener('click',e=>{if(S.status!=='done')return;const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,g=geom();
+  let best=null,bd=18;S.bands.forEach(b=>{if(!b.vis||Math.abs(b.px-x)>g.lw/2)return;const d=Math.abs(b.py-y);if(d<bd){bd=d;best=b}});
+  S.sel=best&&best.key!==S.sel?best.key:null;buzz(10);draw();info();renderLearn()});
+
+/* ---------- 7. Boutons du gel, bande choisie, avertissements ---------- */
+function ui(){const st=S.status,R=$('bRun');
+  R.innerHTML=st==='running'||st==='loading'?ic('pause')+'<span>Pause</span>':st==='paused'?ic('play')+'<span>Reprendre</span>':ic('play')+`<span>${S.ran?'Relancer':'Lancer'}</span>`;
+  R.classList.toggle('wait',st==='idle');$('bSkip').disabled=st==='done';$('bReset').disabled=st==='idle'}
+$('bRun').addEventListener('click',()=>['running','loading','paused'].includes(S.status)?pause():run());
+$('bSkip').addEventListener('click',()=>run(true));
+$('bReset').addEventListener('click',reset);
+function info(){const b=S.sel&&S.bands.find(x=>x.key===S.sel),box=$('binfo');
+  if(!b){box.innerHTML=`<div class="bhint">${ic(S.status==='done'?'tap':'info')}<span>${S.status==='done'?'Touchez une bande du gel pour la comparer au marqueur.':'Lancez la migration, puis touchez une bande pour estimer sa taille.'}</span></div>`;return}
+  const row=(k,v,c)=>`<div class="vr"><span class="k">${k}</span><span class="v${c?' acc':''}">${v}</span></div>`;
+  const dot=b.ladder?`<span class="dot" style="--sc:var(--c-purple)">M</span>`:`<span class="dot" style="--sc:${sCol(b.si)}">${b.si+1}</span>`;
+  let h=`<div class="vr">${dot}<span class="k" style="color:var(--tx)">${esc(b.ladder?lName():sName(b.s,b.si))}</span></div>`;
+  if(b.ladder)h+=row('Bande du marqueur',bp(b.size),1);
+  else{h+=row('Taille réelle',bp(b.size));const r=estimate(b);
+    h+=row('Taille estimée (marqueur)',r&&r.est?'≈ '+bp(r.est):'hors de la gamme du marqueur',r&&r.est);
+    if(r&&r.lo&&r.lo!==r.hi)h+=row('Entre les bandes',`${nf(r.hi.size)} et ${nf(r.lo.size)} pb`)}
+  h+=row('Distance de migration','≈ '+dec((b.dist*GEL_MM).toFixed(1))+' mm');
+  const qd=QTY.find(x=>x[0]===b.q);
+  h+=`<div class="vr col"><span class="k">Quantité d'ADN déposée</span><div class="chips qch">${QTY.map(([v,l])=>`<button type="button" data-q="${v}" class="${v===b.q?'on':''}">${l}</button>`).join('')}</div><small class="qh">${qd[2]}</small></div>`;
+  h+=`<div class="vr"><span class="k">Couleur de la bande</span><div class="sws">${BCOL.map(([v,n,c])=>`<button type="button" class="sw${(b.col||'')===v?' on':''}" data-col="${v}" style="--c:${c}" title="${n}" aria-label="${n}"></button>`).join('')}</div></div>`;
+  box.innerHTML=h}
+/* couleur choisie pour une bande précise (mémorisée par taille, dans sa piste) */
+$('binfo').addEventListener('click',e=>{const q=e.target.closest('[data-q]');if(!q)return;const b=S.bands.find(x=>x.key===S.sel);if(!b)return;
+  const map=b.ladder?S.lqty:b.s.qty;map[b.size]=+q.dataset.q;buzz(10);save();buildBands();draw();info()});
+$('binfo').addEventListener('click',e=>{const w=e.target.closest('[data-col]');if(!w)return;const b=S.bands.find(x=>x.key===S.sel);if(!b)return;
+  const map=b.ladder?S.lcol:b.s.col,v=w.dataset.col;if(v)map[b.size]=v;else delete map[b.size];buzz(10);
+  save();buildBands();draw();info();renderSamples()});
+function warn(){const out=[],close=[];
+  S.bands.filter(b=>!b.ladder).forEach(b=>{if(!b.vis)out.push(b.size)});
+  S.samples.forEach((s,i)=>{const d=s.frags.map(z=>[z,migr(z)]).sort((a,b)=>a[1]-b[1]);
+    for(let k=1;k<d.length;k++)if(d[k][1]-d[k-1][1]<.012&&d[k][1]<=VISIBLE)close.push(`${nf(d[k-1][0])} et ${nf(d[k][0])} pb (${sName(s,i)})`)});
+  const L=ladder(),m=[];
+  if(out.length)m.push(`${[...new Set(out)].map(nf).join(', ')} pb ${out.length>1?'sortent':'sort'} du gel : réduisez la durée ou la tension, ou augmentez le pourcentage d'agarose.`);
+  if(close.length)m.push(`Bandes presque confondues : ${close.slice(0,2).join(' ; ')}. Augmentez le pourcentage d'agarose ou la durée de migration pour mieux les séparer.`);
+  if(L.sizes.length<2)m.push('Marqueur personnalisé : entrez au moins 2 tailles (20 à 50 000 pb).');
+  const t=$('gtip');t.className='tip'+(m.length?' warn':'');t.innerHTML=m.length?ic('warn')+`<span>${esc(m.join('\n'))}</span>`:''}
+
+/* ---------- 8. Réglages du gel (capsules) et conseil d'agarose ---------- */
+const DD={agarose:{id:'dAg',t:'Agarose',vals:AGAR,u:'%',fmt:v=>dec(v)+' %',min:.3,max:4,ph:'0,8'},
+  volt:{id:'dV',t:'Tension',vals:VOLTS,u:'V',fmt:v=>v+' V',min:10,max:200,ph:'90'},
+  time:{id:'dT',t:'Durée',vals:TIMES,u:'min',fmt:v=>v+' min',min:5,max:180,ph:'40'}};
+const CHEV='<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+const ddLabel=(el,txt,aria)=>{el.innerHTML=`<span>${esc(txt)}</span>${CHEV}`;el.setAttribute('aria-label',aria+' : '+txt)};
+function renderSettings(){Object.entries(DD).forEach(([k,d])=>ddLabel($(d.id),d.fmt(S[k]),d.t))}
+/* menu déroulant maison : cfg = {t, opts:[{v,l,sub,tag}], cur, custom:{u,ph,min,max,round,val}, set(v)} */
+let ddBtn=null,ddCfg=null;
+function ddClose(){if(!ddBtn)return;$('ddp').hidden=true;ddBtn.classList.remove('open');ddBtn=ddCfg=null}
+function ddPlace(){const p=$('ddp'),r=ddBtn.getBoundingClientRect(),h=p.offsetHeight,w=p.offsetWidth;
+  /* zone vraiment visible (le clavier du téléphone en cache le bas) */
+  const vv=window.visualViewport,vt=vv?vv.offsetTop:0,vh=vv?vv.height:innerHeight,bot=vt+vh-8;
+  if(document.activeElement&&document.activeElement.id==='ddIn'){p.style.top=Math.max(vt+8,bot-h)+'px';p.style.left=clamp(r.right-w,8,innerWidth-w-8)+'px';return}
+  const top=r.bottom+8+h<bot||r.top-8-h<vt+8?Math.min(r.bottom+8,bot-h):r.top-8-h;
+  p.style.top=Math.max(8,top)+'px';p.style.left=clamp(r.right-w,8,innerWidth-w-8)+'px'}
+function ddOpen(btn,cfg){if(ddBtn===btn){ddClose();return}ddClose();ddBtn=btn;ddCfg=cfg;btn.classList.add('open');buzz(8);
+  const c=cfg.custom,p=$('ddp');
+  p.innerHTML=`<div class="ddh">${esc(cfg.t)}</div>`+cfg.opts.map(o=>`<button type="button" role="option" class="ddo${o.v===cfg.cur?' on':''}" data-v="${esc(o.v)}" aria-selected="${o.v===cfg.cur}"><span>${esc(o.l)}${o.sub?`<small>${esc(o.sub)}</small>`:''}</span>${o.tag?`<em>${o.tag}</em>`:''}${ic('check')}</button>`).join('')
+    +(c?`<div class="ddc"><span>Personnalisé</span><input class="fadd" id="ddIn" inputmode="decimal" placeholder="${c.ph}" value="${c.val!=null?dec(c.val):''}" aria-label="${esc(cfg.t)} personnalisée (${c.u})"><b>${c.u}</b><button type="button" class="ddok" id="ddOk">OK</button></div><div class="ferr" id="ddErr"></div>`:'');
+  p.hidden=false;ddPlace()}
+function ddPick(raw){const cfg=ddCfg,o=cfg.opts.find(x=>String(x.v)===raw);ddClose();buzz(10);cfg.set(o?o.v:raw)}
+function ddCustom(){const c=ddCfg.custom,v=parseFloat($('ddIn').value.replace(',','.'));
+  if(!(v>=c.min&&v<=c.max)){$('ddErr').textContent=`Entrez une valeur entre ${dec(c.min)} et ${c.max} ${c.u}.`;buzz([30,40,30]);return}
+  const set=ddCfg.set;ddClose();buzz(10);set(c.round(v))}
+Object.entries(DD).forEach(([k,d])=>$(d.id).addEventListener('click',e=>{e.stopPropagation();const a=k==='agarose'&&advise();
+  ddOpen($(d.id),{t:d.t,cur:S[k],opts:d.vals.map(v=>({v,l:d.fmt(v),tag:a&&a.pct===v?'Conseillé':''})),
+    custom:{u:d.u,ph:d.ph,min:d.min,max:d.max,val:d.vals.includes(S[k])?null:S[k],round:v=>k==='agarose'?Math.round(v*100)/100:Math.round(v)},
+    set:v=>{S[k]=v;renderSettings();changed()}})}));
+$('ddp').addEventListener('click',e=>{e.stopPropagation();const o=e.target.closest('.ddo');if(o)ddPick(o.dataset.v);if(e.target.closest('#ddOk'))ddCustom()});
+$('ddp').addEventListener('keydown',e=>{if(e.target.id==='ddIn'&&e.key==='Enter'){e.preventDefault();ddCustom()}});
+$('ddp').addEventListener('input',e=>{if(e.target.id==='ddIn')$('ddErr').textContent=''});
+document.addEventListener('click',e=>{if(ddBtn&&!e.target.closest('#ddp'))ddClose()});
+addEventListener('keydown',e=>{if(e.key==='Escape')ddClose()});
+addEventListener('scroll',()=>ddBtn&&ddPlace(),{passive:true});
+$('ddp').addEventListener('focusin',e=>{if(e.target.id==='ddIn')setTimeout(()=>ddBtn&&ddPlace(),300)});
+function reco(){const a=advise(),r=$('reco');if(!a){r.innerHTML='';return}
+  const rg=a.mn===a.mx?bp(a.mn):`${nf(a.mn)} à ${bp(a.mx)}`;
+  const todo=a.pct!==S.agarose||a.lad&&a.lad!==S.ladder;r.classList.toggle('done',!todo);
+  r.innerHTML=`<div class="rh">${ic(todo?'bulb':'check')}<span>${todo?'Conseil pour vos fragments':'Votre gel est bien réglé'}</span></div>`+
+    `<p>Pour ${rg}, un gel à <b>${dec(a.pct)} %</b> ${a.fits?'les sépare bien':'est le meilleur compromis (tailles très différentes)'}`+
+    (a.lad?`, avec le marqueur <b>${LADDERS[a.lad].name}</b>`:'')+'.</p>'+
+    (todo?`<button type="button" id="recGo">${ic('check')}Appliquer ${dec(a.pct)} %${a.lad&&a.lad!==S.ladder?' + '+LADDERS[a.lad].name:''}</button>`:'');
+  const g=$('recGo');if(g)g.onclick=()=>{buzz(OK);S.agarose=a.pct;if(a.lad)S.ladder=a.lad;renderSettings();renderLadder();changed()}}
+
+/* ---------- 9. Échantillons ---------- */
+function renderSamples(){
+  $('samples').innerHTML=S.samples.map((s,i)=>`<div class="sr" data-i="${i}" style="--sc:${sCol(i)}">
+    <div class="srh"><span class="dot">${i+1}</span><input class="nm" value="${esc(s.name)}" maxlength="24" placeholder="Échantillon ${i+1}" aria-label="Nom de l'échantillon ${i+1}">
+    <button class="del" type="button" data-del aria-label="Supprimer l'échantillon">${ic('trash')}</button></div>
+    <div class="frs">${s.frags.map((z,k)=>`<span class="fc">${s.col[z]?`<i style="--bc:${s.col[z]}"></i>`:''}${nf(z)} pb<button type="button" data-fx="${k}" aria-label="Retirer ${nf(z)} pb">${ic('close')}</button></span>`).join('')}
+    ${s.frags.length<MAXF?`<input class="fadd" inputmode="numeric" placeholder="+ taille (pb)" aria-label="Ajouter un fragment (pb ou kb)">`:''}</div>
+    <div class="srx"><span>Smear</span><button class="dd sm" type="button" data-smear="${i}" aria-haspopup="listbox" aria-label="Smear : ${SMEAR[s.smear][1]}"><span>${SMEAR[s.smear][1]}</span>${CHEV}</button></div>
+    <div class="ferr"></div></div>`).join('')||'<div class="bhint">'+ic('info')+'<span>Ajoutez un échantillon pour le déposer sur le gel.</span></div>';
+  $('addS').disabled=S.samples.length>=MAXS}
+function addFrag(inp){const i=+inp.closest('.sr').dataset.i,s=S.samples[i],err=inp.closest('.sr').querySelector('.ferr');
+  const vals=inp.value.split(/[,;\s]+/).filter(Boolean);if(!vals.length)return;
+  for(const v of vals){const n=Math.round(parseFloat(v.replace(',','.'))*(/kb$/i.test(v)?1000:1));
+    if(!(n>=MINBP&&n<=MAXBP)){err.textContent=`« ${v} » : entrez une taille entre 20 et 50 000 pb.`;buzz([30,40,30]);return}
+    if(s.frags.length>=MAXF){err.textContent=`8 fragments au maximum par échantillon.`;break}
+    if(!s.frags.includes(n))s.frags.push(n)}
+  s.frags.sort((a,b)=>b-a);buzz(10);renderSamples();changed();
+  const ni=$('samples').querySelector(`.sr[data-i="${i}"] .fadd`);if(ni)ni.focus()}
+$('samples').addEventListener('keydown',e=>{if(e.target.matches('.fadd')&&(e.key==='Enter'||e.key===',')){e.preventDefault();addFrag(e.target)}if(e.target.matches('.nm')&&e.key==='Enter')e.target.blur()});
+$('samples').addEventListener('focusout',e=>{if(e.target.matches('.fadd')&&e.target.value.trim())addFrag(e.target)});
+$('samples').addEventListener('input',e=>{if(e.target.matches('.nm')){S.samples[+e.target.closest('.sr').dataset.i].name=e.target.value;save();buildBands();draw();if(S.sel)info();renderPos()}
+  if(e.target.matches('.fadd')){e.target.closest('.sr').querySelector('.ferr').textContent=''}});
+$('samples').addEventListener('click',e=>{const sr=e.target.closest('.sr');if(!sr)return;const i=+sr.dataset.i;
+  const fx=e.target.closest('[data-fx]');if(fx){buzz(10);S.samples[i].frags.splice(+fx.dataset.fx,1);renderSamples();changed();return}
+  const sm=e.target.closest('[data-smear]');if(sm){e.stopPropagation();
+    ddOpen(sm,{t:'Smear (traînée)',cur:String(S.samples[i].smear),opts:SMEAR.map(([v,l,sub])=>({v:String(v),l,sub})),set:v=>{S.samples[i].smear=+v;renderSamples();changed()}});return}
+  if(e.target.closest('[data-del]')){buzz();S.samples.splice(i,1);S.lpos=Math.min(S.lpos,S.samples.length);renderSamples();renderPos();renderSettings();changed()}});
+$('addS').addEventListener('click',()=>{if(S.samples.length>=MAXS)return;buzz();S.samples.push({name:'',frags:[],col:{},qty:{},smear:0});renderSamples();renderPos();changed();
+  const ins=$('samples').querySelectorAll('.fadd');ins[ins.length-1]&&ins[ins.length-1].focus()});
+
+/* ---------- 10. Marqueur ---------- */
+const lSub=(k,l)=>k==='custom'?'Vos propres tailles':`${nf(l.sizes[0])} à ${bp(l.sizes.at(-1))} · ${l.sizes.length} bandes`;
+function lSizes(){const L=ladder();$('lSizes').innerHTML=L.sizes.length?L.sizes.slice().reverse().map(z=>`<span class="fc${L.bright.includes(z)?' br':''}" style="--sc:var(--c-purple)">${nf(z)}</span>`).join(''):'<span class="cap">Entrez au moins 2 tailles.</span>'}
+function renderLadder(){ddLabel($('dL'),LADDERS[S.ladder].name,'Marqueur');$('custRow').hidden=S.ladder!=='custom';$('cust').value=S.custom;lSizes();renderPos()}
+function renderPos(){const n=S.samples.length+1;S.lpos=Math.min(S.lpos,n-1);ddLabel($('dP'),'Puits '+(S.lpos+1),'Puits du marqueur');$('lName').value=S.lname}
+$('dL').addEventListener('click',e=>{e.stopPropagation();const a=advise();
+  ddOpen($('dL'),{t:'Marqueur de taille',cur:S.ladder,opts:Object.entries(LADDERS).map(([k,l])=>({v:k,l:l.name,sub:lSub(k,l),tag:a&&a.lad===k?'Conseillé':''})),
+    set:v=>{S.ladder=v;renderLadder();changed();if(v==='custom')$('cust').focus()}})});
+$('dP').addEventListener('click',e=>{e.stopPropagation();const n=S.samples.length+1;
+  ddOpen($('dP'),{t:'Puits du marqueur',cur:String(S.lpos),opts:Array.from({length:n},(_,i)=>({v:String(i),l:'Puits '+(i+1),sub:i===0?'À gauche du gel':i===n-1?'À droite du gel':''})),
+    set:v=>{S.lpos=+v;renderPos();changed()}})});
+$('cust').addEventListener('input',e=>{S.custom=e.target.value;lSizes();changed()});
+$('lName').addEventListener('input',e=>{S.lname=e.target.value;save();draw()});
+
+/* ---------- 11. Comprendre : courbe d'étalonnage, tableau, conseils ---------- */
+function renderLearn(){
+  const lad=S.bands.filter(b=>b.ladder&&b.vis).sort((a,b)=>a.dist-b.dist),svg=$('curve');
+  const W=320,H=210,L=44,R=12,T=12,B=30;
+  if(lad.length<2){svg.innerHTML=`<text x="${W/2}" y="${H/2}" text-anchor="middle">Il faut au moins 2 bandes du marqueur visibles sur le gel.</text>`;$('ccap').textContent='';return}
+  const xs=lad.map(b=>b.dist*GEL_MM),ys=lad.map(b=>Math.log10(b.size));
+  const x0=0,x1=Math.max(...xs)*1.08,y0=Math.floor(Math.min(...ys)*10)/10-.1,y1=Math.ceil(Math.max(...ys)*10)/10+.1;
+  const X=x=>L+(x-x0)/(x1-x0)*(W-L-R),Y=y=>T+(y1-y)/(y1-y0)*(H-T-B);
+  let s=`<line class="ax" x1="${L}" y1="${H-B}" x2="${W-R}" y2="${H-B}"/><line class="ax" x1="${L}" y1="${T}" x2="${L}" y2="${H-B}"/>`;
+  [20,50,100,200,500,1000,2000,5000,10000,20000].filter(v=>Math.log10(v)>=y0&&Math.log10(v)<=y1).forEach(v=>{const y=Y(Math.log10(v));
+    s+=`<line class="gl" x1="${L}" y1="${y.toFixed(1)}" x2="${W-R}" y2="${y.toFixed(1)}"/><text x="${L-5}" y="${(y+3).toFixed(1)}" text-anchor="end">${nf(v)}</text>`});
+  for(let mm=0;mm<=x1;mm+=10)s+=`<text x="${X(mm).toFixed(1)}" y="${H-B+14}" text-anchor="middle">${mm}</text>`;
+  s+=`<text x="${(L+W-R)/2}" y="${H-3}" text-anchor="middle">distance de migration (mm)</text>`;
+  s+=`<polyline class="ln" points="${lad.map((b,k)=>X(xs[k]).toFixed(1)+','+Y(ys[k]).toFixed(1)).join(' ')}"/>`+lad.map((b,k)=>`<circle class="pt" cx="${X(xs[k]).toFixed(1)}" cy="${Y(ys[k]).toFixed(1)}" r="3.2"/>`).join('');
+  const b=S.sel&&S.bands.find(x=>x.key===S.sel&&!x.ladder),r=b&&estimate(b);
+  if(r&&r.est){const x=X(b.dist*GEL_MM),y=Y(Math.log10(r.est));s+=`<path class="sl2" d="M${x.toFixed(1)} ${H-B}V${y.toFixed(1)}H${L}"/><circle class="sp" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5.5"/>`;
+    $('ccap').innerHTML=`La bande de <b>${esc(sName(b.s,b.si))}</b> a migré de ≈ ${dec((b.dist*GEL_MM).toFixed(1))} mm : la courbe d'étalonnage donne ≈ <b>${bp(r.est)}</b> (taille réelle : ${bp(b.size)}).`}
+  else $('ccap').textContent="Chaque point violet est une bande du marqueur (log₁₀ de la taille en fonction de la distance de migration) : plus un fragment est petit, plus il migre loin. Touchez une bande d'échantillon sur le gel pour estimer sa taille sur cette courbe.";
+  svg.innerHTML=s;
+  $('rtab').innerHTML=RANGE.map(([p,a,b])=>`<div class="rt-row${p===S.agarose?' on':''}"><b>${dec(p)} %</b><span>${nf(a)} à ${bp(b)}</span>${p===S.agarose?'<em>Votre gel</em>':''}</div>`).join('')}
+$('tips').innerHTML=[
+  ['zap','blue',"<b>L'ADN migre vers le pôle + (anode)</b> : ses groupements phosphate le chargent négativement. Placez toujours les puits du côté du pôle − (cathode, fil noir)."],
+  ['gel','purple',"<b>Plus un fragment est petit, plus il migre loin.</b> Un gel plus concentré sépare mieux les petits fragments, un gel moins concentré les grands fragments."],
+  ['ruler','orange',"<b>Déposez toujours un marqueur de taille</b> : sans lui, impossible d'estimer la taille des bandes."],
+  ['thermo','pink',"<b>Tension trop élevée : le gel chauffe</b> et les bandes se déforment en « sourire ». Comptez 5 à 8 V par cm de distance entre les électrodes."],
+  ['drop','teal',"<b>Tampon de charge</b> : il alourdit l'échantillon pour qu'il reste au fond du puits, et son colorant marque le front de migration. Arrêtez la migration avant que le front sorte du gel."],
+  ['shield','green',"<b>Révélation</b> : BET sur transilluminateur UV, ou SYBR Safe sous UV ou lumière bleue. Portez des gants, et ne regardez jamais les UV sans écran ou lunettes de protection."]]
+  .map(([i,c,t])=>`<div class="vr" style="--sc:var(--c-${c})">${ic(i)}<p>${t}</p></div>`).join('');
+
+/* ---------- 12. Onglets ---------- */
+const nbs=$$('.nb');let anims=[],tabTok=0;
+function play(el,kf,o,done){const a=el.animate(kf,o);anims.push(a);a.onfinish=()=>{anims=anims.filter(x=>x!==a);a.cancel();done&&done()}}
+function setTab(i,dir){const old=S.tab;if(i===old)return;
+  const next=$('view'+i),prev=old>=0?$('view'+old):null,my=++tabTok;dir=dir||(i>old?1:-1);S.tab=i;BC.dataset.tab=i;sto.s('bbd_tab',i);
+  navCtl.select(i);nbs.forEach((b,k)=>b.classList.toggle('on',k===i));if(prev){buzz();scrollTo(0,0)}
+  anims.splice(0).forEach(a=>{a.onfinish=null;a.cancel()});$$('.view').forEach(v=>v!==prev&&v!==next&&v.classList.remove('on'));
+  const enter=()=>{if(my!==tabTok)return;if(prev)prev.classList.remove('on');next.classList.add('on');if(i===0)draw();if(i===2)renderLearn();
+    if(RM||!prev)return;$$('.vt,.gh,.grp,.gelbox,.card,.gctl,.adds',next).forEach((e,k)=>play(e,[{opacity:0,transform:`translateX(${dir*38}px) scale(.97)`},{opacity:1,transform:'none'}],{duration:600,delay:Math.min(k,8)*45,easing:'cubic-bezier(.22,1,.36,1)',fill:'backwards'}))};
+  if(RM||!prev)enter();else play(prev,[{opacity:1,transform:'none'},{opacity:0,transform:`translateX(${-dir*44}px) scale(.96)`}],{duration:200,easing:'cubic-bezier(.4,0,1,1)',fill:'forwards'},enter)}
+const sl=$('sl'),navCtl=window.LiquidGlass?LiquidGlass.tabs({wrap:$('navWrap'),inner:$('nav'),indicator:sl,items:nbs,onSelect:i=>setTab(i),glass:false})
+  :{select(i){sl.style.translate=nbs[i].offsetLeft+'px 0';sl.style.width=nbs[i].offsetWidth+'px'}};
+if(!window.LiquidGlass){nbs.forEach((b,i)=>b.addEventListener('click',()=>setTab(i)));addEventListener('resize',()=>navCtl.select(S.tab))}
+
+/* ---------- 13. Thème, menu, verre ---------- */
+const period=()=>{const h=new Date().getHours();return h>=7&&h<20?'day':'night'};
+function applyTheme(){root.dataset.theme=S.dark?'dark':'light';document.body.classList.toggle('theme-light',!S.dark);document.body.classList.toggle('theme-dark',S.dark);$('themeBtn').innerHTML=ic(S.dark?'sun':'moon');$('metaTheme').content=S.dark?'#000000':'#f2f2f7'}
+$('themeBtn').addEventListener('click',()=>{buzz();S.dark=!S.dark;sto.s('bioBandTheme',S.dark?'dark':'light');sto.s('bioBandThemePeriod',period());applyTheme()});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{if(sto.g('bioBandTheme')&&sto.g('bioBandThemePeriod')===period())return;S.dark=e.matches;applyTheme()});
+$('mb').addEventListener('click',()=>{buzz();let n=0;const go=()=>typeof window.openCapsuleMenu==='function'?window.openCapsuleMenu():++n<40&&setTimeout(go,100);go()});
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+$$('.tools,.mb,.nav-in').forEach(b=>{
+  const aim=e=>{const r=b.getBoundingClientRect();b.style.setProperty('--mx',e.clientX-r.left+'px');b.style.setProperty('--my',e.clientY-r.top+'px')};
+  b.addEventListener('pointerenter',e=>{aim(e);b.classList.add('lit')});b.addEventListener('pointerdown',e=>{aim(e);b.classList.add('lit')});
+  b.addEventListener('pointermove',aim);b.addEventListener('pointerleave',()=>b.classList.remove('lit'));
+  ['pointerup','pointercancel'].forEach(n=>b.addEventListener(n,e=>e.pointerType!=='mouse'&&b.classList.remove('lit')))});
+let rz=0;addEventListener('resize',()=>{if(ddBtn)ddPlace();cancelAnimationFrame(rz);rz=requestAnimationFrame(draw)});
+if(window.visualViewport)['resize','scroll'].forEach(n=>visualViewport.addEventListener(n,()=>ddBtn&&ddPlace()));
+addEventListener('keydown',e=>{if(e.target.matches('input,textarea'))return;if(e.code==='Space'&&S.tab===0){e.preventDefault();$('bRun').click()}});
+
+/* ---------- 14. Démarrage ---------- */
+applyTheme();buildBands();renderSettings();renderSamples();renderLadder();reco();warn();ui();info();
+const t0=parseInt(sto.g('bbd_tab'),10);setTab(t0>=0&&t0<3?t0:0,1);
+requestAnimationFrame(draw);
+document.addEventListener('DOMContentLoaded',()=>{const f=document.querySelector('.modern-transparent-footer');if(f)$('shell').appendChild(f)});
+/* tests : BioBand/?tests */
+window.BioBandTests=()=>{const R=[],ok=(n,c)=>R.push([n,!!c]);const keep=JSON.stringify([S.agarose,S.volt,S.time]);
+  S.agarose=1;S.volt=100;S.time=30;
+  ok('500 pb va plus loin que 1 500 pb',migr(500)>migr(1500));
+  ok('gel plus concentré : un fragment migre moins loin',(()=>{S.agarose=2;const a=migr(1000);S.agarose=.7;const b=migr(1000);S.agarose=1;return a<b})());
+  ok('durée plus longue : migration plus loin',(()=>{const a=migr(1000);S.time=60;const b=migr(1000);S.time=30;return b>a})());
+  S.ladder='1kb';buildBands();
+  const f=S.bands.find(b=>!b.ladder&&b.size===500);ok('500 pb lu ≈ 500 pb avec le marqueur 1 kb',f&&Math.abs(estimate(f).est-500)<=5);
+  const s2=S.samples[0];const old=s2.frags;s2.frags=[1200];buildBands();const g=S.bands.find(b=>!b.ladder&&b.size===1200);ok('1 200 pb lu entre 1 000 et 1 500',g&&estimate(g).est>1000&&estimate(g).est<1500);s2.frags=old;
+  const sv=S.samples;S.samples=[{name:'',frags:[300,800],col:{},qty:{},smear:0}];ok('300–800 pb : 1,5 ou 2 % conseillé',[1.5,2].includes(advise().pct));S.samples=[{name:'',frags:[3000,8000],col:{},qty:{},smear:0}];ok('3–8 kb : 0,7 ou 1 % conseillé',[0.7,1].includes(advise().pct));S.samples=[{name:'',frags:[10000,20000],col:{},qty:{},smear:0}];ok('10–20 kb : 0,5 % conseillé',advise().pct===0.5);S.samples=[{name:'',frags:[50,150],col:{},qty:{},smear:0}];ok('50–150 pb : 2,5 % conseillé',advise().pct===2.5);S.samples=sv;
+  ok('bande saturée plus épaisse qu\'une bande faible',QH[4]>QH[1]&&QA[4]>QA[1]);
+  [S.agarose,S.volt,S.time]=JSON.parse(keep);buildBands();return R};
+if(/[?&]tests/.test(location.search)){const R=BioBandTests();const d=document.createElement('pre');d.style.cssText='position:fixed;inset:auto 8px 90px 8px;z-index:99;padding:12px;border-radius:16px;background:#111;color:#fff;font-size:12px;white-space:pre-wrap';
+  d.textContent=`Tests BioBand : ${R.filter(r=>r[1]).length}/${R.length}\n`+R.map(r=>(r[1]?'✓ ':'✗ ')+r[0]).join('\n');document.body.appendChild(d)}
+})();
+
+</script>
+<script src="/menu-flottant.js"></script>
+</body>
+</html>
