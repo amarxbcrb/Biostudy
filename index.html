@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="fr" data-haptic="own" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-visual">
+<title>BioStudy | Outils de calcul de laboratoire et cours de biologie</title>
+<meta name="description" content="Outils de calcul de laboratoire vérifiés (master mix PCR, dilutions C₁V₁ = C₂V₂, molarité, UFC/mL, milieux de culture, gel d'agarose) et cours de biologie classés par université. Pour étudiants, enseignants, techniciens et chercheurs. Gratuit, sans compte.">
+<meta name="keywords" content="biologie, PCR, master mix, dilution, C1V1=C2V2, molarité, molalité, concentration massique, conversion d'unités, gel d'agarose, électrophorèse, cours de biologie, TD, TP, examens">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="author" content="Amar Bouchareb">
+<link rel="canonical" href="https://www.biostudy.xyz/">
+<meta name="theme-color" content="#000000" id="metaTheme">
+<meta name="color-scheme" content="dark light">
+<!-- application web : installable uniquement depuis l'accueil -->
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/png" href="/Pictures/favicon.png">
+<link rel="apple-touch-icon" href="/Pictures/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BioStudy">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<!-- partage -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:site_name" content="BioStudy">
+<meta property="og:url" content="https://www.biostudy.xyz/">
+<meta property="og:title" content="BioStudy | Outils de laboratoire et cours de biologie">
+<meta property="og:description" content="Mélange PCR, dilutions, molarité, UFC/mL, solutions et milieux, conversions d'unités, gel d'agarose ; cours, TD, TP et examens de biologie. Gratuit, sans compte.">
+<meta property="og:image" content="https://www.biostudy.xyz/Pictures/icon-512.png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="Logo BioStudy">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="BioStudy | Outils de laboratoire et cours de biologie">
+<meta name="twitter:description" content="Mélange PCR, dilutions, molarité, UFC/mL, solutions et milieux, conversions d'unités, gel d'agarose ; cours de biologie. Gratuit, sans compte.">
+<meta name="twitter:image" content="https://www.biostudy.xyz/Pictures/icon-512.png">
+<script>
+/* thème avant le premier rendu : choix mémorisé, sinon celui du système */
+(()=>{let t=null;try{t=localStorage.getItem('bsTheme')}catch(e){}
+document.documentElement.dataset.theme=t||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark')})();
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+{"@type":"WebSite","@id":"https://www.biostudy.xyz/#site","name":"BioStudy","alternateName":"Biostudy","url":"https://www.biostudy.xyz/","inLanguage":"fr","publisher":{"@id":"https://www.biostudy.xyz/#org"},
+ "description":"Outils de laboratoire en ligne et cours de biologie : mélange PCR, dilutions, molarité, UFC/mL, solutions et milieux, conversions d'unités, gel d'agarose ; cours, TD, TP et examens."},
+{"@type":"Organization","@id":"https://www.biostudy.xyz/#org","name":"BioStudy","url":"https://www.biostudy.xyz/","logo":{"@type":"ImageObject","url":"https://www.biostudy.xyz/Pictures/icon-512.png","width":512,"height":512},"founder":{"@type":"Person","name":"Amar Bouchareb"}},
+{"@type":"WebPage","@id":"https://www.biostudy.xyz/#webpage","url":"https://www.biostudy.xyz/","name":"BioStudy | Outils de calcul de laboratoire et cours de biologie","audience":{"@type":"Audience","audienceType":"Étudiants, enseignants, techniciens de laboratoire et chercheurs en biologie"},"inLanguage":"fr","isPartOf":{"@id":"https://www.biostudy.xyz/#site"},"about":"Biologie, calculs de laboratoire","primaryImageOfPage":"https://www.biostudy.xyz/Pictures/icon-512.png"},
+{"@type":"ItemList","name":"Outils BioStudy","itemListElement":[
+ {"@type":"ListItem","position":1,"name":"BioPCR – mélange réactionnel PCR","url":"https://www.biostudy.xyz/BioPCR/"},
+ {"@type":"ListItem","position":2,"name":"BioDilu – C₁V₁ = C₂V₂, dilutions en série, UFC/mL et gammes","url":"https://www.biostudy.xyz/BioDilu/"},
+ {"@type":"ListItem","position":3,"name":"BioChem – molarité, molalité et solutions","url":"https://www.biostudy.xyz/BioChem/"},
+ {"@type":"ListItem","position":4,"name":"BioConvert – conversions d'unités","url":"https://www.biostudy.xyz/BioConvert/"},
+ {"@type":"ListItem","position":5,"name":"BioBand – simulation de gel d'agarose","url":"https://www.biostudy.xyz/BioBand/"},
+ {"@type":"ListItem","position":6,"name":"BioPrep – préparer solutions, mélanges et milieux","url":"https://www.biostudy.xyz/BioPrep/"},
+ {"@type":"ListItem","position":7,"name":"BioMicro – UFC/mL, DO et temps de génération","url":"https://www.biostudy.xyz/BioMicro/"},
+ {"@type":"ListItem","position":8,"name":"BioCampus – cours, TD, TP et examens","url":"https://www.biostudy.xyz/BioCampus/"},
+ {"@type":"ListItem","position":9,"name":"BioStat – biostatistique avec R pas à pas","url":"https://www.biostudy.xyz/BioStat/"}]},
+{"@type":"FAQPage","mainEntity":[
+ {"@type":"Question","name":"À qui s'adresse BioStudy ?","acceptedAnswer":{"@type":"Answer","text":"À tous ceux qui apprennent, enseignent ou pratiquent la biologie : étudiants (du lycée au doctorat), enseignants qui préparent leurs séances de TP, techniciens de laboratoire et chercheurs qui ont besoin d'un calcul rapide et vérifiable. BioCampus rassemble les cours par université, et les outils de calcul couvrent la PCR, les dilutions, les solutions, la microbiologie et l'électrophorèse."}},
+ {"@type":"Question","name":"Comment calculer une dilution avec la relation C₁V₁ = C₂V₂ ?","acceptedAnswer":{"@type":"Answer","text":"Cette relation traduit la conservation de la quantité de soluté lors d'une dilution : C₁ est la concentration de la solution mère, V₁ le volume de solution mère à prélever, C₂ la concentration finale et V₂ le volume final. Les deux concentrations doivent être exprimées dans la même unité, de même que les deux volumes. Le volume de diluant à ajouter est V₂ − V₁, en supposant les volumes additifs. BioDilu effectue ce calcul à partir de vos valeurs."}},
+ {"@type":"Question","name":"Comment calculer une concentration molaire ?","acceptedAnswer":{"@type":"Answer","text":"La concentration molaire C (en mol·L⁻¹) est le rapport de la quantité de matière de soluté n au volume de solution V : C = n / V = m / (M · V), où m est la masse de soluté et M sa masse molaire. Par exemple, 2,922 g de NaCl (M = 58,44 g·mol⁻¹) dans 100 mL donnent C = 0,5 mol·L⁻¹. BioChem résout cette relation pour n'importe quelle grandeur."}},
+ {"@type":"Question","name":"Comment préparer un mélange réactionnel de PCR pour plusieurs échantillons ?","acceptedAnswer":{"@type":"Answer","text":"On prépare en une seule fois un master mix (mélange réactionnel) qui contient les composants communs à toutes les réactions (tampon, MgCl₂, dNTP, amorces (F) et (R), Taq ADN polymérase, eau exempte de nucléases), puis on le répartit dans les tubes avant d'ajouter l'ADN matrice. Le volume de chaque composant se calcule par Vᵢ = C_f · V_f / Cᵢ. On compte une réaction par échantillon et par témoin (dont le témoin négatif, qui reçoit de l'eau à la place de l'ADN matrice), plus une ou plusieurs réactions supplémentaires pour compenser les pertes de pipetage. BioPCR calcule ces volumes."}},
+ {"@type":"Question","name":"Que signifie UFC/mL et comment l'estime-t-on ?","acceptedAnswer":{"@type":"Answer","text":"UFC/mL signifie « unités formant colonie par millilitre » : c'est la concentration de micro-organismes viables capables de former une colonie dans des conditions de culture données. Après ensemencement d'une dilution, UFC/mL = N / (V · d), où N est le nombre de colonies comptées, V le volume ensemencé en mL et d la dilution de la suspension ensemencée (par exemple 10⁻³). On retient en général les boîtes comportant entre 30 et 300 colonies. BioMicro fait ce calcul et signale les boîtes hors de cette plage."}},
+ {"@type":"Question","name":"Comment choisir la concentration d'un gel d'agarose ?","acceptedAnswer":{"@type":"Answer","text":"Plus le gel est concentré, mieux il sépare les petits fragments ; un gel moins concentré convient mieux aux grands fragments. Les acides nucléiques, chargés négativement, migrent vers l'anode (pôle +) : la distance de migration diminue quand la taille augmente, de façon à peu près linéaire avec le log₁₀ de la taille. BioBand simule la migration et propose un pourcentage d'agarose adapté à vos fragments ; cette simulation indicative ne remplace pas le marqueur de taille déposé sur le gel."}},
+ {"@type":"Question","name":"Où trouver des cours, des TD et des TP de biologie ?","acceptedAnswer":{"@type":"Answer","text":"BioCampus regroupe des cours, des fiches de révision, des travaux dirigés, des travaux pratiques et des sujets d'examen de biologie, classés par université, dans la limite des documents disponibles."}},
+ {"@type":"Question","name":"BioStudy est-il gratuit et peut-on l'installer ?","acceptedAnswer":{"@type":"Answer","text":"Oui. Tous les outils sont gratuits et utilisables sans compte. BioStudy peut être installé comme une application sur l'écran d'accueil du téléphone ou de l'ordinateur."}}]}
+]}
+</script>
+<style>
+/* ===== Jetons : sobre et professionnel, couleurs système Apple réservées aux icônes ===== */
+:root{--font:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+--ease:cubic-bezier(.22,1,.36,1);--spring:cubic-bezier(.34,1.45,.64,1);--navh:60px;--gx:20px;--top:72px;--blur:22px;--max:1120px;
+--bg:#000;--sf:#111113;--sf2:#1c1c1e;--fill:rgba(255,255,255,.07);--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.14);
+--tx:#f5f5f7;--tx2:#a1a1a6;--tx3:#6e6e73;--sep:rgba(255,255,255,.09);--hair:rgba(255,255,255,.08);--shadow:0 1px 0 rgba(255,255,255,.04) inset;
+--lg-rgb:28,28,30;--lg-a:.68;--lg-hi:rgba(255,255,255,.3);--lg-sh:rgba(0,0,0,.5);--lens:rgba(255,255,255,.17);--lens-line:rgba(255,255,255,.26);
+--acc:#0a84ff;--acc-tx:#4da3ff;
+--c-blue:#0a84ff;--c-indigo:#5e5ce6;--c-purple:#bf5af2;--c-pink:#ff375f;--c-red:#ff453a;--c-orange:#ff9f0a;--c-yellow:#ffd60a;--c-green:#30d158;--c-teal:#40cbe0;--c-cyan:#64d2ff;color-scheme:dark}
+[data-theme=light]{--bg:#f5f5f7;--sf:#fff;--sf2:#f5f5f7;--fill:rgba(0,0,0,.05);--line:rgba(0,0,0,.07);--line2:rgba(0,0,0,.12);
+--tx:#1d1d1f;--tx2:#6e6e73;--tx3:#8e8e93;--sep:rgba(0,0,0,.08);--hair:rgba(0,0,0,.09);--shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px -12px rgba(0,0,0,.08);
+--lg-rgb:255,255,255;--lg-a:.68;--lg-hi:#fff;--lg-sh:rgba(0,0,0,.12);--lens:rgba(120,120,128,.16);--lens-line:rgba(255,255,255,.9);
+--acc:#007aff;--acc-tx:#0066cc;
+--c-blue:#007aff;--c-indigo:#5856d6;--c-purple:#af52de;--c-pink:#ff2d55;--c-red:#ff3b30;--c-orange:#ff9500;--c-yellow:#ffcc00;--c-green:#34c759;--c-teal:#30b0c7;--c-cyan:#32ade6;color-scheme:light}
+@media(min-width:600px){:root{--gx:28px;--top:80px}}
+/* ===== Base ===== */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%;overflow-x:clip;background:var(--bg)}
+body{min-height:100dvh;overflow-x:clip;background:var(--bg);color:var(--tx);font:16px/1.5 var(--font);-webkit-font-smoothing:antialiased;transition:background .4s,color .3s}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}
+svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+img{display:block;max-width:100%}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--acc);outline-offset:3px;border-radius:12px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+#btn-flottant-menu{display:none!important}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+/* ===== Verre : identique aux barres des outils, reflet sous la souris ===== */
+.glass{position:relative;background:rgba(var(--lg-rgb),var(--lg-a));-webkit-backdrop-filter:blur(var(--blur)) saturate(190%);backdrop-filter:blur(var(--blur)) saturate(190%);
+box-shadow:inset 0 1px 0 var(--lg-hi),0 0 0 .5px var(--hair),0 12px 30px var(--lg-sh)}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(circle 90px at var(--mx,50%) var(--my,50%),rgba(255,255,255,.28),transparent 70%)}
+.glass.lit::after{opacity:1}
+@media(prefers-reduced-transparency:reduce){.glass{background:var(--sf2)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}}
+/* ===== En-tête ===== */
+.top{position:fixed;top:0;left:0;right:0;z-index:20;padding-top:env(safe-area-inset-top);pointer-events:none}
+.hin{max-width:none;margin:auto;padding:12px var(--gx);display:flex;align-items:center;gap:10px;animation:rise .6s var(--ease)}
+.brand{flex:1;min-width:0;display:flex;align-items:center;gap:10px;pointer-events:auto}
+.brand img{width:auto;height:42px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.18))}
+.tools{pointer-events:auto;height:48px;padding:0 4px;border-radius:999px;display:flex;align-items:center;gap:2px}
+.tb{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;position:relative;z-index:1;transition:transform .35s var(--spring),background .3s}
+.tb:active{transform:scale(.86);background:var(--fill)}
+.bdot{position:absolute;top:2px;right:0;min-width:18px;height:18px;padding:0 5px;box-sizing:border-box;border-radius:999px;background:var(--c-red);color:#fff;font:700 11px/18px -apple-system,BlinkMacSystemFont,sans-serif;font-style:normal;text-align:center;transform:scale(0);transition:transform .3s var(--spring)}#bellBtn.has .bdot{transform:none}
+.circ{pointer-events:auto;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;transition:transform .4s var(--spring)}
+.circ:active{transform:scale(.88)}
+@media(hover:hover){.tb:hover{background:var(--fill)}.circ:hover{transform:scale(1.06)}}
+.pop{position:absolute;top:calc(100% + 8px);right:var(--gx);width:min(300px,calc(100vw - 32px));padding:14px 18px;border-radius:22px;font-size:14px;line-height:1.5;display:none;pointer-events:auto}
+.pop.on{display:block;animation:rise .4s var(--spring)}
+.pop b{color:var(--acc-tx)}
+/* ===== Mise en page : une vue par onglet ===== */
+.shell{max-width:var(--max);margin:auto;padding:calc(var(--top) + env(safe-area-inset-top)) var(--gx) calc(var(--navh) + 40px + env(safe-area-inset-bottom))}
+.view{display:none}
+.view.on{display:block}
+.sec{padding-top:88px}
+.lbl{display:block;font-size:14px;font-weight:600;color:var(--acc-tx);letter-spacing:.01em}
+h2{text-wrap:balance;margin-top:8px;font-size:clamp(30px,7.4vw,48px);font-weight:700;letter-spacing:-.035em;line-height:1.08;max-width:760px}
+.lead{margin-top:14px;font-size:clamp(17px,4.3vw,19px);color:var(--tx2);max-width:660px;line-height:1.55}
+.lead b{color:var(--tx);font-weight:600}
+.center{text-align:center}.center h2,.center .lead{margin-inline:auto}
+/* mots qui montent un par un */
+.sw .w{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.14em;margin-bottom:-.14em}
+.sw .w>span{display:inline-block;transform:translateY(105%);transition:transform .9s var(--ease);transition-delay:calc(var(--d,0)*45ms)}
+.sw.in .w>span{transform:none}
+/* révélation au défilement */
+.rv{opacity:0;transform:translateY(22px);filter:blur(6px);transition:opacity .8s var(--ease),transform .9s var(--ease),filter .8s var(--ease);transition-delay:calc(var(--d,0)*70ms)}
+.rv.in{opacity:1;transform:none;filter:none}
+/* boutons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 24px;border-radius:999px;font-size:16px;font-weight:600;background:var(--sf);border:1px solid var(--line2);transition:transform .35s var(--spring),background .25s,border-color .25s}
+.btn:active{transform:scale(.96)}
+.btn.pri{background:var(--acc);border-color:transparent;color:#fff}
+@media(hover:hover){.btn:hover{border-color:var(--tx3)}.btn.pri:hover{background:color-mix(in srgb,var(--acc) 88%,#fff)}}
+.btn svg{width:19px;height:19px}
+.acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}
+.lnk{display:inline-flex;align-items:center;gap:4px;font-size:15.5px;font-weight:600;color:var(--acc-tx)}
+.lnk svg{width:16px;height:16px;transition:transform .35s var(--spring)}
+@media(hover:hover){.lnk:hover svg,a.tool:hover .lnk svg{transform:translateX(3px)}}
+/* surfaces : fond uni, filet fin, aucun dégradé coloré */
+.box{position:relative;border-radius:28px;background:var(--sf);border:1px solid var(--line);box-shadow:var(--shadow);overflow:hidden}
+.box::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .35s;background:radial-gradient(circle 220px at var(--mx,50%) var(--my,0%),rgba(255,255,255,.06),transparent 70%)}
+[data-theme=light] .box::before{background:radial-gradient(circle 220px at var(--mx,50%) var(--my,0%),rgba(0,0,0,.025),transparent 70%)}
+.box.lit::before{opacity:1}
+.ic{width:44px;height:44px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;background:var(--c);color:#fff}
+.ic svg{width:22px;height:22px}
+/* ===== Accueil v6 : une colonne lisible, des espaces généreux, rien de superflu ===== */
+#accueil{max-width:760px;margin-inline:auto}
+#accueil .sec{padding-top:clamp(56px,11vw,88px)}
+#accueil .sec.s1{padding-top:40px}
+#outils{scroll-margin-top:calc(var(--top) + env(safe-area-inset-top) + 8px)}
+#accueil h2{font-size:clamp(26px,6.6vw,36px);font-weight:700;letter-spacing:-.03em;line-height:1.1}
+.hero{padding-top:28px}
+.hero h1{text-wrap:balance;font-size:clamp(38px,10vw,58px);font-weight:800;letter-spacing:-.045em;line-height:1.03}
+.hero .lead{margin-top:20px}
+/* « Lire la suite » : le texte se déplie sous l'ouverture, la flèche tourne */
+.suite-txt{display:grid;grid-template-rows:0fr;transition:grid-template-rows .55s var(--ease)}
+.suite-txt>div{min-height:0;overflow:hidden}
+.suite-txt p{margin-top:14px;max-width:660px;font-size:clamp(16px,4.1vw,18px);color:var(--tx2);line-height:1.6;opacity:0;transform:translateY(-6px);transition:opacity .4s var(--ease),transform .5s var(--ease)}
+.hero.ouvert .suite-txt{grid-template-rows:1fr}
+.hero.ouvert .suite-txt p{opacity:1;transform:none;transition-delay:.12s}
+.suite{display:inline-flex;align-items:center;gap:4px;min-height:44px;margin-top:8px;margin-left:-2px;padding:0 2px;font-size:16px;font-weight:600;color:var(--acc-tx)}
+.suite svg{width:18px;height:18px;transition:rotate .45s var(--spring)}
+.hero.ouvert .suite svg{rotate:180deg}
+.suite:active{opacity:.6}
+/* en-têtes de groupe façon Réglages */
+.gh{display:block;margin:28px 20px 8px;font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--tx3)}
+.s1 .gh{margin-top:0}
+/* lignes : pastille ronde, titre + une ligne, flèche */
+.ch,.lst>*,.acc summary{display:flex;align-items:center;gap:14px;width:100%;text-align:left}
+.t{flex:1;min-width:0}
+.t b{display:block;font-size:17px;font-weight:600;letter-spacing:-.01em;line-height:1.3}
+.t small{display:block;margin-top:2px;font-size:14px;color:var(--tx2);line-height:1.4}
+.ch>svg:last-child,.lst>*>svg:last-child,.acc summary>svg{width:18px;height:18px;color:var(--tx3);flex-shrink:0}
+.choix{display:grid;gap:12px}
+#accueil h2+.lst{margin-top:24px}
+.ch{min-height:92px;padding:18px 20px;border-radius:26px;transition:transform .35s var(--spring),border-color .25s}
+.ch .ic{width:48px;height:48px}.ch .ic svg{width:24px;height:24px}
+.ch .t b{font-size:18px;font-weight:700}
+.ch:active{transform:scale(.97)}
+@media(hover:hover){.ch:hover{border-color:var(--line2)}.ch:hover>svg:last-child{transform:translateX(2px)}}
+.ch>svg:last-child{transition:transform .35s var(--spring)}
+/* étapes */
+.etapes{list-style:none;display:grid;gap:12px;margin-top:24px}
+.etapes li{display:flex;gap:16px;padding:20px 22px;border-radius:26px}
+.etapes i{width:34px;height:34px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:15px;font-weight:700;color:var(--acc-tx);background:color-mix(in srgb,var(--acc) 14%,transparent)}
+.etapes b{display:block;font-size:17px;font-weight:600;line-height:1.35;padding-top:5px}
+.etapes p{margin-top:4px;font-size:15px;color:var(--tx2);line-height:1.55}
+/* outils : liste groupée, une ligne par outil qui se déplie */
+.acc,.lst{border-radius:26px;interpolate-size:allow-keywords}
+.acc details,.lst>*{position:relative}
+.acc details+details::before,.lst>*+*::before{content:"";position:absolute;top:0;left:72px;right:0;height:1px;background:var(--sep)}
+.acc summary,.lst>*{min-height:72px;padding:12px 18px;list-style:none;cursor:pointer}
+.acc summary::-webkit-details-marker{display:none}
+.acc .ic,.lst .ic{width:40px;height:40px}.acc .ic svg,.lst .ic svg{width:20px;height:20px}
+.acc summary>svg{transition:rotate .4s var(--spring)}
+.acc details[open] summary>svg{rotate:180deg}
+.acc details::details-content{block-size:0;overflow:clip;transition:block-size .45s var(--ease),content-visibility .45s allow-discrete}
+.acc details[open]::details-content{block-size:auto}
+.acc .corps{padding:0 18px 20px 72px}
+.acc .corps p{font-size:15.5px;color:var(--tx2);line-height:1.6}
+.acc .corps .btn{margin-top:14px;min-height:44px;padding:0 18px;font-size:15px}
+.acc .corps .btn svg{width:17px;height:17px}
+.acc details[open] .corps{animation:rise .45s var(--ease) backwards}
+@media(hover:hover){.acc summary:hover,.lst>*:hover{background:color-mix(in srgb,var(--tx) 3%,transparent)}}
+.lst>*:active{background:var(--fill)}
+@media(max-width:420px){.acc .corps{padding-left:18px}}
+/* ===== Vues Avis et Aide ===== */
+.vh{padding-top:26px}
+.vh h2{font-size:clamp(34px,8.6vw,52px)}
+.avg{display:flex;align-items:center;gap:12px;margin-top:22px}.avg b{font-size:44px;font-weight:700;letter-spacing:-.03em}.avg small{color:var(--tx2);font-size:14px}
+.st{display:inline-flex;gap:2px;color:var(--c-orange)}.st svg{width:18px;height:18px;fill:currentColor;stroke:none}.st svg.o{fill:none;stroke:var(--tx3);stroke-width:1.6}
+.avb svg{fill:currentColor;stroke:none}
+.avf{display:flex;flex-direction:column;margin-top:24px;max-width:720px;animation:rise .5s var(--ease)}
+.avr{position:relative;display:flex;flex-direction:column;gap:10px;padding:16px 20px}
+.avr+.avr::before{content:"";position:absolute;top:0;left:20px;right:0;height:1px;background:var(--sep)}
+.avl{font-size:12.5px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--tx2)}
+.avh{font-size:13px;color:var(--tx3)}
+.avi{width:100%;min-height:48px;padding:12px 18px;border:1.5px solid var(--line2);border-radius:999px;background:transparent;color:var(--tx);font:inherit;font-size:16px;outline:none;transition:border-color .2s,box-shadow .2s}
+textarea.avi{border-radius:22px;resize:vertical;line-height:1.45}
+.avi:focus{border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 22%,transparent)}
+.stars{display:flex;gap:6px}
+.stars button{width:46px;height:46px;display:grid;place-items:center;border-radius:50%;color:var(--tx3);transition:transform .35s var(--spring),color .2s}
+.stars button svg{width:32px;height:32px;fill:none;stroke:currentColor;stroke-width:1.6}
+.stars button.on{color:var(--c-orange)}.stars button.on svg{fill:currentColor;stroke:none}
+.stars button:active{transform:scale(.85)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{min-height:40px;padding:0 16px;border-radius:999px;background:var(--fill);font-size:14.5px;font-weight:600;transition:background .2s,color .2s}
+.chips button.on{background:var(--acc);color:#fff}
+/* liste des avis : grille (et non colonnes CSS, qui coupaient le message vide sur PC) */
+.avlist{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin-top:28px;align-items:start}
+.avc{padding:22px;display:flex;flex-direction:column;gap:12px}
+.avc p{font-size:15.5px;line-height:1.6;overflow-wrap:anywhere}
+.avc .who{display:flex;align-items:center;gap:12px;margin-top:auto;padding-top:4px;font-size:14px;color:var(--tx2);line-height:1.35}
+.avc .who b{color:var(--tx);font-weight:600}
+.avc .ini{width:38px;height:38px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;background:var(--c,var(--acc));color:#fff;font-weight:700;font-size:14px}
+.avempty{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:44px 24px;text-align:center}
+.avempty b{font-size:18px;font-weight:600}.avempty span{color:var(--tx2);font-size:15px}
+.avmore{grid-column:1/-1;justify-self:center;margin-top:6px}
+/* aide */
+.faq{margin-top:28px}
+.faq details{position:relative;padding:0 22px}
+.faq details+details::before{content:"";position:absolute;top:0;left:22px;right:0;height:1px;background:var(--sep)}
+.faq summary{min-height:62px;display:flex;align-items:center;gap:12px;font-size:16px;font-weight:600;cursor:pointer;list-style:none;padding:14px 0}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";margin-left:auto;flex-shrink:0;font-size:24px;font-weight:300;color:var(--tx3);transition:transform .35s var(--spring)}
+.faq details[open] summary::after{transform:rotate(45deg)}
+.faq details[open] p{animation:rise .45s var(--ease)}
+.faq p{padding-bottom:18px;font-size:15px;color:var(--tx2);line-height:1.65}
+.faq a{color:var(--acc-tx);font-weight:600}
+/* ===== Pied de page (footer-global.js) ===== */
+.shell>footer{position:relative!important;z-index:1!important;margin-top:56px!important;padding:24px 0 0!important}
+[data-theme=light] .shell>footer a{background:var(--sf)!important;color:#000!important;border:1px solid rgba(0,0,0,.1)!important}
+[data-theme=light] .shell>footer svg{filter:brightness(0)!important}
+[data-theme=light] .shell>footer :is(span,p){color:#000!important}
+/* ===== Barre d'onglets : même verre, même lentille et même comportement que les outils ===== */
+.nav{position:fixed;z-index:30;bottom:max(12px,env(safe-area-inset-bottom));left:12px;right:12px;max-width:330px;height:var(--navh);margin-inline:auto;border-radius:999px;animation:navin .8s var(--ease) backwards .2s}
+@keyframes navin{from{opacity:0;translate:0 40px;scale:.94}}
+@keyframes navin-d{from{opacity:0;translate:0 -30px;scale:.94}}
+.nav-in{height:100%;padding:5px;border-radius:999px;display:flex;touch-action:pan-y;-webkit-user-select:none;user-select:none;cursor:grab}
+.nav-in.dragging{cursor:grabbing}
+.sl{position:absolute;top:5px;bottom:5px;left:0;width:80px;z-index:1;border-radius:999px;pointer-events:none;translate:5px 0;background:var(--lens);border:1px solid var(--lens-line);box-shadow:inset 0 1px 1px rgba(255,255,255,.5),0 4px 14px rgba(0,0,0,.14);transition:translate .6s var(--spring),width .3s var(--ease),scale .3s var(--spring)}
+.sl.interacting{scale:1.06 1.12}
+.dragging .sl{transition:scale .25s var(--spring)}
+.nb{flex:1;position:relative;z-index:2;border-radius:999px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:.66rem;font-weight:500;color:var(--tx2);white-space:nowrap;transition:color .3s,transform .45s var(--spring)}
+.nb:active{transform:scale(.92)}
+.nb svg{width:21px;height:21px;color:var(--nc);opacity:.75;transition:opacity .3s}
+.nb.on{color:var(--acc-tx);font-weight:600}.nb.on svg{opacity:1;animation:ipop .35s var(--ease)}
+@keyframes ipop{from{transform:scale(.85)}}
+.nb:nth-of-type(1){--nc:var(--c-blue)}.nb:nth-of-type(2){--nc:var(--c-orange)}.nb:nth-of-type(3){--nc:var(--c-teal)}
+body.kb .nav{visibility:hidden}
+@media(max-width:389px){.nb{font-size:.62rem}}
+/* ===== Tablette et PC ===== */
+@media(min-width:700px){
+.choix{grid-template-columns:repeat(2,minmax(0,1fr))}
+.avlist{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(min-width:1024px) and (min-height:600px){
+:root{--top:84px;--gx:32px}
+.hin{padding:16px 32px}
+.tools{height:52px}.tb{width:44px;height:44px}.circ{width:52px;height:52px}
+.nav{top:calc(env(safe-area-inset-top) + 14px);bottom:auto;left:0;right:0;width:min(400px,calc(100vw - 560px));max-width:none;height:56px;animation-name:navin-d}
+.nb{flex-direction:row;gap:8px;font-size:.8rem}.nb svg{width:19px;height:19px}
+.shell{padding-bottom:48px}
+.sec{padding-top:128px}
+.hero{padding-top:72px}
+.avlist{grid-template-columns:repeat(3,minmax(0,1fr))}
+.vh{padding-top:56px}
+.two{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:64px;align-items:start}
+.two .vh{position:sticky;top:calc(var(--top) + 40px)}
+.two .faq{margin-top:56px}}
+@media(prefers-reduced-motion:reduce){*,::before,::after{animation-duration:.01ms!important;transition-duration:.01ms!important}.rv,.sw .w>span{opacity:1!important;transform:none!important;filter:none!important}}
+</style>
+</head>
+<body data-v="accueil">
+
+<header class="top">
+  <div class="hin">
+    <a class="brand" href="/" aria-label="BioStudy, accueil"><img src="/Pictures/logo-mark.png" width="34" height="42" alt="BioStudy"></a>
+    <div class="tools glass">
+      <button class="tb" id="instBtn" type="button" aria-label="Installer l'application" title="Installer l'application" hidden><svg viewBox="0 0 24 24"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></svg></button>
+      <button class="tb" id="bellBtn" type="button" aria-label="Notifications" title="Notifications" hidden><svg viewBox="0 0 24 24"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg><i class="bdot"></i></button>
+      <button class="tb" id="themeBtn" type="button" aria-label="Changer de thème" title="Thème"></button>
+    </div>
+    <button class="circ glass" id="mb" type="button" data-menu aria-label="Menu des outils" title="Menu"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/></svg></button>
+  </div>
+  <div class="pop glass" id="ihint" role="note">Pour installer BioStudy : touchez <b>Partager</b>, puis <b>Sur l'écran d'accueil</b>.</div>
+</header>
+
+<div class="shell" id="shell">
+<main>
+
+  <!-- ===================== ACCUEIL (v6, simple : on comprend tout de suite ce qu'on trouve ici) ===================== -->
+  <section class="view on" id="accueil" data-v="accueil" aria-labelledby="h1">
+    <!-- 1. Ouverture : texte court + « Lire la suite » -->
+    <div class="hero" id="hero">
+      <h1 id="h1" class="sw">La biologie, du cours à la paillasse.</h1>
+      <p class="lead rv" style="--d:2">BioStudy rassemble des outils de calcul pour le laboratoire et les cours de biologie classés par université. Gratuit, sans compte, sur téléphone comme sur ordinateur.</p>
+      <div class="suite-txt" id="suiteTxt" aria-hidden="true"><div>
+        <p>Pour les étudiants, les enseignants, les techniciens de laboratoire et les chercheurs. Vous choisissez un outil, vous saisissez vos valeurs dans les unités de votre protocole, et le résultat s'affiche avec la relation utilisée : vous pouvez refaire le calcul à la main et l'expliquer.</p>
+        <p>Chaque outil est vérifié sur des cas de référence, par exemple NaCl 0,5 M dans 100 mL → 2,922 g. Les cours de BioCampus sont partagés par la communauté : chacun peut en ajouter, sans créer de compte.</p>
+      </div></div>
+      <button class="suite rv" style="--d:3" id="suiteBtn" type="button" aria-expanded="false" aria-controls="suiteTxt"><span>Lire la suite</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+    </div>
+
+    <!-- 2. Deux portes d'entrée -->
+    <div class="sec s1">
+      <span class="gh rv">Que venez-vous faire ?</span>
+      <div class="choix">
+        <a class="box ch rv" href="/BioCampus/"><span class="ic" style="--c:var(--c-blue)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg></span><span class="t"><b>Réviser mes cours</b><small>Cours, TD, TP et annales de votre université</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a>
+        <button class="box ch rv" style="--d:1" type="button" data-to="outils"><span class="ic" style="--c:var(--c-orange)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/><path d="M6.453 15h11.094"/><path d="M8.5 2h7"/></svg></span><span class="t"><b>Faire un calcul de labo</b><small>PCR, dilutions, solutions, microbiologie…</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+      </div>
+    </div>
+
+    <!-- 3. Comment ça marche -->
+    <div class="sec">
+      <h2 class="sw">Comment ça marche</h2>
+      <ol class="etapes">
+        <li class="box rv"><i>1</i><div><b>Choisissez l'outil</b><p>Selon ce que vous préparez : une PCR, une dilution, une solution, un dénombrement…</p></div></li>
+        <li class="box rv" style="--d:1"><i>2</i><div><b>Saisissez vos valeurs</b><p>Dans les unités de votre protocole. Les conversions sont automatiques et une saisie impossible est signalée, avec la façon de la corriger.</p></div></li>
+        <li class="box rv" style="--d:2"><i>3</i><div><b>Lisez le résultat</b><p>Avec la relation utilisée et, si besoin, le pas à pas au labo.</p></div></li>
+      </ol>
+    </div>
+
+    <!-- 4. Les outils : une ligne par outil, la flèche affiche le détail (liens réels pour le référencement) -->
+    <div class="sec" id="outils">
+      <h2 class="sw">Les outils</h2>
+      <p class="lead rv">Touchez un outil pour voir ce qu'il fait.</p>
+      <span class="gh rv">Calculer</span>
+      <div class="box acc rv">
+        <details name="outil"><summary><span class="ic" style="--c:var(--c-blue)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 16 1.5 1.5"/><path d="m14 8-1.5-1.5"/><path d="M15 2c-1.8 2-2.5 4-2.8 6"/><path d="m16.5 10.5 1 1"/><path d="m17 6-2.9-2.9"/><path d="M2 15c6.7-6 13.3 0 20-6"/><path d="m20 9 .9.9"/><path d="M3.1 14.1 4 15"/><path d="m6.5 12.5 1 1"/><path d="m7 18 2.9 2.9"/><path d="M9 22c1.8-2 2.5-4 2.8-6"/></svg></span><span class="t"><b>BioPCR</b><small>Mélange réactionnel PCR</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="corps"><p>Volume de chaque réactif, eau exempte de nucléases pour compléter, master mix pour toutes vos réactions avec le surplus, et protocole à cocher.</p><a class="btn" href="/BioPCR/">Ouvrir BioPCR <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a></div></details>
+        <details name="outil"><summary><span class="ic" style="--c:var(--c-purple)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 9-8.4 8.4A2 2 0 0 0 3 18.8v1.4a2 2 0 0 1-.6 1.4 2 2 0 0 1 1.4-.6h1.4a2 2 0 0 0 1.4-.6L15 12"/><path d="m18 9 .4.4a1 1 0 1 1-3 3l-3.8-3.8a1 1 0 1 1 3-3l.4.4 3.4-3.4a1 1 0 1 1 3 3z"/></svg></span><span class="t"><b>BioDilu</b><small>Dilutions · C₁V₁ · UFC/mL</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="corps"><p>C₁V₁ = C₂V₂, dilution au 1/n, dilutions en série, UFC/mL et gammes de concentrations, avec le pas à pas au labo : pipette, cônes, homogénéisation.</p><a class="btn" href="/BioDilu/">Ouvrir BioDilu <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a></div></details>
+        <details name="outil"><summary><span class="ic" style="--c:var(--c-indigo)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="1"/><path d="M20.2 20.2c2-2 0-7.4-4.5-11.9C11.2 3.8 5.8 1.8 3.8 3.8c-2 2 0 7.4 4.5 11.9 4.5 4.5 9.9 6.5 11.9 4.5Z"/><path d="M15.7 15.7c4.5-4.5 6.5-9.9 4.5-11.9-2-2-7.4 0-11.9 4.5-4.5 4.5-6.5 9.9-4.5 11.9 2 2 7.4 0 11.9-4.5Z"/></svg></span><span class="t"><b>BioChem</b><small>Molarité, molalité et solutions</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="corps"><p>Concentrations molaire et massique, molalité, masse volumique, et molarité d'une solution commerciale à partir de son titre massique et de sa masse volumique.</p><a class="btn" href="/BioChem/">Ouvrir BioChem <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a></div></details>
+        <details name="outil"><summary><span class="ic" style="--c:var(--c-green)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 22a7 7 0 1 0 0-14h-1"/><path d="M9 14h2"/><path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"/><path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/></svg></span><span class="t"><b>BioMicro</b><small>Microbiologie</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="corps"><p>Dénombrement en UFC/mL, DO₆₀₀ → cellules/mL, dilution d'une culture jusqu'à une DO visée, temps de génération et taux de croissance, volume de préculture à ensemencer pour atteindre une DO visée au bon moment (levure, bactérie).</p><a class="btn" href="/BioMicro/">Ouvrir BioMicro <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a></div></details>
+        <details name="outil"><summary><span class="ic" style="--c:var(--c-cyan)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg></span><span class="t"><b>BioConvert</b><small>Conversions d'unités</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="corps"><p>Masses, volumes et concentrations (mol/L, %, ppm, g/L…), et passage masse ↔ quantité de matière (m = n · M).</p><a class="btn" href="/BioConvert/">Ouvrir BioConvert <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a></div></details>
+      </div>
+      <span class="gh rv">Préparer et simuler</span>
+      <div class="box acc rv">
+        <details name="outil"><summary><span class="ic" style="--c:var(--c-orange)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg></span><span class="t"><b>BioPrep</b><small>Solutions et milieux</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="corps"><p>À partir d'une poudre, d'une solution mère ou d'une recette (LB, PBS, MacConkey…) : quantités adaptées à votre volume, check-list au labo et fiche PDF.</p><a class="btn" href="/BioPrep/">Ouvrir BioPrep <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a></div></details>
+        <details name="outil"><summary><span class="ic" style="--c:var(--c-pink)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="3"/><path d="M7 8h4"/><path d="M13 8h4"/><path d="M7 12h4"/><path d="M13 15h4"/><path d="M7 16h4"/></svg></span><span class="t"><b>BioBand</b><small>Gel d'agarose</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="corps"><p>Simulation indicative de la migration des fragments d'ADN : pourcentage d'agarose, marqueur de taille, quantité déposée et estimation de la taille des bandes.</p><a class="btn" href="/BioBand/">Ouvrir BioBand <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a></div></details>
+      </div>
+      <span class="gh rv">Analyser et réviser</span>
+      <div class="box acc rv">
+        <details name="outil"><summary><span class="ic" style="--c:var(--c-red)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></span><span class="t"><b>BioStat</b><small>Biostatistique avec R</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="corps"><p>Choisir le bon test et savoir pourquoi, écrire le code R, mettre en forme ses graphiques et comprendre chaque test avec des visualisations interactives.</p><a class="btn" href="/BioStat/">Ouvrir BioStat <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a></div></details>
+        <details name="outil"><summary><span class="ic" style="--c:var(--c-teal)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg></span><span class="t"><b>BioCampus</b><small>Cours, TD, TP et examens</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="corps"><p>Cours et documents de biologie classés par université et par niveau, partagés par la communauté. Recherche tolérante aux fautes, sans compte.</p><a class="btn" href="/BioCampus/">Ouvrir BioCampus <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a></div></details>
+      </div>
+    </div>
+
+    <!-- 5. Aide -->
+    <div class="sec">
+      <h2 class="sw">Besoin d'aide ?</h2>
+      <div class="box lst rv">
+        <button type="button" data-go="faq"><span class="ic" style="--c:var(--c-teal)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></span><span class="t"><b>Questions fréquentes</b><small>Dilutions, molarité, PCR, UFC/mL…</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+        <button type="button" data-go="avis"><span class="ic" style="--c:var(--c-indigo)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></span><span class="t"><b>Donner mon avis</b><small>Une idée, un problème : dites-le-nous</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== AVIS (publiés après validation dans le studio, onglet Avis) ===================== -->
+  <section class="view" id="avis" data-v="avis" aria-labelledby="t-avis">
+    <div class="vh">
+      <span class="lbl rv">Avis</span>
+      <h2 id="t-avis" class="sw">L'avis de ceux qui l'utilisent.</h2>
+      <p class="lead rv" style="--d:2">Étudiants, enseignants, techniciens et chercheurs partagent leur expérience. Chaque avis est relu avant publication et oriente les prochaines améliorations.</p>
+      <div class="avg rv" id="avAvg" hidden><b id="avMoy"></b><span class="st" id="avSt"></span><small id="avNb"></small></div>
+      <div class="acts rv" style="--d:3"><button class="btn pri avb" id="avOpen" type="button"><svg viewBox="0 0 24 24"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg>Donner mon avis</button></div>
+    </div>
+    <form class="box avf" id="avForm" hidden novalidate>
+      <div class="avr"><label class="avl" for="avNom">Nom et prénom</label><input class="avi" id="avNom" maxlength="60" autocomplete="name" placeholder="Nom et prénom"></div>
+      <div class="avr"><span class="avl">Fonction</span><div class="chips" id="avFct"><button type="button" data-v="Étudiant(e)">Étudiant(e)</button><button type="button" data-v="Enseignant(e)">Enseignant(e)</button><button type="button" data-v="Chercheur(se)">Chercheur(se)</button><button type="button" data-v="Technicien(ne)">Technicien(ne)</button><button type="button" data-v="Autre">Autre</button></div>
+        <small class="avh" id="avNivL" hidden>Votre niveau</small><div class="chips" id="avNiv" hidden><button type="button" data-v="Lycée">Lycée</button><button type="button" data-v="BTS / BUT">BTS / BUT</button><button type="button" data-v="L1">L1</button><button type="button" data-v="L2">L2</button><button type="button" data-v="L3">L3</button><button type="button" data-v="M1">M1</button><button type="button" data-v="M2">M2</button><button type="button" data-v="Doctorat">Doctorat</button></div>
+        <input class="avi" id="avAutre" maxlength="40" placeholder="Précisez (ex. : ingénieur, pharmacien…)" hidden></div>
+      <div class="avr"><span class="avl">Étoiles</span><div class="stars" id="avStars" role="radiogroup" aria-label="Note sur 5"></div><small class="avh" id="avStTx">Touchez les étoiles</small></div>
+      <div class="avr"><label class="avl" for="avTx">Commentaire</label><textarea class="avi" id="avTx" maxlength="800" rows="4" placeholder="Ce que vous utilisez, ce qui vous aide, ce qu'on pourrait améliorer…"></textarea></div>
+      <input id="avHp" name="site" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px">
+      <div class="avr"><button class="btn pri" id="avSend" type="submit">Envoyer mon avis</button><small class="avh" id="avMsg" role="status">Votre avis sera publié après vérification.</small></div>
+    </form>
+    <div class="avlist" id="avList"></div>
+  </section>
+
+  <section class="view" id="faq" data-v="faq" aria-labelledby="t-faq">
+   <div class="two">
+    <div class="vh">
+      <span class="lbl rv">Aide</span>
+      <h2 id="t-faq" class="sw">Questions fréquentes</h2>
+      <p class="lead rv" style="--d:2">Les notions de calcul les plus demandées au laboratoire, et tout ce qu'il faut savoir sur le fonctionnement de BioStudy.</p>
+    </div>
+    <div class="box faq rv">
+      <details><summary>À qui s'adresse BioStudy ?</summary><p>À tous ceux qui apprennent, enseignent ou pratiquent la biologie : étudiants (du lycée au doctorat), enseignants qui préparent leurs séances de TP, techniciens de laboratoire et chercheurs qui ont besoin d'un calcul rapide et vérifiable. <a href="/BioCampus/">BioCampus</a> rassemble les cours par université, et les outils de calcul couvrent la PCR, les dilutions, les solutions, la microbiologie et l'électrophorèse.</p></details>
+      <details><summary>Comment calculer une dilution avec la relation C₁V₁ = C₂V₂ ?</summary><p>Cette relation traduit la conservation de la quantité de soluté lors d'une dilution : C₁ est la concentration de la solution mère, V₁ le volume de solution mère à prélever, C₂ la concentration finale et V₂ le volume final. Les deux concentrations doivent être exprimées dans la même unité, de même que les deux volumes. Le volume de diluant à ajouter est V₂ − V₁, en supposant les volumes additifs. <a href="/BioDilu/">BioDilu</a> effectue ce calcul à partir de vos valeurs.</p></details>
+      <details><summary>Comment calculer une concentration molaire ?</summary><p>La concentration molaire C (en mol·L⁻¹) est le rapport de la quantité de matière de soluté n au volume de solution V : C = n / V = m / (M · V), où m est la masse de soluté et M sa masse molaire. Par exemple, 2,922 g de NaCl (M = 58,44 g·mol⁻¹) dans 100 mL donnent C = 0,5 mol·L⁻¹. <a href="/BioChem/">BioChem</a> résout cette relation pour n'importe quelle grandeur.</p></details>
+      <details><summary>Comment préparer un mélange réactionnel de PCR pour plusieurs échantillons ?</summary><p>On prépare en une seule fois un master mix (mélange réactionnel) qui contient les composants communs à toutes les réactions (tampon, MgCl₂, dNTP, amorces (F) et (R), Taq ADN polymérase, eau exempte de nucléases), puis on le répartit dans les tubes avant d'ajouter l'ADN matrice. Le volume de chaque composant se calcule par Vᵢ = C_f · V_f / Cᵢ. On compte une réaction par échantillon et par témoin (dont le témoin négatif, qui reçoit de l'eau à la place de l'ADN matrice), plus une ou plusieurs réactions supplémentaires pour compenser les pertes de pipetage. <a href="/BioPCR/">BioPCR</a> calcule ces volumes.</p></details>
+      <details><summary>Que signifie UFC/mL et comment l'estime-t-on ?</summary><p>UFC/mL signifie « unités formant colonie par millilitre » : c'est la concentration de micro-organismes viables capables de former une colonie dans des conditions de culture données. Après ensemencement d'une dilution, UFC/mL = N / (V · d), où N est le nombre de colonies comptées, V le volume ensemencé en mL et d la dilution de la suspension ensemencée (par exemple 10⁻³). On retient en général les boîtes comportant entre 30 et 300 colonies. <a href="/BioMicro/">BioMicro</a> fait ce calcul et signale les boîtes hors de cette plage.</p></details>
+      <details><summary>Comment choisir la concentration d'un gel d'agarose ?</summary><p>Plus le gel est concentré, mieux il sépare les petits fragments ; un gel moins concentré convient mieux aux grands fragments. Les acides nucléiques, chargés négativement, migrent vers l'anode (pôle +) : la distance de migration diminue quand la taille augmente, de façon à peu près linéaire avec le log₁₀ de la taille. <a href="/BioBand/">BioBand</a> simule la migration et propose un pourcentage d'agarose adapté à vos fragments ; cette simulation indicative ne remplace pas le marqueur de taille déposé sur le gel.</p></details>
+      <details><summary>Où trouver des cours, des TD et des TP de biologie ?</summary><p><a href="/BioCampus/">BioCampus</a> regroupe des cours, des fiches de révision, des travaux dirigés, des travaux pratiques et des sujets d'examen de biologie, classés par université, dans la limite des documents disponibles.</p></details>
+      <details><summary>BioStudy est-il gratuit et peut-on l'installer ?</summary><p>Oui. Tous les outils sont gratuits et utilisables sans compte. BioStudy peut être installé comme une application sur l'écran d'accueil du téléphone ou de l'ordinateur : sur Android, touchez l'icône de téléchargement en haut de cette page ; sur iPhone, touchez Partager puis « Sur l'écran d'accueil ».</p></details>
+    </div>
+   </div>
+  </section>
+
+</main>
+<script src="/footer-global.js"></script>
+</div>
+
+<nav class="nav" id="navWrap" aria-label="Navigation"><div class="nav-in glass" id="nav"><span class="sl" id="sl"></span>
+  <button class="nb on" type="button" data-v="accueil"><svg viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Accueil</button>
+  <button class="nb" type="button" data-v="avis"><svg viewBox="0 0 24 24"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg>Avis</button>
+  <button class="nb" type="button" data-v="faq"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>Aide</button>
+</div></nav>
+
+<script src="/liquid-glass.js"></script>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id),$$=(s,r=document)=>[...r.querySelectorAll(s)],root=document.documentElement;
+const sto={g(k){try{return localStorage.getItem(k)}catch(e){return null}},s(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1;
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* retour haptique : vibration (Android), interrupteur natif caché (iPhone, iOS 18+) */
+function buzz(p=12){try{if(navigator.vibrate){navigator.vibrate(p);return}if(!IOS)return;
+  const l=document.createElement('label'),i=document.createElement('input');i.type='checkbox';i.setAttribute('switch','');
+  l.dataset.hap='';l.style.display='none';l.appendChild(i);document.head.appendChild(l);l.click();l.remove()}catch(e){}}
+const sv=d=>`<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+const es=x=>String(x==null?'':x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- Accueil : « Lire la suite », accès direct à la liste des outils, un seul outil ouvert à la fois ---------- */
+$('suiteBtn').addEventListener('click',()=>{buzz(8);const h=$('hero'),o=!h.classList.contains('ouvert');h.classList.toggle('ouvert',o);
+  $('suiteBtn').setAttribute('aria-expanded',o);$('suiteTxt').setAttribute('aria-hidden',!o);$('suiteBtn').firstChild.textContent=o?'Réduire':'Lire la suite'});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-to]');if(!b)return;buzz();$(b.dataset.to).scrollIntoView({behavior:RM?'auto':'smooth',block:'start'})});
+$$('.acc details').forEach(d=>d.addEventListener('toggle',()=>{if(!d.open)return;buzz(8);
+  $$('.acc details[open]').forEach(x=>{if(x!==d)x.open=false})}));
+
+/* ---------- Animations : titres mot à mot, révélation floue au défilement, compteurs, parcours ---------- */
+$$('.sw').forEach(h=>{let n=0;const walk=el=>[...el.childNodes].forEach(nd=>{if(nd.nodeType===3){const f=document.createDocumentFragment();
+    nd.textContent.split(/(\s+)/).forEach(p=>{if(!p)return;if(/^\s+$/.test(p)){f.appendChild(document.createTextNode(p));return}
+      const w=document.createElement('span');w.className='w';w.innerHTML=`<span style="--d:${n++}">${es(p)}</span>`;f.appendChild(w)});nd.replaceWith(f)}else if(nd.nodeType===1)walk(nd)});walk(h)});
+const io='IntersectionObserver' in window&&!RM?new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;const t=e.target;t.classList.add('in');io.unobserve(t);
+  $$('[data-n]',t).forEach(b=>{const n=+b.dataset.n,s=b.dataset.s||'';if(b.dataset.z){b.textContent='0'+s;return}if(RM){b.textContent=n+s;return}const t0=performance.now();const f=x=>{const k=Math.min(1,(x-t0)/1100);b.textContent=Math.round(n*(1-Math.pow(1-k,3)))+s;if(k<1)requestAnimationFrame(f)};requestAnimationFrame(f)})}),{rootMargin:'0px 0px -8% 0px',threshold:.12}):null;
+function reveal(v){const els=$$('.rv,.sw',v);if(!io){els.forEach(e=>{e.classList.add('in');$$('[data-n]',e).forEach(b=>b.textContent=b.dataset.n+(b.dataset.s||''))});return}
+  els.forEach(e=>{e.classList.remove('in');io.observe(e)})}
+/* ---------- Cartes : reflet sous le pointeur + inclinaison (ordinateur) ---------- */
+const FINE=matchMedia('(hover:hover) and (pointer:fine)').matches;
+function prepCards(rootEl){$$('.box,.glass',rootEl).forEach(c=>{if(c.dataset.fx)return;c.dataset.fx=1;
+  const aim=e=>{const r=c.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;c.style.setProperty('--mx',x+'px');c.style.setProperty('--my',y+'px');
+    if(false){c.style.setProperty('--ry',((x/r.width)-.5)*6+'deg');c.style.setProperty('--rx',(.5-(y/r.height))*6+'deg')}};
+  c.addEventListener('pointerenter',e=>{aim(e);c.classList.add('lit')});c.addEventListener('pointermove',aim);
+  c.addEventListener('pointerleave',()=>{c.classList.remove('lit');c.style.setProperty('--rx','0deg');c.style.setProperty('--ry','0deg')})})}
+
+/* ---------- Onglets : changement de vue animé (pas de défilement), comme dans les outils ---------- */
+const VIEWS=['accueil','avis','faq'],nbs=$$('.nb');
+let cur='accueil',navCtl=null;
+function show(v,o={}){if(!VIEWS.includes(v))v='accueil';const prev=cur,i=VIEWS.indexOf(v),dir=i>=VIEWS.indexOf(prev)?1:-1;
+  nbs.forEach((b,k)=>{b.classList.toggle('on',k===i);b.toggleAttribute('aria-current',k===i)});if(navCtl&&!o.fromNav)navCtl.select(i);
+  if(o.push!==false&&v!==prev)history.pushState({v},'',v==='accueil'?location.pathname:'#'+v);
+  if(v===prev&&!o.force){scrollTo({top:0,behavior:RM?'auto':'smooth'});return}
+  cur=v;document.body.dataset.v=v;const from=$(prev),to=$(v);
+  const enter=()=>{if(from&&from!==to)from.classList.remove('on');to.classList.add('on');scrollTo(0,0);reveal(to);
+    if(!RM&&to.animate)to.animate([{opacity:0,transform:`translateX(${dir*34}px)`,filter:'blur(8px)'},{opacity:1,transform:'none',filter:'blur(0)'}],{duration:520,easing:'cubic-bezier(.22,1,.36,1)'});};
+  if(RM||!from||from===to||!from.animate||o.instant)enter();
+  else{const a=from.animate([{opacity:1,transform:'none',filter:'blur(0)'},{opacity:0,transform:`translateX(${-dir*30}px)`,filter:'blur(8px)'}],{duration:170,easing:'cubic-bezier(.4,0,1,1)',fill:'forwards'});a.onfinish=()=>{enter();a.cancel()}}}
+function navSel(i){buzz();show(VIEWS[i],{fromNav:true})}
+navCtl=window.LiquidGlass?LiquidGlass.tabs({wrap:$('navWrap'),inner:$('nav'),indicator:$('sl'),items:nbs,onSelect:navSel,glass:false})
+  :{select(i){const b=nbs[i],sl=$('sl');sl.style.translate=b.offsetLeft+'px 0';sl.style.width=b.offsetWidth+'px'}};
+if(!window.LiquidGlass){nbs.forEach((b,i)=>b.addEventListener('click',()=>navSel(i)));addEventListener('resize',()=>navCtl.select(VIEWS.indexOf(cur)))}
+document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g){buzz();show(g.dataset.go)}});
+addEventListener('popstate',e=>show((e.state&&e.state.v)||location.hash.slice(1)||'accueil',{push:false}));
+/* anciens liens vers les sections */
+const ALIAS={seance:'accueil',apropos:'faq',outils:'accueil',campus:'accueil'};
+{const h=location.hash.slice(1);const v=ALIAS[h]||h;history.replaceState({v:VIEWS.includes(v)?v:'accueil'},'');if(VIEWS.includes(v)&&v!=='accueil')show(v,{push:false,instant:true});else reveal($('accueil'))}
+
+/* clavier ouvert (formulaire d'avis) : la barre se masque, comme dans les outils */
+if(window.visualViewport){const vv=visualViewport,kb=()=>{const a=document.activeElement,open=innerHeight-vv.height>120&&!!a&&a.matches('input,textarea');document.body.classList.toggle('kb',open)};
+  vv.addEventListener('resize',kb);addEventListener('focusin',()=>setTimeout(kb,350));addEventListener('focusout',()=>setTimeout(kb,120))}
+
+/* cloche : boîte de notifications (menu-flottant.js → window.bsPush) */
+(function bell(n){if(!window.bsPush){if(n<60)setTimeout(()=>bell(n+1),150);return}const b=$('bellBtn');
+  bsPush.on(st=>{b.hidden=!st.visible;b.classList.toggle('has',st.unread>0);b.querySelector('.bdot').textContent=st.unread>9?'9+':st.unread||'';b.setAttribute('aria-label',st.unread?`Notifications : ${st.unread} nouvelle${st.unread>1?'s':''}`:'Notifications')});
+  b.addEventListener('click',()=>{buzz(10);bsPush.open()})})(0);
+/* logo aligné sur le texte : on retire la marge transparente à gauche de l'image (le logo choisi dans le studio peut en avoir) */
+(()=>{const im=document.querySelector('.brand img');if(!im)return;
+  const fit=()=>{try{const w=im.naturalWidth,h=im.naturalHeight;if(!w||!h)return;const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(im,0,0);
+    const d=x.getImageData(0,0,w,h).data;let L=w;for(let y=0;y<h;y++)for(let i=0;i<L;i++)if(d[(y*w+i)*4+3]>24){L=i;break}
+    if(L>0&&L<w)im.style.marginLeft=-(L*im.offsetHeight/h).toFixed(1)+'px'}catch(e){}};
+  im.addEventListener('load',fit);if(im.complete)fit();addEventListener('resize',fit);window.bsLogoFit=fit})();
+fetch('/api/vitrine/site').then(r=>r.ok?r.json():null).then(d=>{if(!d||!d.site)return;const lt=+d.site.logoTaille;if(lt&&lt!==100){const im=document.querySelector('.brand img');if(im){im.style.height=Math.round(42*lt/100)+'px';window.bsLogoFit&&bsLogoFit()}}}).catch(()=>{});
+
+/* ===== avis notés : formulaire + avis validés (studio, onglet Avis) ===== */
+(()=>{const STAR='<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>';
+$('avStars').innerHTML=[1,2,3,4,5].map(n=>`<button type="button" role="radio" aria-checked="false" aria-label="${n} étoile${n>1?'s':''}" data-n="${n}"><svg viewBox="0 0 24 24">${STAR}</svg></button>`).join('');
+const stars=n=>`<span class="st" aria-label="${n} sur 5">${[1,2,3,4,5].map(i=>`<svg viewBox="0 0 24 24"${i>Math.round(n)?' class="o"':''}>${STAR}</svg>`).join('')}</span>`;
+const COLS=['blue','orange','teal','purple','pink','indigo'];
+const F={note:0,fonction:'',niveau:''},LBL=['','Pas satisfait','Moyen','Bien','Très bien','Excellent'];
+let all=[],shown=9;
+function draw(){const L=$('avList');
+  if(!all.length){L.innerHTML='<div class="box avempty"><b>Aucun avis publié pour le moment</b><span>Partagez le premier : il sera publié après relecture.</span></div>';return}
+  L.innerHTML=all.slice(0,shown).map((n,i)=>{const ini=n.nom.trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+    const f=[n.fonction,n.niveau].filter(Boolean).join(' · ');
+    return `<article class="box avc rv" style="--d:${i%3}">${stars(n.note)}<p>${es(n.texte)}</p><div class="who"><span class="ini" style="--c:var(--c-${COLS[n.nom.length%COLS.length]})">${es(ini)}</span><span><b>${es(n.nom)}</b>${f?`<br>${es(f)}`:''}</span></div></article>`}).join('')
+    +(all.length>shown?'<button class="btn avmore" id="avMore" type="button">Voir plus d\'avis</button>':'');
+  const m=$('avMore');if(m)m.onclick=()=>{shown+=9;draw()};prepCards($('avList'));if(cur==='avis')reveal($('avList'))}
+fetch('/api/vitrine/notes').then(r=>r.ok?r.json():null).then(d=>{if(!d)return draw();all=d.notes||[];
+  if(d.total){$('avAvg').hidden=false;$('avMoy').textContent=(+d.moyenne).toFixed(1).replace('.',',');$('avSt').outerHTML=stars(d.moyenne);$('avNb').textContent=d.total+' avis'}
+  draw()}).catch(()=>draw());
+$('avOpen').onclick=()=>{const f=$('avForm');f.hidden=!f.hidden;buzz(10);if(!f.hidden)setTimeout(()=>f.scrollIntoView({behavior:'smooth',block:'start'}),60)};
+$('avStars').addEventListener('click',e=>{const b=e.target.closest('[data-n]');if(!b)return;F.note=+b.dataset.n;buzz(10);
+  $('avStars').querySelectorAll('button').forEach(x=>{const on=+x.dataset.n<=F.note;x.classList.toggle('on',on);x.setAttribute('aria-checked',+x.dataset.n===F.note)});
+  $('avStTx').textContent=LBL[F.note]});
+const pick=(box,key,after)=>$(box).addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(!b)return;buzz(10);
+  const on=!b.classList.contains('on');$(box).querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b&&on));F[key]=on?b.dataset.v:'';after&&after()});
+pick('avFct','fonction',()=>{$('avNiv').hidden=$('avNivL').hidden=F.fonction!=='Étudiant(e)';$('avAutre').hidden=F.fonction!=='Autre';if($('avNiv').hidden){F.niveau='';$('avNiv').querySelectorAll('button').forEach(x=>x.classList.remove('on'))}});
+pick('avNiv','niveau');
+$('avForm').addEventListener('submit',async e=>{e.preventDefault();const m=$('avMsg'),s=$('avSend');
+  const err=$('avNom').value.trim().length<2?'Indiquez votre nom et prénom.':!F.fonction?'Indiquez votre fonction.':!F.note?'Choisissez une note (étoiles).':$('avTx').value.trim().length<5?'Écrivez un commentaire (5 caractères minimum).':'';
+  if(err){m.textContent=err;m.style.color='var(--c-red)';buzz([30,40,30]);return}
+  s.disabled=true;m.style.color='';m.textContent='Envoi…';
+  try{const r=await fetch('/api/vitrine/notes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nom:$('avNom').value,fonction:F.fonction==='Autre'&&$('avAutre').value.trim()?$('avAutre').value.trim():F.fonction,niveau:F.niveau,note:F.note,texte:$('avTx').value,site:$('avHp').value})});
+    const d=await r.json().catch(()=>({}));if(!r.ok||d.ok===false)throw new Error(d.erreur||'Envoi impossible, réessayez plus tard.');
+    buzz([12,60,18]);$('avForm').innerHTML='<div class="avr" style="align-items:center;text-align:center;padding:28px 18px"><b style="font-size:18px">Merci pour votre avis !</b><small class="avh">Il apparaîtra ici après vérification.</small></div>'}
+  catch(x){m.textContent=x.message;m.style.color='var(--c-red)';s.disabled=false}});
+})();
+
+/* ---------- Thème ---------- */
+const SUN=sv('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2m-7.07-17.07 1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>'),
+  MOON=sv('<path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/>');
+function applyTheme(t){root.dataset.theme=t;const d=t==='dark';document.body.classList.toggle('theme-light',!d);document.body.classList.toggle('theme-dark',d);
+  $('themeBtn').innerHTML=d?SUN:MOON;$('metaTheme').content=d?'#000000':'#f5f5f7'}
+applyTheme(root.dataset.theme);
+$('themeBtn').addEventListener('click',()=>{buzz();const t=root.dataset.theme==='dark'?'light':'dark';sto.s('bsTheme',t);applyTheme(t)});
+matchMedia('(prefers-color-scheme: light)').addEventListener('change',e=>{if(!sto.g('bsTheme'))applyTheme(e.matches?'light':'dark')});
+
+/* ---------- Menu flottant (menu-flottant.js, chargé en fin de page) ---------- */
+document.addEventListener('click',e=>{if(e.target.closest('[data-hap]'))return;const b=e.target.closest('[data-menu]');if(!b)return;buzz();
+  let n=0;const go=()=>typeof window.openCapsuleMenu==='function'?window.openCapsuleMenu():++n<40&&setTimeout(go,100);go()});
+
+/* ---------- Installation : seule page installable du site ---------- */
+(()=>{const b=$('instBtn'),h=$('ihint');let ask=null;
+  if(matchMedia('(display-mode: standalone)').matches||navigator.standalone)return;
+  b.hidden=!IOS;
+  addEventListener('beforeinstallprompt',e=>{e.preventDefault();ask=e;b.hidden=false});
+  addEventListener('appinstalled',()=>{ask=null;b.hidden=true;buzz([12,60,18])});
+  b.addEventListener('click',async e=>{e.stopPropagation();buzz();if(!ask){h.classList.toggle('on');return}ask.prompt();const r=await ask.userChoice;ask=null;if(r.outcome==='accepted')b.hidden=true});
+  document.addEventListener('click',e=>{if(!e.target.closest('#ihint'))h.classList.remove('on')})})();
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+
+/* ---------- Reflet du verre sous le pointeur ---------- */
+prepCards(document);
+
+/* ---------- Pied de page : placé dans la page ---------- */
+document.addEventListener('DOMContentLoaded',()=>{const f=document.querySelector('.modern-transparent-footer');if(f)$('shell').appendChild(f)});
+})();
+</script>
+<script src="/menu-flottant.js" defer></script>
+</body>
+</html>
