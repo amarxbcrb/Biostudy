@@ -1,0 +1,9 @@
+BIOCHEM : calculs de chimie des solutions
+============================================
+index.html   L'outil : molarité, concentration massique, molalité, masse volumique,
+             concentration d'une solution commerciale (w, densité, M).
+             C'est l'outil de référence du « moteur » commun (BioDilu, BioMicro,
+             BioConvert sont construits sur le même modèle).
+sw.js        Ancien service worker propre à l'outil, gardé seulement pour
+             désinstaller l'ancienne version chez les visiteurs (peut être supprimé
+             plus tard).

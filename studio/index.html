@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-visual">
+<meta name="robots" content="noindex, nofollow">
+<title>Studio BioStudy</title>
+<style>
+/* Studio : gestion des contenus mis en avant sur BioStudy (vitrine.js + /api/vitrine) */
+:root{--bg:#f2f2f7;--surf:#fff;--fill:rgba(118,118,128,.12);--tx:#000;--tx2:#6c6c70;--tx3:#8a8a8e;--line:rgba(60,60,67,.12);
+--acc:#007aff;--acc-tx:#0064d2;--ok:#1f8a3b;--ok-bg:rgba(52,199,89,.16);--warn:#b25000;--warn-bg:rgba(255,149,0,.16);--err:#d70015;--err-bg:rgba(255,59,48,.12);
+--sh:0 1px 2px rgba(0,0,0,.04),0 14px 40px rgba(20,30,60,.07);--r:24px;--pill:999px;
+--font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#000;--surf:#1c1c1e;--fill:#2c2c2e;--tx:#fff;--tx2:#a1a1a6;--tx3:#8e8e93;--line:rgba(84,84,88,.45);
+--acc:#0a84ff;--acc-tx:#4da3ff;--ok:#30d158;--ok-bg:rgba(48,209,88,.18);--warn:#ffb340;--warn-bg:rgba(255,159,10,.18);--err:#ff453a;--err-bg:rgba(255,69,58,.16);
+--sh:inset 0 1px 0 rgba(255,255,255,.05),0 0 0 1px rgba(255,255,255,.05);color-scheme:dark}}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+html{background:var(--bg)}
+body{min-height:100dvh;background:var(--bg);color:var(--tx);font:15px/1.45 var(--font);-webkit-font-smoothing:antialiased;padding:0 16px 80px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 0 18px}
+.logo{font-size:26px;font-weight:800;letter-spacing:-.6px}.logo i{font-style:normal;color:var(--acc-tx)}
+.sub{font-size:13px;color:var(--tx2);font-weight:600}
+.card{background:var(--surf);border-radius:var(--r);box-shadow:var(--sh);padding:20px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:var(--pill);font-weight:700;font-size:14.5px;
+background:var(--fill);transition:transform .3s cubic-bezier(.34,1.45,.64,1),opacity .2s;white-space:nowrap}
+.btn:active{transform:scale(.95)}.btn:disabled{opacity:.45;pointer-events:none}
+.btn.pri{background:var(--acc);color:#fff}.btn.dan{color:var(--err)}.btn.sm{min-height:36px;padding:0 14px;font-size:13.5px}
+.btn svg{width:18px;height:18px}
+label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:var(--tx2)}
+.in,textarea.in,select.in{width:100%;min-height:46px;border-radius:16px;background:var(--fill);border:1.5px solid transparent;padding:10px 14px;font-size:15px;font-weight:500;color:var(--tx)}
+textarea.in{min-height:96px;resize:vertical;line-height:1.45}
+.in:focus{outline:none;border-color:var(--acc);background:var(--surf)}
+.hint{font-size:12.5px;color:var(--tx3);font-weight:500}
+h2{font-size:18px;font-weight:800;letter-spacing:-.3px}
+h3{font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--tx2)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.stack{display:flex;flex-direction:column;gap:14px}
+.toast{position:fixed;left:50%;bottom:24px;translate:-50% 0;z-index:100;max-width:calc(100vw - 32px);padding:12px 18px;border-radius:16px;background:var(--surf);box-shadow:0 12px 40px rgba(0,0,0,.25);
+font-weight:600;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s,translate .35s}
+.toast.on{opacity:1;translate:-50% -6px}.toast.err{color:var(--err)}
+/* connexion */
+#login{max-width:420px;margin:12vh auto 0}
+/* liste */
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.it{display:flex;flex-direction:column;gap:10px;padding:16px}
+.it .th{height:120px;border-radius:16px;background:var(--fill) center/cover no-repeat;display:grid;place-items:center;color:var(--tx3);font-weight:700;font-size:13px;overflow:hidden}
+.it .nm{font-weight:800;font-size:16px;overflow-wrap:anywhere}
+.it .meta{font-size:13px;color:var(--tx2)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:var(--pill);font-size:12px;font-weight:800}
+.chip::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.s-on{color:var(--ok);background:var(--ok-bg)}.s-plan{color:var(--acc-tx);background:color-mix(in srgb,var(--acc) 14%,transparent)}
+.s-end{color:var(--tx2);background:var(--fill)}.s-pause{color:var(--warn);background:var(--warn-bg)}
+.empty{text-align:center;padding:48px 20px;color:var(--tx2)}
+.empty b{display:block;color:var(--tx);font-size:17px;margin-bottom:6px}
+/* éditeur */
+.ed{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+@media(max-width:900px){.ed{grid-template-columns:1fr}}
+.pv{position:sticky;top:16px}
+.fmts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.fmt{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 8px;border-radius:18px;background:var(--fill);border:2px solid transparent;font-size:13px;font-weight:700;text-align:center}
+.fmt.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 10%,transparent)}
+.fmt .mini{width:64px;height:44px;border-radius:8px;background:var(--surf);position:relative;box-shadow:inset 0 0 0 1px var(--line)}
+.fmt .mini i{position:absolute;background:var(--acc);border-radius:4px;opacity:.85}
+.drop{display:flex;align-items:center;gap:12px;padding:12px;border-radius:18px;background:var(--fill);border:2px dashed var(--line);min-height:72px}
+.drop.over{border-color:var(--acc)}
+.drop .thumb{width:72px;height:52px;border-radius:12px;background:var(--surf) center/cover no-repeat;flex-shrink:0;display:grid;place-items:center;color:var(--tx3);font-size:11px;font-weight:700;overflow:hidden}
+.drop .thumb video{width:100%;height:100%;object-fit:cover}
+.drop .txt{flex:1;min-width:0;font-size:13px;color:var(--tx2)}
+.drop .txt b{display:block;color:var(--tx);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sw{display:flex;gap:8px;flex-wrap:wrap}
+.sw button{width:32px;height:32px;border-radius:50%;box-shadow:inset 0 0 0 2px rgba(255,255,255,.4)}
+.sw button.on{outline:3px solid var(--acc);outline-offset:2px}
+.stage{position:relative;height:520px;border-radius:22px;overflow:hidden;background:linear-gradient(180deg,var(--bg),color-mix(in srgb,var(--bg) 80%,var(--acc)));box-shadow:inset 0 0 0 1px var(--line)}
+.stage.mob{width:330px;margin:0 auto;height:600px;border-radius:34px;box-shadow:inset 0 0 0 1px var(--line),0 0 0 8px var(--fill)}
+.fake{position:absolute;inset:0;padding:22px;display:flex;flex-direction:column;gap:12px;pointer-events:none}
+.fake i{display:block;border-radius:14px;background:var(--surf);opacity:.8}
+#pvBox{position:absolute;inset:0;overflow:auto}
+#pvBox .vt-band{margin-top:250px}
+.seg{display:inline-flex;background:var(--fill);border-radius:var(--pill);padding:3px}
+.seg button{min-height:34px;padding:0 14px;border-radius:var(--pill);font-weight:700;font-size:13px;color:var(--tx2)}
+.seg button.on{background:var(--surf);color:var(--tx);box-shadow:0 2px 8px rgba(0,0,0,.12)}
+/* publication */
+.sheet{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;padding:16px}
+.sheet[hidden]{display:none}
+.sheet .card{width:min(560px,100%);max-height:calc(100dvh - 32px);overflow:auto;display:flex;flex-direction:column;gap:18px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button,.chips label{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:0 14px;border-radius:var(--pill);background:var(--fill);font-weight:700;font-size:13.5px;cursor:pointer}
+.chips .on,.chips label:has(input:checked){background:var(--acc);color:#fff}
+.chips.off{opacity:.4;pointer-events:none}
+#pMode{flex-wrap:wrap}
+.chips label{position:relative}.chips input{position:absolute;inset:0;opacity:0;pointer-events:none}
+.sum{padding:12px 14px;border-radius:16px;background:var(--fill);font-size:13.5px;color:var(--tx2)}
+.sum b{color:var(--tx)}
+.cfg{max-width:640px;margin:8vh auto 0}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;align-items:start}
+.hint{color:var(--tx2);font-size:13.5px;line-height:1.45}
+.lprev{display:flex;align-items:center;gap:10px;min-height:84px;padding:10px 18px;border-radius:999px;background:var(--fill);overflow:hidden}.lprev img{width:auto;height:42px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.18))}.lprev span{font-weight:700;opacity:.5}
+#ltRange{flex:1;min-width:0;accent-color:#007aff}
+.ico{display:flex;align-items:center;gap:16px}.ico img{width:72px;height:72px;border-radius:18px;object-fit:cover;background:var(--fill)}
+.tools{display:flex;flex-direction:column}
+.tl{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 0;border-top:.5px solid var(--fill)}.tl:first-child{border-top:0}
+.tl b{font-size:15px}.tl .seg button.on[data-e=cache]{background:#8e8e93;color:#fff}.tl .seg button.on[data-e=maintenance]{background:#ff9500;color:#fff}
+.tl[data-k]>b{flex:1 0 100%}
+.tl>div:first-child{flex:1;min-width:200px}.tl .hint{margin-top:2px}
+.tg{position:relative;flex-shrink:0;width:51px;height:31px;cursor:pointer}.tg input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.tg i{position:absolute;inset:0;border-radius:999px;background:var(--fill);transition:background .25s}.tg i::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.2);transition:transform .3s cubic-bezier(.34,1.45,.64,1)}
+.tg input:checked+i{background:#34c759}.tg input:checked+i::after{transform:translateX(20px)}#sGlobal:checked+i{background:#ff9500}
+.tx{display:flex;gap:8px;align-items:center;width:100%;flex-wrap:wrap}.tx .in{flex:1;min-width:180px;min-height:38px;border-radius:999px;padding:6px 14px;font-size:14px}
+.nwb{min-height:34px;padding:0 12px;border-radius:999px;background:var(--fill);font-weight:700;font-size:13px;color:var(--tx2)}.nwb.on{background:#ff9f0a;color:#fff}
+.nb{display:inline-grid;place-items:center;min-width:18px;height:18px;margin-left:6px;padding:0 5px;border-radius:999px;background:#ff3b30;color:#fff;font-size:11px;font-weight:800}
+.msgs{display:flex;flex-direction:column;gap:12px}
+.msg{display:flex;flex-direction:column;gap:8px;padding:16px 18px}.msg.new{box-shadow:var(--sh),inset 4px 0 0 var(--acc)}
+.msg .mh{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:12.5px;color:var(--tx2);font-weight:600}
+.msg .mt{white-space:pre-wrap;overflow-wrap:anywhere;font-size:15px}
+.msg .ma{display:flex;gap:8px;flex-wrap:wrap}
+.cfg ol{padding-left:20px;display:flex;flex-direction:column;gap:8px;color:var(--tx2)}
+.cfg code{background:var(--fill);padding:1px 6px;border-radius:6px;color:var(--tx);font-size:13px}
+
+/* ===== Liquid Glass : même langage visuel que les outils BioStudy ===== */
+:root{--c-blue:#007aff;--c-orange:#ff9500;--c-red:#ff3b30;--c-green:#34c759;--c-gray:#8e8e93;--c-purple:#af52de;
+--fb:rgba(60,60,67,.3);--lg-rgb:255,255,255;--lg-a:.68;--lg-hi:#fff;--lg-sh:rgba(0,0,0,.12);--hair:rgba(0,0,0,.09);
+--lens:rgba(120,120,128,.16);--lens-line:rgba(255,255,255,.9);--blob:.3;--spring:cubic-bezier(.34,1.45,.64,1);--ease:cubic-bezier(.22,1,.36,1)}
+@media(prefers-color-scheme:dark){:root{--c-blue:#0a84ff;--c-orange:#ff9f0a;--c-red:#ff453a;--c-green:#30d158;--c-purple:#bf5af2;
+--fb:rgba(235,235,245,.26);--lg-rgb:28,28,30;--lg-a:.66;--lg-hi:rgba(255,255,255,.34);--lg-sh:rgba(0,0,0,.5);--hair:rgba(255,255,255,.08);
+--lens:rgba(255,255,255,.17);--lens-line:rgba(255,255,255,.26);--blob:0}}
+body::before{content:"";position:fixed;inset:-50%;z-index:-1;pointer-events:none;opacity:var(--blob);filter:blur(60px);
+background:radial-gradient(circle at 20% 30%,rgba(10,132,255,.5),transparent 40%),radial-gradient(circle at 80% 70%,rgba(94,92,230,.25),transparent 40%)}
+.glass{position:relative;background:rgba(var(--lg-rgb),var(--lg-a));-webkit-backdrop-filter:blur(22px) saturate(190%);backdrop-filter:blur(22px) saturate(190%);
+box-shadow:inset 0 1px 0 var(--lg-hi),0 0 0 .5px var(--hair),0 12px 30px var(--lg-sh)}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;
+background:radial-gradient(circle 90px at var(--mx,50%) var(--my,50%),rgba(255,255,255,.28),transparent 70%)}
+.glass.lit::after{opacity:1}
+.ic{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+/* en-tête : logo et capsule d'actions */
+header{position:sticky;top:0;z-index:30;padding:max(12px,env(safe-area-inset-top)) 0 12px;margin:0 -16px;padding-inline:16px;
+background:linear-gradient(var(--bg) 55%,transparent)}
+.logo{font-size:28px}.sub{display:none}
+#hdrActs{gap:10px;flex-wrap:nowrap}
+.hcap{display:flex;align-items:center;gap:2px;height:48px;padding:0 4px;border-radius:999px}
+.tb{position:relative;z-index:1;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:20px;color:var(--tx);transition:transform .35s var(--spring),background .3s}
+.tb:hover{background:var(--fill)}.tb:active{transform:scale(.86)}
+/* barre d'onglets en verre : en bas sur mobile, en haut au centre sur ordinateur */
+.tabbar{position:fixed;z-index:40;left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));max-width:520px;margin-inline:auto;height:62px;padding:5px;border-radius:999px;display:flex}
+.tabbar .sl{position:absolute;top:5px;bottom:5px;left:0;width:0;opacity:0;border-radius:999px;background:var(--lens);border:1px solid var(--lens-line);
+box-shadow:inset 0 1px 1px rgba(255,255,255,.5),0 4px 14px rgba(0,0,0,.14);transition:transform .6s var(--spring),width .3s var(--ease);pointer-events:none}
+.tabbar button{position:relative;z-index:1;flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:999px;
+font-size:11px;font-weight:600;color:var(--tx2);transition:color .3s,transform .4s var(--spring)}
+.tabbar button .ic{font-size:21px;color:var(--nc);opacity:.75}
+.tabbar button.on{color:var(--tx)}.tabbar button.on .ic{opacity:1}
+.tabbar button:active{transform:scale(.92)}
+.tabbar .nb{position:absolute;top:4px;right:calc(50% - 22px);margin:0}
+body.auth{padding-bottom:110px}
+@media(min-width:900px){
+ .tabbar{top:max(12px,env(safe-area-inset-top));bottom:auto;left:50%;right:auto;transform:translateX(-50%);width:min(620px,calc(100vw - 420px));height:56px}
+ .tabbar button{flex-direction:row;gap:8px;font-size:13.5px}.tabbar button .ic{font-size:18px}
+ .tabbar .nb{position:static}
+ body.auth{padding-bottom:40px}.sub{display:block}}
+/* groupes façon Réglages : blocs pleins arrondis, champs bordés transparents */
+.card{border-radius:26px;box-shadow:0 0 0 .5px var(--hair)}
+.in,textarea.in,select.in{background:transparent;border:1.5px solid var(--fb);border-radius:999px;padding:10px 16px}
+textarea.in{border-radius:20px}
+.in:focus{background:transparent;border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 22%,transparent)}
+.top h2{font-size:26px;letter-spacing:-.6px}
+#login{margin-top:14vh;border-radius:30px;padding:28px}
+#login h2{font-size:24px}
+/* notifications : aperçu et progression */
+.npv{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:22px}
+.npv img{width:38px;height:38px;border-radius:9px;flex-shrink:0}
+.npv div{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;position:relative;z-index:1}
+.npv b{font-size:14.5px}.npv span{font-size:14px;color:var(--tx2);overflow-wrap:anywhere}
+.npv small{font-size:12px;color:var(--tx3);position:relative;z-index:1}
+.drop{flex-wrap:wrap}.drop .txt{flex:1 1 170px}
+.npv .pvi{width:100%;height:auto;max-height:180px;border-radius:12px;object-fit:cover}
+.pvbs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.pvbs:empty{display:none}
+.pvb{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;font-style:normal;font-size:13px;font-weight:700;color:var(--acc-tx);
+background:linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,.08)),color-mix(in srgb,var(--acc) 12%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 0 0 .5px color-mix(in srgb,var(--acc) 35%,transparent),0 4px 12px rgba(0,0,0,.1)}
+.pvb:first-child{color:#fff;background:linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,0)),var(--acc)}.pvb svg{width:15px;height:15px}
+.pbt{display:flex;flex-direction:column;gap:8px;padding:10px;border-radius:22px;background:var(--fill)}.pbt+.pbt{margin-top:8px}
+.icp{display:flex;flex-wrap:wrap;gap:6px}.icp button{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--surf);color:var(--tx2)}
+.icp button.on{background:var(--acc);color:#fff}.icp button svg{width:18px;height:18px}.icp button[data-i=""]{font-size:12px;font-weight:700;width:auto;padding:0 12px}
+.pvi{width:100%;margin-top:8px;border-radius:12px;max-height:180px;object-fit:cover}
+.prog{height:8px;border-radius:999px;background:var(--fill);overflow:hidden}.prog i{display:block;height:100%;width:0;background:var(--acc);border-radius:999px;transition:width .3s}
+.chips button.on,.chips label:has(input:checked){background:var(--acc);color:#fff}
+</style>
+<link rel="icon" type="image/png" href="/Pictures/favicon.png">
+</head>
+<body>
+<div class="wrap">
+  <header><div><div class="logo">Bio<i>Studio</i></div><div class="sub">Contenus mis en avant et réglages de BioStudy</div></div>
+    <div class="row" id="hdrActs" hidden>
+      <nav class="tabbar glass" id="tabs" aria-label="Sections du studio"><span class="sl" id="tsl"></span>
+        <button type="button" class="on" data-v="vList" style="--nc:var(--c-blue)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1.5"/><rect width="7" height="7" x="14" y="3" rx="1.5"/><rect width="7" height="7" x="14" y="14" rx="1.5"/><rect width="7" height="7" x="3" y="14" rx="1.5"/></svg><span>Contenus</span></button>
+        <button type="button" data-v="vSite" style="--nc:var(--c-gray)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg><span>Site</span></button>
+        <button type="button" data-v="vPush" style="--nc:var(--c-red)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg><span>Notifs</span></button>
+        <button type="button" data-v="vNotes" style="--nc:var(--c-orange)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg><span>Avis</span><span class="nb" id="notNb" hidden></span></button>
+        <button type="button" data-v="vMsg" style="--nc:var(--c-green)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg><span>Messages</span><span class="nb" id="msgNb" hidden></span></button>
+      </nav>
+      <div class="hcap glass"><a class="tb" href="/" target="_blank" rel="noopener" title="Voir le site" aria-label="Voir le site"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></a><button class="tb" id="logout" type="button" title="Se déconnecter" aria-label="Se déconnecter"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg></button></div>
+    </div></header>
+
+  <!-- connexion -->
+  <form class="card stack" id="login" autocomplete="on">
+    <h2>Connexion</h2>
+    <label class="f">Mot de passe<input class="in" id="pw" type="password" autocomplete="current-password" required></label>
+    <button class="btn pri" type="submit">Entrer</button>
+  </form>
+
+  <!-- stockage non configuré -->
+  <div class="card cfg stack" id="setup" hidden>
+    <h2>Encore une étape dans Cloudflare</h2>
+    <p>Le studio a besoin d'un espace de stockage pour enregistrer vos contenus. À faire une seule fois :</p>
+    <ol>
+      <li>Cloudflare → <b>Storage &amp; Databases</b> → <b>KV</b> → <b>Create a namespace</b>, nom : <code>biostudy-vitrine</code>.</li>
+      <li><b>Workers &amp; Pages</b> → votre projet → <b>Settings</b> → <b>Bindings</b> → <b>Add</b> → <b>KV namespace</b> : nom de variable <code>VITRINE</code>, espace <code>biostudy-vitrine</code>.</li>
+      <li>Même page → <b>Variables and Secrets</b> → <b>Add</b> → type <b>Secret</b>, nom <code>VITRINE_CLE</code>, valeur : le mot de passe de votre choix.</li>
+      <li><b>Deployments</b> → relancez le dernier déploiement (<b>Retry deployment</b>).</li>
+    </ol>
+    <button class="btn pri" type="button" onclick="location.reload()">J'ai terminé, réessayer</button>
+  </div>
+
+  <!-- réglages du site -->
+  <section id="vSite" hidden>
+    <div class="top"><h2>Réglages du site</h2><button class="btn pri" id="siteSave" type="button">Enregistrer</button></div>
+    <div class="sgrid">
+      <div class="card stack">
+        <h3>Tout le site</h3>
+        <div class="tl"><div><b>Site entier en maintenance</b><p class="hint">Accueil et tous les outils affichent la page d'attente. Vous gardez l'accès avec « Ouvrir le site (admin) ».</p></div><label class="tg"><input type="checkbox" id="sGlobal"><i></i></label></div>
+        <label class="f">Retour prévu (facultatif) : à cette heure, la maintenance (site et outils) s'arrête toute seule<span class="row"><input class="in" type="datetime-local" id="sRetour" style="flex:1;min-width:0"><button class="btn sm" id="sRetourX" type="button">Effacer</button></span></label>
+        <div class="tl"><div><b>Messages des visiteurs</b><p class="hint">Bouton « Une idée, un problème ? » en bas du menu des outils. Les messages arrivent dans l'onglet Messages.</p></div><label class="tg"><input type="checkbox" id="sAvis"><i></i></label></div>
+        <label class="f">Google Analytics : identifiant de mesure (G-…), vide = désactivé. Les visiteurs voient une fenêtre de consentement ; rien n'est mesuré sans leur accord.<input class="in" id="sGa" maxlength="24" placeholder="G-XXXXXXXXXX" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>
+        <div class="tl"><div><b>Mesurer l'audience</b><p class="hint">Affiche la demande d'accord (« Accepter » / « Continuer sans accepter ») et mesure les visiteurs qui acceptent. Désactivé : ni demande ni Google Analytics.</p></div><label class="tg"><input type="checkbox" id="sGaOn"><i></i></label></div>
+        <div class="tl"><div><b>Sauvegarde</b><p class="hint">Télécharge un fichier avec les réglages, les contenus et les messages (les images restent sur Cloudflare).</p></div><button class="btn sm" id="sBackup" type="button">Télécharger</button></div>
+      </div>
+      <div class="card stack">
+        <h3>Logo et icônes</h3>
+        <p class="hint">Le logo sert aussi d'icône de l'application installée. Le favicon est la petite icône de l'onglet du navigateur (s'il est vide, le logo est utilisé). Image carrée conseillée, PNG, au moins 512 × 512 px.</p>
+        <div class="ico"><img id="imLogo" alt="Logo actuel"><div class="stack"><b>Logo</b><div class="row"><button class="btn sm" data-up="logo" type="button">Changer</button><button class="btn sm" data-reset="logo" type="button">Logo d'origine</button></div></div></div>
+        <div class="ico"><img id="imFav" alt="Favicon actuel"><div class="stack"><b>Favicon</b><div class="row"><button class="btn sm" data-up="favicon" type="button">Changer</button><button class="btn sm" data-reset="favicon" type="button">Favicon d'origine</button></div></div></div>
+        <div class="stack"><div class="row" style="justify-content:space-between"><b>Taille du logo sur le site</b><span class="hint" id="ltVal">100 %</span></div>
+          <div class="lprev"><img id="ltImg" alt=""><span>BioStudy</span></div>
+          <div class="row"><input type="range" id="ltRange" min="60" max="160" step="5" value="100"><button class="btn sm" id="ltReset" type="button">Taille d'origine</button></div></div>
+        <input type="file" id="fSite" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden>
+      </div>
+      <div class="card stack">
+        <h3>Outils</h3>
+        <p class="hint"><b>Masqué</b> : retiré du menu et de l'accueil (le lien direct marche encore). <b>Nouveau</b> : pastille orange dans le menu et sur l'accueil. <b>Description</b> : remplace le petit texte sous le nom. <b>Maintenance</b> : la page de l'outil affiche un message d'attente ; personne ne peut utiliser l'outil ; vous, connecté au studio sur ce navigateur, avez un bouton « Ouvrir l'outil » sur cette page pour le tester.</p>
+        <div class="tools" id="siteTools"></div>
+        <label class="f">Message de maintenance (facultatif)<textarea class="in" id="siteMsg" maxlength="400" placeholder="Ex. : BioPrep revient dimanche avec de nouvelles recettes !"></textarea></label>
+      </div>
+    </div>
+  </section>
+
+  <!-- notifications push -->
+  <section id="vPush" hidden>
+    <div class="top"><h2>Notifications</h2><span class="chip s-plan" id="pushCount" hidden></span></div>
+    <div class="card stack" id="pushSetup" hidden>
+      <h3>Activer les notifications</h3>
+      <p class="hint">Les visiteurs pourront s'abonner depuis le menu des outils (« Recevoir les notifications »). Android et ordinateur : dans le navigateur ou l'application installée. iPhone et iPad (iOS 16.4 ou plus) : seulement quand BioStudy est ajouté à l'écran d'accueil.</p>
+      <p class="hint">Les clés de sécurité sont créées une seule fois dans votre navigateur et gardées dans le stockage Cloudflare du studio : aucun réglage à faire dans Cloudflare.</p>
+      <button class="btn pri" id="pushInit" type="button">Activer les notifications</button>
+    </div>
+    <div class="sgrid" id="pushMain" hidden>
+      <div class="card stack">
+        <h3>Nouvelle notification</h3>
+        <label class="f">Titre<input class="in" id="pTitre" maxlength="80" placeholder="Ex. : Nouveau sur BioStudy"></label>
+        <label class="f">Message<textarea class="in" id="pTexte" maxlength="240" placeholder="Ex. : BioBand simule maintenant le smear et l'épaisseur des bandes."></textarea></label>
+        <div class="f"><span>Image (facultatif)</span>
+          <div class="drop" id="pDrop"><div class="thumb" id="pTh">Aucune</div><div class="txt"><b id="pImgN">Ajoutez une grande image</b>Affichée par Chrome et Edge (Android, Windows). iPhone et Mac montrent seulement le texte.</div>
+            <button class="btn sm" type="button" id="pImgB">Choisir</button><button class="btn sm dan" type="button" id="pImgX" hidden>Retirer</button></div>
+          <input class="in" id="pImgU" inputmode="url" placeholder="…ou collez le lien d'une image (https://…)">
+          <input type="file" id="pImgF" accept="image/png,image/jpeg,image/webp" hidden></div>
+        <div class="f"><span>Boutons (facultatif, 2 maximum)</span>
+          <div class="pbt" data-b="0"><div class="row"><input class="in" data-bt="t" maxlength="30" placeholder="Bouton 1, ex. : Découvrir" style="flex:1;min-width:150px"><input class="in" data-bt="l" placeholder="Lien : /BioBand/ ou https://… (vide = même page)" style="flex:2;min-width:200px"></div><div class="icp" data-bt="i"></div></div>
+          <div class="pbt" data-b="1"><div class="row"><input class="in" data-bt="t" maxlength="30" placeholder="Bouton 2, ex. : Plus tard" style="flex:1;min-width:150px"><input class="in" data-bt="l" placeholder="Lien (vide = même page)" style="flex:2;min-width:200px"></div><div class="icp" data-bt="i"></div></div>
+          <span class="hint">Dans la boîte de la cloche : boutons en verre avec leur icône, partout. Sur le téléphone : Chrome, Edge et Samsung Internet affichent les boutons (sans icône) ; iPhone et Mac ouvrent la page choisie plus bas.</span></div>
+        <div class="f"><span>Ouvre la page</span><div class="chips" id="pLiens"></div></div>
+        <div class="f"><span>Aperçu</span><div class="npv glass"><img src="/Pictures/icon-192.png" alt=""><div><b id="pvT">Titre</b><span id="pvB">Message</span><img id="pvI" class="pvi" alt="" hidden><span id="pvBt" class="pvbs"></span></div><small>maintenant</small></div></div>
+        <button class="btn pri" id="pSend" type="button">Envoyer</button>
+        <div class="prog" id="pProg" hidden><i id="pBar"></i></div>
+      </div>
+      <div class="stack">
+        <div class="card stack"><h3 id="pSubT">Abonnés</h3><div class="msgs" id="pSubs"></div></div>
+        <div class="card stack"><h3>Derniers envois</h3><div class="msgs" id="pHist"></div>
+          <p class="hint">« Supprimer » retire la notification de l'historique (et de ce que reçoit un appareil resté hors ligne). Une notification déjà affichée sur un téléphone ne peut pas en être effacée. Les abonnements expirés sont supprimés automatiquement à l'envoi.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- avis notés de l'accueil -->
+  <section id="vNotes" hidden>
+    <div class="top"><h2 id="notCount">Avis</h2><span class="hint">Un avis n'apparaît sur l'accueil qu'après « Publier ».</span></div>
+    <div class="msgs" id="notList"></div>
+  </section>
+
+  <!-- messages des visiteurs -->
+  <section id="vMsg" hidden>
+    <div class="top"><h2 id="msgCount">Messages</h2><div class="row"><button class="btn sm" id="msgRead" type="button">Tout marquer comme lu</button><button class="btn sm dan" id="msgClear" type="button">Tout supprimer</button></div></div>
+    <div class="msgs" id="msgList"></div>
+  </section>
+
+  <!-- liste -->
+  <section id="vList" hidden>
+    <div class="top"><h2 id="count">Vos contenus</h2><button class="btn pri" id="new" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Nouveau contenu</button></div>
+    <div class="list" id="list"></div>
+  </section>
+
+  <!-- éditeur -->
+  <section id="vEdit" hidden>
+    <div class="top"><button class="btn sm" id="back" type="button">← Retour à la liste</button>
+      <div class="row"><button class="btn" id="saveDraft" type="button">Enregistrer sans publier</button><button class="btn pri" id="publish" type="button">Publier…</button></div></div>
+    <div class="ed">
+      <div class="stack">
+        <div class="card stack">
+          <label class="f">Nom (pour vous retrouver, invisible sur le site)<input class="in" id="nom" maxlength="120" placeholder="Ex. : Stage d'été labo"></label>
+          <div class="f"><span>Format</span>
+            <div class="fmts" id="fmts">
+              <button class="fmt" data-f="fenetre" type="button"><span class="mini"><i style="inset:8px 14px"></i></span>Fenêtre<span class="hint">au centre de l'écran</span></button>
+              <button class="fmt" data-f="carte" type="button"><span class="mini"><i style="right:4px;bottom:4px;width:24px;height:18px"></i></span>Carte<span class="hint">dans un coin</span></button>
+              <button class="fmt" data-f="bande" type="button"><span class="mini"><i style="left:4px;right:4px;bottom:8px;height:12px"></i></span>Bande<span class="hint">avant le pied de page</span></button>
+            </div></div>
+        </div>
+        <div class="card stack">
+          <h3>Contenu</h3>
+          <label class="f">Titre<input class="in" id="titre" maxlength="160" placeholder="Ex. : Révisez avec BioCampus"></label>
+          <label class="f">Texte<textarea class="in" id="texte" maxlength="1500" placeholder="Quelques lignes, les retours à la ligne sont conservés."></textarea></label>
+          <div class="f"><span>Image</span>
+            <div class="drop" id="dImg"><div class="thumb" id="tImg">Aucune</div><div class="txt"><b id="nImg">Glissez une image ici</b>PNG, JPG, WebP, GIF</div>
+              <button class="btn sm" type="button" data-pick="img">Choisir</button><button class="btn sm dan" type="button" data-clear="img" hidden>Retirer</button></div>
+            <input class="in" id="uImg" placeholder="…ou collez l'adresse d'une image (https://…)">
+          </div>
+          <div class="f"><span>Vidéo (facultatif, remplace l'image)</span>
+            <div class="drop" id="dVid"><div class="thumb" id="tVid">Aucune</div><div class="txt"><b id="nVid">Glissez une vidéo ici</b>MP4 ou WebM, 24 Mo maximum</div>
+              <button class="btn sm" type="button" data-pick="vid">Choisir</button><button class="btn sm dan" type="button" data-clear="vid" hidden>Retirer</button></div>
+            <input class="in" id="uVid" placeholder="…ou collez un lien YouTube ou l'adresse d'une vidéo">
+          </div>
+          <div class="row" style="align-items:flex-end">
+            <label class="f" style="flex:1;min-width:160px">Texte du bouton<input class="in" id="bt" maxlength="60" placeholder="Ex. : Découvrir"></label>
+            <label class="f" style="flex:2;min-width:220px">Lien du bouton<input class="in" id="bl" placeholder="https://… ou /BioCampus"></label>
+          </div>
+          <div class="f"><span>Couleur du bouton</span><div class="sw" id="sw"></div></div>
+          <input type="file" id="fImg" accept="image/*" hidden><input type="file" id="fVid" accept="video/mp4,video/webm,video/quicktime" hidden>
+        </div>
+      </div>
+      <div class="pv stack">
+        <div class="row" style="justify-content:space-between"><h3>Aperçu</h3><div class="seg" id="dev"><button class="on" data-d="mob" type="button">Mobile</button><button data-d="pc" type="button">Ordinateur</button></div></div>
+        <div class="stage mob" id="stage"><div class="fake"><i style="height:44px;width:60%"></i><i style="height:150px"></i><i style="height:90px"></i><i style="height:120px"></i></div><div id="pvBox"></div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- publication -->
+<div class="sheet" id="pub" hidden role="dialog" aria-modal="true" aria-labelledby="pubT">
+  <div class="card">
+    <h2 id="pubT">Publier</h2>
+    <div class="stack"><h3>Durée</h3>
+      <div class="chips" id="durs"></div>
+      <div class="row" id="custom" hidden>
+        <label class="f" style="flex:1;min-width:200px">Début<input class="in" type="datetime-local" id="dDeb"></label>
+        <label class="f" style="flex:1;min-width:200px">Fin (vide = sans fin)<input class="in" type="datetime-local" id="dFin"></label>
+      </div></div>
+    <div class="stack"><h3>Pages</h3>
+      <div class="seg" id="pMode"><button type="button" data-m="tout">Tout le site</button><button type="button" data-m="seulement">Seulement sur…</button><button type="button" data-m="sauf">Partout sauf…</button></div>
+      <div class="chips" id="pages"></div></div>
+    <div class="stack"><h3>Par visiteur</h3>
+      <div class="row"><span class="hint" style="min-width:120px">Nombre d'affichages</span><div class="chips" id="nVues"></div></div>
+      <div class="row" id="parRow"><span class="hint" style="min-width:120px">Compté</span><div class="seg" id="par"><button type="button" data-k="jour">par jour</button><button type="button" data-k="visite">par visite</button><button type="button" data-k="total">au total</button></div></div>
+    </div>
+    <div class="stack"><h3>Quand et où</h3>
+      <div class="row"><span class="hint" style="min-width:120px">Apparaît après</span><div class="chips" id="delai"></div></div>
+      <div class="row"><span class="hint" style="min-width:120px">À partir de la</span><div class="chips" id="apres"></div></div>
+      <div class="row"><span class="hint" style="min-width:120px">Appareils</span><div class="seg" id="app"><button type="button" data-k="tous">Tous</button><button type="button" data-k="mobile">Mobile</button><button type="button" data-k="ordi">Ordinateur</button></div></div>
+    </div>
+    <label class="row" id="againRow" style="gap:10px;font-weight:600;font-size:14px;cursor:pointer"><input type="checkbox" id="again" style="width:20px;height:20px;accent-color:var(--acc)">Montrer à nouveau aux visiteurs qui l'ont déjà vu</label>
+    <div class="sum" id="sum"></div>
+    <div class="row" style="justify-content:flex-end"><button class="btn" id="pubCancel" type="button">Annuler</button><button class="btn pri" id="pubGo" type="button">Publier maintenant</button></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>window.__vtNoAuto = true;</script>
+<script src="/vitrine.js"></script>
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id), API = '/api/vitrine';
+const PAGES = [['accueil', 'Accueil'], ['biocampus', 'BioCampus'], ['biopcr', 'BioPCR'], ['biodilu', 'BioDilu'], ['bioband', 'BioBand'], ['bioprep', 'BioPrep'],
+  ['bioconvert', 'BioConvert'], ['biochem', 'BioChem']];
+const FMT = { fenetre: 'Fenêtre', carte: 'Carte', bande: 'Bande' };
+const NVUES = [[1, '1 fois'], [2, '2 fois'], [3, '3 fois'], [5, '5 fois'], [10, '10 fois'], [0, 'Sans limite']];
+const PAR = { jour: 'par jour', visite: 'par visite', total: 'au total' };
+const DELAIS = [[0, 'Tout de suite'], [3, '3 s'], [10, '10 s'], [30, '30 s'], [60, '1 min']];
+const APRES = [[1, '1re page vue'], [2, '2e page vue'], [3, '3e page vue'], [5, '5e page vue']];
+const APP = { tous: 'tous les appareils', mobile: 'mobile uniquement', ordi: 'ordinateur uniquement' };
+const DURS = [['1j', '1 jour', 1], ['3j', '3 jours', 3], ['7j', '1 semaine', 7], ['14j', '2 semaines', 14], ['30j', '1 mois', 30], ['inf', 'Sans fin', 0], ['perso', 'Personnalisée', -1]];
+const COLORS = ['#0a84ff', '#5e5ce6', '#bf5af2', '#ff375f', '#ff9f0a', '#30b0c7', '#34c759', '#1c1c1e'];
+let cle = '', items = [], cur = null, dev = 'mob';
+try { cle = sessionStorage.getItem('st-cle') || ''; } catch (e) {}
+
+/* ---------- utilitaires ---------- */
+let tt = 0;
+function toast(msg, err) { const t = $('toast'); t.textContent = msg; t.classList.toggle('err', !!err); t.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('on'), 3200); }
+async function api(path, opts = {}) {
+  const r = await fetch(API + path, { ...opts, headers: { 'X-Cle': cle, ...(opts.headers || {}) } });
+  let d = {}; try { d = await r.json(); } catch (e) {}
+  if (r.status === 503 || (r.status === 404 && !d.erreur)) { show('setup'); throw new Error('setup'); }
+  if (r.status === 401) { logout(); throw new Error(d.erreur || 'Mot de passe incorrect.'); }
+  if (!r.ok || d.ok === false) throw new Error(d.erreur || 'Erreur ' + r.status);
+  return d;
+}
+function show(v) { segOn(v); ['login', 'setup', 'vList', 'vEdit', 'vSite', 'vMsg', 'vNotes', 'vPush'].forEach(id => $(id).hidden = id !== v); $('hdrActs').hidden = !['vList', 'vEdit', 'vSite', 'vMsg', 'vNotes', 'vPush'].includes(v); document.body.classList.toggle('auth', !$('hdrActs').hidden); scrollTo(0, 0); }
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fdate = d => new Date(d).toLocaleString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+const localInput = d => { const x = new Date(d); x.setMinutes(x.getMinutes() - x.getTimezoneOffset()); return x.toISOString().slice(0, 16); };
+function state(it) {
+  const now = Date.now();
+  if (it.statut === 'pause') return ['s-pause', 'Non publié'];
+  if (it.fin && Date.parse(it.fin) <= now) return ['s-end', 'Terminé'];
+  if (it.debut && Date.parse(it.debut) > now) return ['s-plan', 'Programmé'];
+  return ['s-on', 'En ligne'];
+}
+const pageName = k => (PAGES.find(x => x[0] === k) || [k, k])[1];
+function pagesTxt(it) {
+  const p = (it.pages || []).filter(k => k !== '*'), m = it.pagesMode || (p.length ? 'seulement' : 'tout');
+  if (m === 'tout' || !p.length) return 'Tout le site';
+  return (m === 'sauf' ? 'Partout sauf ' : '') + p.map(pageName).join(', ');
+}
+const mediaUrl = m => m && (m.id ? API + '/m/' + m.id : m.url) || '';
+
+/* ---------- connexion ---------- */
+$('login').addEventListener('submit', async e => {
+  e.preventDefault(); cle = $('pw').value;
+  try { await api('/check'); try { sessionStorage.setItem('st-cle', cle); } catch (_) {} adminCookie(); load(); }
+  catch (err) { if (err.message !== 'setup') toast(err.message, true); }
+});
+function logout() { document.cookie = 'bs_adm=; path=/; max-age=0; samesite=lax; secure'; cle = ''; try { sessionStorage.removeItem('st-cle'); } catch (_) {} show('login'); }
+$('logout').addEventListener('click', logout);
+
+/* ---------- réglages du site : logo, favicon, outils masqués ou en maintenance ---------- */
+const OUTILS = [['biocampus', 'BioCampus'], ['biopcr', 'BioPCR'], ['biodilu', 'BioDilu'], ['biochem', 'BioChem'], ['biomicro', 'BioMicro'], ['bioconvert', 'BioConvert'],
+  ['bioprep', 'BioPrep'], ['bioband', 'BioBand'], ['biostat', 'BioStat'], ['biogene', 'BioGene']];
+const ETATS = [['visible', 'Visible'], ['cache', 'Masqué'], ['maintenance', 'Maintenance']];
+let site = { logo: '', favicon: '', outils: {}, message: '' }, upKind = '';
+function segOn(v) { let on = null; document.querySelectorAll('#tabs button').forEach(b => { const k = b.dataset.v === (v === 'vEdit' ? 'vList' : v); b.classList.toggle('on', k); if (k) on = b; });
+  requestAnimationFrame(() => { const sl = $('tsl'); if (on && on.offsetWidth) { sl.style.width = on.offsetWidth + 'px'; sl.style.transform = `translateX(${on.offsetLeft}px)`; sl.style.opacity = 1; } }); }
+addEventListener('resize', () => segOn(document.querySelector('#tabs button.on')?.dataset.v));
+/* reflet du verre qui suit le pointeur (comme sur les outils) */
+document.querySelectorAll('.glass').forEach(b => { const aim = e => { const r = b.getBoundingClientRect(); b.style.setProperty('--mx', e.clientX - r.left + 'px'); b.style.setProperty('--my', e.clientY - r.top + 'px'); };
+  b.addEventListener('pointerenter', e => { aim(e); b.classList.add('lit'); }); b.addEventListener('pointermove', aim); b.addEventListener('pointerleave', () => b.classList.remove('lit')); });
+/* cookie administrateur : permet d'ouvrir un outil en maintenance (empreinte du mot de passe, jamais le mot de passe) */
+async function adminCookie() {
+  try { const h = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(cle));
+    document.cookie = 'bs_adm=' + [...new Uint8Array(h)].map(x => x.toString(16).padStart(2, '0')).join('') + '; path=/; max-age=2592000; samesite=lax; secure'; } catch (e) {}
+}
+async function loadSite() {
+  try { const r = await fetch(API + '/site', { cache: 'no-store' }); const d = await r.json(); if (d.site) site = d.site; } catch (e) {}
+  renderSite(); show('vSite');
+}
+function renderSite() {
+  const t = '?t=' + Date.now();
+  $('imLogo').src = site.logo ? API + '/m/' + site.logo : '/Pictures/icon-192.png' + t;
+  $('imFav').src = site.favicon ? API + '/m/' + site.favicon : site.logo ? API + '/m/' + site.logo : '/Pictures/favicon.png' + t;
+  $('siteMsg').value = site.message || '';
+  $('ltImg').src = site.logo ? API + '/m/' + site.logo : '/Pictures/logo-mark.png' + t; $('ltRange').value = site.logoTaille || 100; ltShow();
+  $('sGlobal').checked = !!site.global; $('sAvis').checked = site.avis !== false; $('sGa').value = site.ga || ''; $('sGaOn').checked = site.gaOn !== false; $('sRetour').value = site.retour ? localInput(site.retour) : '';
+  $('siteTools').innerHTML = OUTILS.map(([k, n]) => { const r = site.outils[k] || {}, e = r.etat || 'visible';
+    return `<div class="tl" data-k="${esc(k)}"><b>${esc(n)}</b><div class="seg">${ETATS.map(([v, l]) => `<button type="button" data-e="${v}"${v === e ? ' class="on"' : ''}>${l}</button>`).join('')}</div>
+      <div class="tx"><input class="in" data-desc maxlength="80" placeholder="Description (par défaut)" value="${esc(r.desc || '')}"><button type="button" class="nwb${r.nouveau ? ' on' : ''}" data-nw>Nouveau</button></div></div>`; }).join('');
+}
+$('tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; if (b.dataset.v === 'vSite') loadSite(); else if (b.dataset.v === 'vMsg') loadMsg(true); else if (b.dataset.v === 'vNotes') loadNotes(true); else if (b.dataset.v === 'vPush') loadPush(true); else load(); });
+$('siteTools').addEventListener('click', e => { const b = e.target.closest('[data-e]'); if (!b) return; const k = b.closest('[data-k]').dataset.k;
+  const r = site.outils[k] = site.outils[k] || {}; if (b.dataset.e === 'visible') delete r.etat; else r.etat = b.dataset.e;
+  b.parentNode.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); });
+$('siteTools').addEventListener('click', e => { const b = e.target.closest('[data-nw]'); if (!b) return; const k = b.closest('[data-k]').dataset.k;
+  const r = site.outils[k] = site.outils[k] || {}; r.nouveau = !r.nouveau; b.classList.toggle('on', r.nouveau); });
+$('siteTools').addEventListener('input', e => { if (!e.target.matches('[data-desc]')) return; const k = e.target.closest('[data-k]').dataset.k;
+  (site.outils[k] = site.outils[k] || {}).desc = e.target.value; });
+$('sRetourX').addEventListener('click', () => { $('sRetour').value = ''; });
+$('sBackup').addEventListener('click', async () => {
+  try { const [a, m, n] = await Promise.all([api('/all'), api('/avis'), api('/notes-all')]);
+    const blob = new Blob([JSON.stringify({ date: new Date().toISOString(), site, contenus: a.items || [], messages: m.avis || [], avis: n.notes || [] }, null, 1)], { type: 'application/json' });
+    const l = document.createElement('a'); l.href = URL.createObjectURL(blob); l.download = 'biostudy-sauvegarde-' + new Date().toISOString().slice(0, 10) + '.json'; l.click(); setTimeout(() => URL.revokeObjectURL(l.href), 2000);
+    toast('Sauvegarde téléchargée.'); } catch (err) { toast(err.message, true); }
+});
+
+/* ---------- notifications push ---------- */
+let pushSt = null, pLien = '/', pImg = '', subs = [];
+/* icônes des boutons (mêmes noms que BTN_IC dans menu-flottant.js) */
+const BIC = { fleche: '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>', lien: '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+  lecture: '<path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/>', telecharger: '<path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/>',
+  livre: '<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+  etoile: '<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>',
+  labo: '<path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/><path d="M6.453 15h11.094"/><path d="M8.5 2h7"/>',
+  calendrier: '<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',
+  cadeau: '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/>',
+  info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>' };
+const bic = k => BIC[k] ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${BIC[k]}</svg>` : '';
+const pIcon = ['fleche', 'fleche'];
+document.querySelectorAll('.pbt .icp').forEach((box, i) => { box.innerHTML = `<button type="button" data-i="">Sans</button>` + Object.keys(BIC).map(k => `<button type="button" data-i="${k}" title="${k}">${bic(k)}</button>`).join('');
+  const mark = () => box.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.i === pIcon[i])); mark();
+  box.addEventListener('click', e => { const b = e.target.closest('[data-i]'); if (!b) return; pIcon[i] = b.dataset.i; mark(); pv(); }); });
+const pBtns = () => [...document.querySelectorAll('.pbt')].map((r, i) => ({ texte: r.querySelector('[data-bt=t]').value.trim(), lien: r.querySelector('[data-bt=l]').value.trim(), icone: pIcon[i] })).filter(x => x.texte);
+const b64u = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+async function loadPush(open) {
+  try { pushSt = await api('/push-stat'); } catch (e) { if (e.message !== 'setup') toast(e.message, true); return; }
+  renderPush(); if (open) show('vPush');
+  if (pushSt.configure) { try { subs = (await api('/push-subs')).abonnes || []; } catch (e) { subs = []; } renderSubs(); }
+}
+function renderSubs() {
+  $('pSubT').textContent = subs.length ? `Abonnés (${subs.length})` : 'Abonnés';
+  $('pSubs').innerHTML = subs.length ? subs.map(a => `<div class="msg" data-sid="${esc(a.id)}"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><div><b>${esc(a.nom || 'Sans nom')}</b> <span class="hint">${esc([a.fonction, a.niveau].filter(Boolean).join(' · '))}</span>
+    <div class="mh">${a.date ? `<span>${esc(fdate(a.date))}</span>` : ''}${a.appareil ? `<span>· ${esc(a.appareil)}</span>` : ''}${a.page ? `<span>· depuis ${esc(PG[a.page] || a.page)}</span>` : ''}</div></div>
+    <button class="btn sm dan" type="button" data-sdel>Supprimer</button></div></div>`).join('') : '<p class="hint">Aucun abonné pour le moment. Les visiteurs s\'abonnent avec la cloche (accueil et menu des outils).</p>';
+}
+$('pSubs').addEventListener('click', async e => { const b = e.target.closest('[data-sdel]'); if (!b) return; const id = b.closest('[data-sid]').dataset.sid, a = subs.find(x => x.id === id);
+  if (!confirm(`Supprimer l'abonné ${a && a.nom ? a.nom : ''} ? Il ne recevra plus les notifications.`)) return;
+  try { await api('/push-subdel', { method: 'POST', body: JSON.stringify({ id }) }); toast('Abonné supprimé.'); loadPush(false); } catch (err) { toast(err.message, true); } });
+$('pHist').addEventListener('click', async e => { const b = e.target.closest('[data-hdel]'); if (!b) return;
+  if (!confirm("Supprimer cette notification de l'historique ?")) return;
+  try { await api('/push-histdel', { method: 'POST', body: JSON.stringify({ id: b.dataset.hdel }) }); toast('Notification supprimée.'); loadPush(false); } catch (err) { toast(err.message, true); } });
+$('pImgB').addEventListener('click', () => $('pImgF').click());
+$('pImgX').addEventListener('click', () => { pImg = ''; $('pImgU').value = ''; pImgShow(); });
+$('pImgF').addEventListener('change', async e => { const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  if (f.size > 1024 * 1024) return toast('Image trop lourde : 1 Mo maximum pour une notification.', true);
+  try { toast('Envoi…'); const d = await api('/up', { method: 'POST', headers: { 'Content-Type': f.type }, body: f }); pImg = d.id; $('pImgU').value = ''; pImgShow(); toast('Image prête.'); } catch (err) { toast(err.message, true); } });
+function pImgShow() { const lu = $('pImgU').value.trim(), u = pImg ? API + '/m/' + pImg : /^https:\/\//.test(lu) ? lu : ''; $('pTh').style.backgroundImage = u ? `url(${u})` : ''; $('pTh').textContent = u ? '' : 'Aucune';
+  $('pImgN').textContent = pImg ? 'Image ajoutée' : u ? 'Image depuis le lien' : 'Ajoutez une grande image'; $('pImgX').hidden = !u; $('pvI').hidden = !u; if (u) $('pvI').src = u; }
+function renderPush() {
+  const c = pushSt.configure, n = pushSt.abonnes;
+  $('pushSetup').hidden = c; $('pushMain').hidden = !c; $('pushCount').hidden = !c;
+  $('pushCount').textContent = `${n} abonné${n > 1 ? 's' : ''}`;
+  $('pLiens').innerHTML = [['/', 'Accueil'], ...OUTILS.map(([, nm]) => ['/' + nm + '/', nm])].map(([u, nm]) => `<button type="button" data-u="${u}" class="${u === pLien ? 'on' : ''}">${esc(nm)}</button>`).join('');
+  $('pSend').textContent = n ? `Envoyer à ${n} abonné${n > 1 ? 's' : ''}` : 'Aucun abonné pour le moment'; $('pSend').disabled = !n;
+  $('pHist').innerHTML = pushSt.hist.length ? pushSt.hist.map(h => `<div class="msg"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><div style="min-width:0"><div class="mh"><span>${esc(fdate(h.date))}</span><span>· ${h.envoyes} reçue${h.envoyes > 1 ? 's' : ''}</span>${h.echecs ? `<span>· ${h.echecs} échec${h.echecs > 1 ? 's' : ''}</span>` : ''}</div><b>${esc(h.titre)}</b>${h.texte ? `<div class="mt">${esc(h.texte)}</div>` : ''}<div class="hint">${esc(h.lien || '/')}${h.image || h.imageUrl ? ' · avec image' : ''}${(h.boutons || (h.bouton ? [h.bouton] : [])).map(x => ` · bouton « ${esc(x.texte)} »`).join('')}</div></div><button class="btn sm dan" type="button" data-hdel="${esc(h.id)}">Supprimer</button></div></div>`).join('') : '<p class="hint">Aucune notification envoyée.</p>';
+  pv();
+}
+function pv() { $('pvT').textContent = $('pTitre').value.trim() || 'Titre'; $('pvB').textContent = $('pTexte').value.trim() || 'Message'; $('pvBt').innerHTML = pBtns().map(x => `<em class="pvb">${bic(x.icone)}${esc(x.texte)}</em>`).join(''); }
+document.querySelectorAll('.pbt [data-bt=t]').forEach(e => e.addEventListener('input', pv));
+$('pImgU').addEventListener('input', () => { if ($('pImgU').value.trim()) pImg = ''; pImgShow(); });
+$('pTitre').addEventListener('input', pv); $('pTexte').addEventListener('input', pv);
+$('pLiens').addEventListener('click', e => { const b = e.target.closest('[data-u]'); if (!b) return; pLien = b.dataset.u; $('pLiens').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); });
+$('pushInit').addEventListener('click', async () => {
+  try { const k = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+    const jwk = await crypto.subtle.exportKey('jwk', k.privateKey), pub = b64u(await crypto.subtle.exportKey('raw', k.publicKey));
+    await api('/push-setup', { method: 'POST', body: JSON.stringify({ pub, jwk }) }); toast('Notifications activées : la cloche apparaît sur l\'accueil et dans le menu des outils.'); loadPush(true); }
+  catch (err) { toast(err.message, true); }
+});
+$('pSend').addEventListener('click', async () => {
+  const titre = $('pTitre').value.trim(), n = pushSt.abonnes;
+  if (!titre) return toast('Écrivez un titre.', true);
+  const lu = $('pImgU').value.trim(); if (!pImg && lu && !/^https:\/\//.test(lu)) return toast("Le lien de l'image doit commencer par https://", true);
+  if (!confirm(`Envoyer cette notification à ${n} abonné${n > 1 ? 's' : ''} ? Elle ne pourra pas être retirée.`)) return;
+  const b = $('pSend'); b.disabled = true; $('pProg').hidden = false; $('pBar').style.width = '0%';
+  let cursor = null, id = '', ok = 0, ko = 0, out = 0, done = 0;
+  try {
+    do { const d = await api('/push-send', { method: 'POST', body: JSON.stringify({ titre, texte: $('pTexte').value, lien: pLien, image: pImg, imageUrl: pImg ? '' : $('pImgU').value.trim(), boutons: pBtns(), cursor, id }) });
+      id = d.id; cursor = d.cursor; ok += d.envoyes; ko += d.echecs; out += d.retires; done += d.envoyes + d.echecs + d.retires;
+      $('pBar').style.width = Math.min(100, done / Math.max(1, n) * 100) + '%'; } while (cursor);
+    toast(`Envoyée : ${ok} reçue${ok > 1 ? 's' : ''}${out ? ` · ${out} abonnement${out > 1 ? 's' : ''} expiré${out > 1 ? 's' : ''} retiré${out > 1 ? 's' : ''}` : ''}${ko ? ` · ${ko} échec${ko > 1 ? 's' : ''}` : ''}.`);
+    $('pTitre').value = ''; $('pTexte').value = ''; document.querySelectorAll('.pbt input').forEach(e => e.value = ''); $('pImgU').value = ''; pImg = ''; pImgShow(); pv();
+  } catch (err) { toast(err.message, true); }
+  $('pProg').hidden = true; loadPush(false);
+});
+
+/* ---------- avis notés (accueil) : publier / retirer / supprimer ---------- */
+let notes = [];
+const etoiles = n => '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n);
+function notBadge() { const n = notes.filter(a => !a.ok).length; $('notNb').hidden = !n; $('notNb').textContent = n; }
+async function loadNotes(open) {
+  try { notes = (await api('/notes-all')).notes || []; } catch (e) { if (e.message !== 'setup') toast(e.message, true); return; }
+  notBadge(); if (!open) return; renderNotes(); show('vNotes');
+}
+function renderNotes() {
+  const pub = notes.filter(n => n.ok), moy = pub.length ? (pub.reduce((s, n) => s + n.note, 0) / pub.length).toFixed(1).replace('.', ',') : '–';
+  $('notCount').textContent = notes.length ? `${notes.length} avis · ${pub.length} publié${pub.length > 1 ? 's' : ''} · moyenne ${moy}/5` : 'Avis';
+  $('notList').innerHTML = notes.length ? notes.map(n => `<div class="card msg${n.ok ? '' : ' new'}" data-id="${esc(n.id)}">
+    <div class="mh"><span class="chip ${n.ok ? 's-on' : 's-pause'}">${n.ok ? 'Publié' : 'En attente'}</span><span style="color:#ff9f0a;font-size:16px;letter-spacing:1px">${etoiles(n.note)}</span><span>${esc(fdate(n.date))}</span></div>
+    <div><b>${esc(n.nom)}</b> <span class="hint">${esc([n.fonction, n.niveau].filter(Boolean).join(' · '))}</span></div>
+    <div class="mt">${esc(n.texte)}</div>
+    <div class="ma"><button class="btn sm${n.ok ? '' : ' pri'}" data-ok="${n.ok ? 0 : 1}" type="button">${n.ok ? "Retirer de l'accueil" : 'Publier'}</button><button class="btn sm dan" data-del type="button">Supprimer</button></div></div>`).join('')
+    : '<div class="card empty"><b>Aucun avis</b>Les avis laissés sur l\'accueil (section « Vos avis ») arriveront ici.</div>';
+}
+async function majNotes(body) { try { notes = (await api('/notes-maj', { method: 'POST', body: JSON.stringify(body) })).notes || []; renderNotes(); notBadge(); } catch (err) { toast(err.message, true); } }
+$('notList').addEventListener('click', e => { const c = e.target.closest('[data-id]'); if (!c) return; const id = c.dataset.id;
+  if (e.target.closest('[data-del]')) { if (confirm('Supprimer cet avis ?')) majNotes({ ids: [id], suppr: true }); }
+  else if (e.target.closest('[data-ok]')) majNotes({ ids: [id], ok: e.target.closest('[data-ok]').dataset.ok === '1' }); });
+
+/* ---------- messages des visiteurs ---------- */
+let avis = [];
+const PG = { accueil: 'Accueil' }; OUTILS.forEach(([k, n]) => PG[k] = n);
+function msgBadge() { const n = avis.filter(a => !a.lu).length; $('msgNb').hidden = !n; $('msgNb').textContent = n; }
+async function loadMsg(open) {
+  try { avis = (await api('/avis')).avis || []; } catch (e) { if (e.message !== 'setup') toast(e.message, true); return; }
+  msgBadge(); if (!open) return; renderMsg(); show('vMsg');
+}
+function renderMsg() {
+  $('msgCount').textContent = avis.length ? avis.length + ' message' + (avis.length > 1 ? 's' : '') : 'Messages';
+  $('msgList').innerHTML = avis.length ? avis.map(a => `<div class="card msg${a.lu ? '' : ' new'}" data-id="${esc(a.id)}">
+    <div class="mh"><span class="chip ${a.lu ? 's-end' : 's-plan'}">${a.lu ? 'Lu' : 'Nouveau'}</span><span>${esc(fdate(a.date))}</span><span>· ${esc(PG[a.page] || a.page || '?')}</span><span>· ${esc(a.appareil || '')}</span></div>
+    <div class="mt">${esc(a.texte)}</div>
+    ${a.contact ? `<div class="hint">Contact : <a href="mailto:${esc(a.contact)}">${esc(a.contact)}</a></div>` : ''}
+    <div class="ma">${a.contact ? `<a class="btn sm" href="mailto:${esc(a.contact)}?subject=${encodeURIComponent('BioStudy : votre message')}">Répondre</a>` : ''}<button class="btn sm" data-lu="${a.lu ? 0 : 1}" type="button">${a.lu ? 'Marquer non lu' : 'Marquer comme lu'}</button><button class="btn sm dan" data-del type="button">Supprimer</button></div></div>`).join('')
+    : '<div class="card empty"><b>Aucun message</b>Les messages envoyés depuis « Une idée, un problème ? » (menu des outils) arriveront ici.</div>';
+}
+async function majMsg(body) { try { avis = (await api('/avis-maj', { method: 'POST', body: JSON.stringify(body) })).avis || []; renderMsg(); msgBadge(); } catch (err) { toast(err.message, true); } }
+$('msgList').addEventListener('click', e => { const c = e.target.closest('[data-id]'); if (!c) return; const id = c.dataset.id;
+  if (e.target.closest('[data-del]')) majMsg({ ids: [id], suppr: true });
+  else if (e.target.closest('[data-lu]')) majMsg({ ids: [id], lu: e.target.closest('[data-lu]').dataset.lu === '1' }); });
+$('msgRead').addEventListener('click', () => majMsg({ ids: avis.map(a => a.id), lu: true }));
+$('msgClear').addEventListener('click', () => { if (avis.length && confirm('Supprimer tous les messages ?')) majMsg({ tout: 'suppr' }); });
+document.querySelectorAll('[data-up]').forEach(b => b.addEventListener('click', () => { upKind = b.dataset.up; $('fSite').click(); }));
+document.querySelectorAll('[data-reset]').forEach(b => b.addEventListener('click', () => { site[b.dataset.reset] = ''; renderSite(); }));
+$('fSite').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  if (f.size > 2 * 1024 * 1024) return toast('Image trop lourde (2 Mo maximum pour une icône).', true);
+  try { toast('Envoi…'); const d = await api('/up', { method: 'POST', headers: { 'Content-Type': f.type }, body: f }); site[upKind] = d.id; renderSite(); autoSave(0); }
+  catch (err) { toast(err.message, true); }
+});
+function ltShow() { const v = +$('ltRange').value; site.logoTaille = v; $('ltVal').textContent = v + ' %'; $('ltImg').style.height = Math.round(42 * v / 100) + 'px'; }
+$('ltRange').addEventListener('input', ltShow);
+$('ltReset').addEventListener('click', () => { $('ltRange').value = 100; ltShow(); });
+/* enregistrement automatique : chaque changement de l'onglet Site part tout de suite (plus besoin d'« Enregistrer ») */
+let saveT = 0, saving = null;
+function autoSave(delay) { clearTimeout(saveT); $('siteSave').textContent = 'Enregistrement…'; saveT = setTimeout(saveSite, delay == null ? 300 : delay); }
+$('vSite').addEventListener('change', e => { if (e.target.id !== 'fSite') autoSave(); });
+$('vSite').addEventListener('click', e => { if (e.target.closest('[data-e],[data-nw],[data-reset],#sRetourX,#ltReset')) autoSave(); });
+$('vSite').addEventListener('input', e => { if (e.target.matches('[data-desc],#siteMsg,#ltRange,#sGa')) autoSave(1200); });
+$('siteSave').addEventListener('click', () => saveSite());
+async function saveSite() {
+  clearTimeout(saveT); if (saving) await saving;
+  site.message = $('siteMsg').value; site.global = $('sGlobal').checked; site.avis = $('sAvis').checked; site.ga = $('sGa').value.trim().toUpperCase(); site.gaOn = $('sGaOn').checked;
+  site.retour = $('sRetour').value ? new Date($('sRetour').value).toISOString() : '';
+  saving = (async () => {
+    try { const d = await api('/site', { method: 'POST', body: JSON.stringify(site) }); site = d.site; try { sessionStorage.removeItem('bs_site'); } catch (_) {}
+      $('siteSave').textContent = 'Enregistré ✓'; toast('Enregistré : en ligne d\'ici une minute environ.'); }
+    catch (err) { $('siteSave').textContent = 'Réessayer'; toast(err.message, true); }
+  })();
+  await saving; saving = null;
+}
+
+/* ---------- liste ---------- */
+async function load() {
+  try { items = (await api('/all')).items || []; } catch (e) { if (e.message !== 'setup') toast(e.message, true); return; }
+  renderList(); show('vList'); loadMsg(false); loadNotes(false);
+}
+function renderList() {
+  $('count').textContent = items.length ? `Vos contenus (${items.length})` : 'Vos contenus';
+  if (!items.length) { $('list').innerHTML = '<div class="card empty" style="grid-column:1/-1"><b>Aucun contenu pour l\'instant</b>Cliquez sur « Nouveau contenu » pour créer votre première mise en avant.</div>'; return; }
+  $('list').innerHTML = items.map(it => {
+    const [cls, lab] = state(it), c = it.contenu || {}, img = mediaUrl(c.image);
+    const per = it.statut === 'pause' ? '' : (it.debut ? 'Du ' + fdate(it.debut) : 'Depuis la publication') + (it.fin ? ' au ' + fdate(it.fin) : ', sans fin');
+    const vues = it.maxVues ? `${it.maxVues} fois ${PAR[it.par] || ''}` : 'sans limite';
+    return `<article class="card it" data-id="${esc(it.id)}">
+      <div class="th" style="${img ? `background-image:url('${esc(img)}')` : ''}">${img ? '' : (c.video && (c.video.id || c.video.url) ? 'Vidéo' : 'Texte seul')}</div>
+      <div class="row" style="justify-content:space-between"><span class="nm">${esc(it.nom || c.titre || 'Sans nom')}</span><span class="chip ${cls}">${lab}</span></div>
+      <div class="meta">${FMT[it.format]} · ${esc(pagesTxt(it))} · ${vues}${per ? '<br>' + per : ''}</div>
+      <div class="row"><button class="btn sm" data-a="edit" type="button">Modifier</button>
+        ${cls === 's-on' || cls === 's-plan' ? `<button class="btn sm" data-a="toggle" type="button">Mettre en pause</button><button class="btn sm" data-a="again" type="button">Réafficher à tous</button>` : `<button class="btn sm" data-a="relaunch" type="button">Relancer…</button>`}
+        <button class="btn sm" data-a="dup" type="button">Dupliquer</button><button class="btn sm dan" data-a="del" type="button">Supprimer</button></div>
+    </article>`;
+  }).join('');
+}
+$('list').addEventListener('click', async e => {
+  const b = e.target.closest('[data-a]'); if (!b) return;
+  const id = b.closest('[data-id]').dataset.id, it = items.find(x => x.id === id); if (!it) return;
+  const a = b.dataset.a;
+  if (a === 'edit') return edit(JSON.parse(JSON.stringify(it)));
+  if (a === 'dup') { const c = JSON.parse(JSON.stringify(it)); delete c.id; delete c.cree; c.nom = (c.nom || 'Contenu') + ' (copie)'; c.statut = 'pause'; return edit(c); }
+  if (a === 'del') {
+    if (b.dataset.sure !== '1') { b.dataset.sure = '1'; b.textContent = 'Confirmer la suppression'; setTimeout(() => { b.dataset.sure = ''; b.textContent = 'Supprimer'; }, 4000); return; }
+    try { await api('/del', { method: 'POST', body: JSON.stringify({ id }) }); items = items.filter(x => x.id !== id); renderList(); toast('Contenu supprimé.'); } catch (err) { toast(err.message, true); }
+    return;
+  }
+  if (a === 'relaunch') { cur = JSON.parse(JSON.stringify(it)); return openPub(true); }
+  if (a === 'again') {
+    if (b.dataset.sure !== '1') { b.dataset.sure = '1'; b.textContent = 'Confirmer'; setTimeout(() => { b.dataset.sure = ''; b.textContent = 'Réafficher à tous'; }, 4000); return; }
+    try { const d = await api('/save', { method: 'POST', body: JSON.stringify({ ...it, rev: (it.rev || 0) + 1 }) }); Object.assign(it, d.item); renderList(); toast('Le contenu sera de nouveau montré à tous les visiteurs.'); } catch (err) { toast(err.message, true); }
+    return;
+  }
+  if (a === 'toggle') {
+    const c = { ...it, statut: it.statut === 'pause' ? 'actif' : 'pause' };
+    try { const d = await api('/save', { method: 'POST', body: JSON.stringify(c) }); Object.assign(it, d.item); renderList(); toast(d.item.statut === 'pause' ? 'Contenu mis en pause.' : 'Contenu remis en ligne.'); } catch (err) { toast(err.message, true); }
+  }
+});
+$('new').addEventListener('click', () => edit({ nom: '', format: 'carte', statut: 'pause', pagesMode: 'tout', pages: [], maxVues: 1, par: 'jour', delai: 0, apresPages: 1, appareils: 'tous', rev: 0, contenu: { titre: '', texte: '', image: null, video: null, bouton: { texte: '', lien: '' }, couleur: COLORS[0] } }));
+
+/* ---------- éditeur ---------- */
+$('sw').innerHTML = COLORS.map(c => `<button type="button" data-c="${c}" style="background:${c}" aria-label="Couleur ${c}"></button>`).join('');
+function edit(it) {
+  cur = it; const c = it.contenu;
+  $('nom').value = it.nom || ''; $('titre').value = c.titre || ''; $('texte').value = c.texte || '';
+  $('bt').value = c.bouton && c.bouton.texte || ''; $('bl').value = c.bouton && c.bouton.lien || '';
+  $('uImg').value = c.image && c.image.url || ''; $('uVid').value = c.video && c.video.url || '';
+  show('vEdit'); sync();
+}
+function sync() {
+  const c = cur.contenu;
+  document.querySelectorAll('#fmts .fmt').forEach(b => b.classList.toggle('on', b.dataset.f === cur.format));
+  document.querySelectorAll('#sw button').forEach(b => b.classList.toggle('on', b.dataset.c === c.couleur));
+  dropUi('Img', c.image, 'image'); dropUi('Vid', c.video, 'video');
+  preview();
+}
+function dropUi(k, m, kind) {
+  const has = m && (m.id || m.url), t = $('t' + k);
+  t.style.backgroundImage = has && kind === 'image' ? `url('${mediaUrl(m)}')` : '';
+  t.innerHTML = has ? (kind === 'video' ? (m.id || /\.(mp4|webm|mov)(\?|$)/i.test(m.url) ? `<video src="${esc(mediaUrl(m))}" muted></video>` : 'YouTube') : '') : 'Aucune';
+  $('n' + k).textContent = has ? (m.nom || (m.id ? 'Fichier envoyé' : 'Lien')) : (kind === 'image' ? 'Glissez une image ici' : 'Glissez une vidéo ici');
+  document.querySelector(`[data-clear="${k.toLowerCase()}"]`).hidden = !has;
+}
+function preview() { $('stage').className = 'stage ' + dev; Vitrine.render(cur, { cible: $('pvBox') }); }
+const bind = (id, fn) => $(id).addEventListener('input', () => { fn($(id).value); preview(); });
+bind('nom', v => cur.nom = v); bind('titre', v => cur.contenu.titre = v); bind('texte', v => cur.contenu.texte = v);
+bind('bt', v => cur.contenu.bouton.texte = v); bind('bl', v => cur.contenu.bouton.lien = v.trim());
+bind('uImg', v => { cur.contenu.image = v.trim() ? { url: v.trim() } : null; dropUi('Img', cur.contenu.image, 'image'); });
+bind('uVid', v => { cur.contenu.video = v.trim() ? { url: v.trim() } : null; dropUi('Vid', cur.contenu.video, 'video'); });
+$('fmts').addEventListener('click', e => { const b = e.target.closest('.fmt'); if (b) { cur.format = b.dataset.f; sync(); } });
+$('sw').addEventListener('click', e => { const b = e.target.closest('[data-c]'); if (b) { cur.contenu.couleur = b.dataset.c; sync(); } });
+$('dev').addEventListener('click', e => { const b = e.target.closest('[data-d]'); if (!b) return; dev = b.dataset.d; document.querySelectorAll('#dev button').forEach(x => x.classList.toggle('on', x === b)); preview(); });
+$('back').addEventListener('click', () => { renderList(); show('vList'); });
+
+/* ---------- fichiers : images réduites avant envoi, vidéos telles quelles ---------- */
+async function shrink(file) {
+  if (!/^image\/(png|jpe?g|webp)$/.test(file.type) || file.size < 350 * 1024) return file;
+  const bmp = await createImageBitmap(file), k = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+  const cv = document.createElement('canvas'); cv.width = Math.round(bmp.width * k); cv.height = Math.round(bmp.height * k);
+  cv.getContext('2d').drawImage(bmp, 0, 0, cv.width, cv.height);
+  const blob = await new Promise(r => cv.toBlob(r, 'image/webp', .86));
+  return blob && blob.size < file.size ? blob : file;
+}
+async function upload(file, kind) {
+  const k = kind === 'image' ? 'Img' : 'Vid';
+  if (kind === 'video' && file.size > 24 * 1024 * 1024) return toast('Vidéo trop lourde (24 Mo maximum). Mettez-la sur YouTube et collez le lien.', true);
+  $('n' + k).textContent = 'Envoi en cours…';
+  try {
+    const body = kind === 'image' ? await shrink(file) : file;
+    const d = await api('/up', { method: 'POST', body, headers: { 'Content-Type': body.type || file.type } });
+    cur.contenu[kind] = { id: d.id, type: d.type, nom: file.name };
+    $(kind === 'image' ? 'uImg' : 'uVid').value = '';
+    sync(); toast(kind === 'image' ? 'Image ajoutée.' : 'Vidéo ajoutée.');
+  } catch (e) { toast(e.message, true); dropUi(k, cur.contenu[kind], kind); }
+}
+document.querySelectorAll('[data-pick]').forEach(b => b.addEventListener('click', () => $(b.dataset.pick === 'img' ? 'fImg' : 'fVid').click()));
+document.querySelectorAll('[data-clear]').forEach(b => b.addEventListener('click', () => { const kind = b.dataset.clear === 'img' ? 'image' : 'video'; cur.contenu[kind] = null; $(kind === 'image' ? 'uImg' : 'uVid').value = ''; sync(); }));
+$('fImg').addEventListener('change', e => { const f = e.target.files[0]; if (f) upload(f, 'image'); e.target.value = ''; });
+$('fVid').addEventListener('change', e => { const f = e.target.files[0]; if (f) upload(f, 'video'); e.target.value = ''; });
+[['dImg', 'image'], ['dVid', 'video']].forEach(([id, kind]) => {
+  const z = $(id);
+  z.addEventListener('dragover', e => { e.preventDefault(); z.classList.add('over'); });
+  z.addEventListener('dragleave', () => z.classList.remove('over'));
+  z.addEventListener('drop', e => { e.preventDefault(); z.classList.remove('over'); const f = e.dataTransfer.files[0]; if (f) upload(f, kind); });
+});
+
+/* ---------- enregistrement / publication ---------- */
+function valid() {
+  const c = cur.contenu;
+  if (!c.titre && !c.texte && !(c.image && (c.image.id || c.image.url)) && !(c.video && (c.video.id || c.video.url))) { toast('Ajoutez au moins un titre, un texte, une image ou une vidéo.', true); return false; }
+  if (c.bouton.texte && !/^(https?:\/\/|\/)/i.test(c.bouton.lien || '')) { toast('Le lien du bouton doit commencer par https:// ou /', true); $('bl').focus(); return false; }
+  return true;
+}
+async function save(it, msg) {
+  try {
+    const d = await api('/save', { method: 'POST', body: JSON.stringify(it) });
+    const i = items.findIndex(x => x.id === d.item.id); if (i >= 0) items[i] = d.item; else items.unshift(d.item);
+    cur = d.item; toast(msg); return true;
+  } catch (e) { toast(e.message, true); return false; }
+}
+$('saveDraft').addEventListener('click', async () => { if (!valid()) return; if (await save({ ...cur, statut: 'pause' }, 'Enregistré (non publié).')) { renderList(); show('vList'); } });
+
+let dur = '7j', relaunch = false;
+const chips = (id, list) => $(id).innerHTML = list.map(([k, l]) => `<button type="button" data-k="${k}">${l}</button>`).join('');
+chips('durs', DURS.map(d => [d[0], d[1]])); chips('nVues', NVUES); chips('delai', DELAIS); chips('apres', APRES);
+$('pages').innerHTML = PAGES.map(([k, l]) => `<label><input type="checkbox" value="${esc(k)}">${l}</label>`).join('');
+const onOf = (id, v, attr = 'k') => document.querySelectorAll(`#${id} [data-${attr}]`).forEach(b => b.classList.toggle('on', String(b.dataset[attr]) === String(v)));
+function pubSync() {
+  onOf('durs', dur); onOf('nVues', cur.maxVues); onOf('par', cur.par); onOf('delai', cur.delai); onOf('apres', cur.apresPages); onOf('app', cur.appareils); onOf('pMode', cur.pagesMode, 'm');
+  $('custom').hidden = dur !== 'perso';
+  $('parRow').hidden = !cur.maxVues;
+  $('pages').classList.toggle('off', cur.pagesMode === 'tout');
+  const p = pagesSel(), [deb, fin] = period();
+  const noPage = cur.pagesMode !== 'tout' && !p.length;
+  const where = noPage ? '<span style="color:var(--err)">choisissez au moins une page</span>' : pagesTxt({ pagesMode: cur.pagesMode, pages: p });
+  $('sum').innerHTML = `<b>${FMT[cur.format]}</b> · <b>${where}</b> · ${deb ? 'à partir du <b>' + fdate(deb) + '</b>' : '<b>dès maintenant</b>'}${fin ? ' jusqu\'au <b>' + fdate(fin) + '</b>' : ', <b>sans date de fin</b>'}.<br>` +
+    `Chaque visiteur la voit <b>${cur.maxVues ? cur.maxVues + ' fois ' + PAR[cur.par] : 'sans limite'}</b>, ${cur.delai ? '<b>' + cur.delai + ' s</b> après l\'ouverture de la page' : '<b>tout de suite</b>'}` +
+    `${cur.apresPages > 1 ? ', à partir de sa <b>' + cur.apresPages + 'e page vue</b>' : ''}, sur <b>${APP[cur.appareils]}</b>.`;
+  $('pubGo').disabled = noPage;
+}
+function pagesSel() { return [...document.querySelectorAll('#pages input:checked')].map(i => i.value); }
+function period() {
+  if (dur === 'perso') { const d = $('dDeb').value, f = $('dFin').value; return [d ? new Date(d).toISOString() : null, f ? new Date(f).toISOString() : null]; }
+  const n = (DURS.find(x => x[0] === dur) || [])[2];
+  return [null, n ? new Date(Date.now() + n * 864e5).toISOString() : null];
+}
+function openPub(isRelaunch) {
+  relaunch = !!isRelaunch;
+  const d = { maxVues: 1, par: 'jour', delai: 0, apresPages: 1, appareils: 'tous', rev: 0 };
+  Object.keys(d).forEach(k => { if (cur[k] == null) cur[k] = d[k]; });
+  if (!cur.pagesMode) cur.pagesMode = cur.pages && cur.pages.length && !cur.pages.includes('*') ? 'seulement' : 'tout';
+  const p = (cur.pages || []).filter(k => k !== '*');
+  document.querySelectorAll('#pages input').forEach(i => i.checked = p.includes(i.value));
+  const ended = cur.fin && Date.parse(cur.fin) <= Date.now();
+  if (!relaunch && (cur.debut || cur.fin) && !ended) { dur = 'perso'; $('dDeb').value = cur.debut ? localInput(cur.debut) : ''; $('dFin').value = cur.fin ? localInput(cur.fin) : ''; }
+  else { dur = '7j'; $('dDeb').value = localInput(Date.now()); $('dFin').value = ''; }
+  /* nouveau contenu ou relance : montré à tous ; simple modification : on garde les compteurs des visiteurs */
+  const isNew = !cur.id || !items.some(x => x.id === cur.id && x.statut === 'actif');
+  $('again').checked = relaunch || isNew; $('againRow').hidden = isNew && !relaunch;
+  $('pubT').textContent = relaunch ? 'Relancer' : 'Publier';
+  $('pub').hidden = false; pubSync();
+}
+$('publish').addEventListener('click', () => { if (valid()) openPub(false); });
+const pick = (id, fn, attr = 'k') => $(id).addEventListener('click', e => { const b = e.target.closest(`[data-${attr}]`); if (b) { fn(b.dataset[attr]); pubSync(); } });
+pick('durs', v => dur = v); pick('nVues', v => cur.maxVues = +v); pick('par', v => cur.par = v); pick('delai', v => cur.delai = +v);
+pick('apres', v => cur.apresPages = +v); pick('app', v => cur.appareils = v); pick('pMode', v => cur.pagesMode = v, 'm');
+$('pages').addEventListener('change', pubSync);
+['dDeb', 'dFin'].forEach(id => $(id).addEventListener('input', pubSync));
+$('pubCancel').addEventListener('click', () => $('pub').hidden = true);
+$('pub').addEventListener('click', e => { if (e.target === $('pub')) $('pub').hidden = true; });
+addEventListener('keydown', e => { if (e.key === 'Escape') $('pub').hidden = true; });
+$('pubGo').addEventListener('click', async () => {
+  const [debut, fin] = period();
+  if (debut && fin && Date.parse(fin) <= Date.parse(debut)) return toast('La date de fin doit être après la date de début.', true);
+  const it = { ...cur, statut: 'actif', pages: cur.pagesMode === 'tout' ? [] : pagesSel(), debut, fin, rev: (cur.rev || 0) + ($('again').checked ? 1 : 0) };
+  if (await save(it, relaunch ? 'Relancé ! Visible sur le site d\'ici une minute.' : 'Publié ! Visible sur le site d\'ici une minute.')) { $('pub').hidden = true; renderList(); show('vList'); }
+});
+
+/* ---------- démarrage ---------- */
+if (cle) api('/check').then(() => { adminCookie(); load(); }).catch(e => { if (e.message !== 'setup') show('login'); }); else show('login');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1767 @@
+<!DOCTYPE html>
+<html lang="fr" data-verre="lib" data-haptic="own" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-visual">
+<meta name="theme-color" content="#f2f2f7" id="metaTheme">
+<title>BioPrep | Préparer solutions et milieux de culture, check-list et PDF</title>
+<meta name="description" content="BioPrep : préparez n’importe quelle solution ou milieu de culture. Recettes prêtes (LB, MacConkey, PBS, TAE…), quantités adaptées à votre volume, vue d’ensemble, check-list au labo avec suivi par personne, impression PDF et import de protocole avec l’IA.">
+<link rel="canonical" href="https://www.biostudy.xyz/BioPrep/">
+<link rel="icon" type="image/png" href="/Pictures/favicon.png">
+<link rel="apple-touch-icon" href="/Pictures/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="BioStudy">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script>
+/* thème avant le premier rendu : choix mémorisé pour la période (jour / nuit) en cours, sinon celui du système */
+(()=>{const g=k=>{try{return localStorage.getItem(k)}catch(e){return null}},h=new Date().getHours(),th=g('bioPrepTheme');
+document.documentElement.dataset.theme=th&&g('bioPrepThemePeriod')===(h>=7&&h<20?'day':'night')?th:matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'})();
+</script>
+<style>
+/* ===== 1. Jetons : palette Réglages iOS (clair #f2f2f7 / groupes blancs ; sombre noir / groupes #1c1c1e) ===== */
+#bc{--serif:"Iowan Old Style","Palatino Linotype",Georgia,serif;--ease:cubic-bezier(.22,1,.36,1);--spring:cubic-bezier(.34,1.45,.64,1);
+--top:70px;--gx:14px;--navh:60px;--blur:22px;
+--grp:#fff;--fill:rgba(118,118,128,.12);--thumb:#fff;--tx:#000;--tx2:#6c6c70;--tx3:#8a8a8e;--sep:rgba(60,60,67,.18);
+--acc:var(--c-blue);--acc-tx:color-mix(in srgb,var(--acc) 78%,#000);--brand:#0064d2;
+--c-blue:#007aff;--c-indigo:#5856d6;--c-purple:#af52de;--c-pink:#ff2d55;--c-orange:#ff9500;--c-green:#34c759;--c-teal:#30b0c7;--c-cyan:#32ade6;--c-mint:#00c7be;--c-brown:#a2845e;
+--ok:#1f8a3b;--err:#d70015;--warn:#ff9500;
+--lg-rgb:255,255,255;--lg-a:.68;--lg-hi:#fff;--lg-sh:rgba(0,0,0,.12);--hair:rgba(0,0,0,.09);
+--fb:rgba(60,60,67,.3);--lens:rgba(120,120,128,.16);--lens-line:rgba(255,255,255,.9);--veil:rgba(0,0,0,.22);--blob:.3;
+color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",sans-serif;font-size:16px;line-height:1.4}
+[data-theme=dark] #bc{--grp:#1c1c1e;--fill:#2c2c2e;--thumb:#636366;--tx:#fff;--tx2:#a1a1a6;--tx3:#8e8e93;--sep:rgba(84,84,88,.6);
+--acc-tx:color-mix(in srgb,var(--acc) 72%,#fff);--brand:#4da3ff;
+--c-blue:#0a84ff;--c-indigo:#5e5ce6;--c-purple:#bf5af2;--c-pink:#ff375f;--c-orange:#ff9f0a;--c-green:#30d158;--c-teal:#40cbe0;--c-cyan:#64d2ff;--c-mint:#63e6e2;--c-brown:#ac8e68;
+--ok:#30d158;--err:#ff453a;
+--lg-rgb:28,28,30;--lg-a:.66;--lg-hi:rgba(255,255,255,.34);--lg-sh:rgba(0,0,0,.5);--hair:rgba(255,255,255,.08);
+--fb:rgba(235,235,245,.26);--lens:rgba(255,255,255,.17);--lens-line:rgba(255,255,255,.26);--veil:rgba(0,0,0,.5);--blob:0}
+/* accent par onglet : solution bleu, mélange indigo, milieu orange, ajout rose */
+#bc{--acc:var(--c-orange)}#bc[data-tab="1"]{--acc:var(--c-blue)}#bc[data-tab="2"]{--acc:var(--c-indigo)}#bc[data-tab="3"]{--acc:var(--c-teal)}#bc[data-tab="4"]{--acc:var(--c-pink)}
+#bc .nb:nth-of-type(1){--nc:var(--c-orange)}#bc .nb:nth-of-type(2){--nc:var(--c-blue)}#bc .nb:nth-of-type(3){--nc:var(--c-indigo)}#bc .nb:nth-of-type(4){--nc:var(--c-teal)}#bc .nb:nth-of-type(5){--nc:var(--c-pink)}
+@media(min-width:600px){#bc{--gx:24px;--top:80px}}
+@media(min-width:900px){#bc{--gx:36px;--top:92px}}
+html{background:#f2f2f7;color-scheme:light;-webkit-text-size-adjust:100%;overflow-x:clip;overscroll-behavior:none;transition:background .4s}
+html[data-theme=dark]{background:#000;color-scheme:dark}
+body{margin:0;min-height:100dvh;overflow-x:clip;overscroll-behavior:none;-webkit-font-smoothing:antialiased}
+#bc::before{content:"";position:fixed;inset:-50%;z-index:-1;pointer-events:none;opacity:var(--blob);filter:blur(60px);animation:flow 20s ease-in-out infinite alternate;
+background:radial-gradient(circle at 20% 30%,rgba(10,132,255,.5),transparent 40%),radial-gradient(circle at 80% 70%,rgba(94,92,230,.25),transparent 40%),radial-gradient(circle at 50% 10%,rgba(142,142,147,.15),transparent 40%)}
+@keyframes flow{to{transform:translate(-4%,3%) rotate(8deg)}}
+:where(#bc) *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:where(#bc) :is(button,input,select){font:inherit;color:inherit}
+:where(#bc) button{border:0;background:none;cursor:pointer;touch-action:manipulation}
+#bc :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+#bc :is(input,select):focus-visible{outline:none}
+#bc [hidden]{display:none!important}
+.ic{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+/* ===== 2. Verre (barres, menus, historique) : un seul style, reflet qui suit la souris ===== */
+.glass{position:relative;background:rgba(var(--lg-rgb),var(--lg-a));-webkit-backdrop-filter:blur(var(--blur)) saturate(190%);backdrop-filter:blur(var(--blur)) saturate(190%);
+box-shadow:inset 0 1px 0 var(--lg-hi),0 0 0 .5px var(--hair),0 12px 30px var(--lg-sh)}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;
+background:radial-gradient(circle 90px at var(--mx,50%) var(--my,50%),rgba(255,255,255,.28),transparent 70%)}
+.glass.lit::after{opacity:1}
+@media(prefers-reduced-transparency:reduce){.glass{background:var(--grp);-webkit-backdrop-filter:none;backdrop-filter:none}}
+
+/* ===== 3. En-tête ===== */
+header{position:fixed;top:0;left:0;right:0;z-index:20;padding-top:env(safe-area-inset-top);pointer-events:none}
+.hin{max-width:1080px;margin:auto;padding:12px var(--gx);display:flex;justify-content:space-between;align-items:center;gap:8px;animation:drop .7s var(--ease)}
+@keyframes drop{from{opacity:0;transform:translateY(-100%)}}
+.logo-c{flex:1;min-width:0;pointer-events:auto}
+.logo{font-size:clamp(1.45rem,6.4vw,1.9rem);font-weight:800;letter-spacing:-.6px;line-height:1;white-space:nowrap}
+.logo i{font-style:normal;color:var(--brand)}
+.sub{font-size:.75rem;font-weight:600;color:var(--tx2);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hact{pointer-events:auto;display:flex;align-items:center;gap:8px;position:relative}
+.tools{height:48px;padding:0 4px;border-radius:999px;display:flex;align-items:center;gap:2px}
+.tb,.mb{display:grid;place-items:center;border-radius:50%;font-size:20px;transition:transform .35s var(--spring),background .3s}
+.tb{width:40px;height:40px;position:relative;z-index:1}
+.mb{width:48px;height:48px}
+.tb:active{transform:scale(.86);background:var(--fill)}
+.mb:active{transform:scale(.88)}
+@media(hover:hover){.tb:hover{background:var(--fill)}.mb:hover{transform:scale(1.06)}}
+.badge{position:absolute;top:7px;right:7px;width:9px;height:9px;border-radius:50%;background:var(--warn);transform:scale(0);transition:transform .35s var(--spring)}
+.badge.on{transform:none;animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,159,10,.8)}70%,to{box-shadow:0 0 0 8px transparent}}
+.pop{position:absolute;top:calc(100% + 10px);right:56px;padding:6px;border-radius:26px;display:none;flex-direction:column;transform-origin:top right}
+.pop.on{display:flex;animation:pop .45s var(--spring)}
+.lmenu{min-width:176px}
+@keyframes pop{from{opacity:0;transform:scale(.86) translateY(-8px)}}
+.lmenu button{position:relative;z-index:1;min-height:44px;padding:11px 16px;border-radius:999px;text-align:left;font-size:15px;font-weight:600}
+.lmenu button:hover,.lmenu button.on{background:var(--fill);color:var(--acc-tx)}
+
+/* ===== 4. Page : saisie puis résultat ===== */
+.shell{min-height:100dvh;max-width:1080px;margin:auto;display:flex;flex-direction:column;
+padding:calc(var(--top) + env(safe-area-inset-top)) var(--gx) calc(var(--navh) + 96px + env(safe-area-inset-bottom))}
+.stage{flex:1 0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:26px;align-content:center;animation:rise .7s var(--ease) backwards}
+@keyframes rise{from{opacity:0;transform:translateY(24px)}}
+@media(min-width:900px){.stage{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:32px}}
+.inputs{display:flex;flex-direction:column;min-width:0}
+.thead{display:flex;align-items:center;gap:10px;margin:0 4px 14px}
+.roll{height:38px;overflow:hidden}
+.roll>div{transition:transform .8s var(--spring)}
+.roll span{height:38px;display:grid;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rnb{width:30px;flex-shrink:0;font-size:27px;color:var(--acc-tx)}
+.rnb span{place-items:center}
+.rttl{flex:1;min-width:0;font-size:clamp(22px,5vw,27px);font-weight:800;letter-spacing:-.6px}
+.view{display:none}
+.view.on{display:block}
+/* en-têtes de groupe façon Réglages */
+.gh{margin:20px 16px 7px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--tx2)}
+/* segments : la pastille se place en CSS (--i : index, --n : nombre) */
+.seg{position:relative;display:flex;padding:3px;border-radius:999px;background:var(--fill);--i:0;--n:2}
+.seg .th{position:absolute;top:3px;bottom:3px;left:3px;width:calc((100% - 6px)/var(--n));border-radius:999px;background:var(--thumb);box-shadow:0 2px 6px rgba(0,0,0,.18);
+transform:translateX(calc(var(--i)*100%));transition:transform .5s var(--spring)}
+.seg button{flex:1;min-width:0;height:34px;position:relative;z-index:1;border-radius:999px;font-size:14px;font-weight:600;color:var(--tx2);white-space:nowrap;transition:color .3s,transform .35s var(--spring)}
+.seg button:active{transform:scale(.94)}
+.seg button.on{color:var(--tx)}
+/* « Calculer » : symbole + nom court ; la grandeur choisie disparaît des valeurs connues */
+.cal button{height:52px;padding:0 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.cal b,.sym,.fl{font-family:var(--serif);font-style:italic;color:var(--acc-tx)}
+.cal b{font-size:20px;line-height:1}
+.cal small{max-width:100%;font-size:11px;overflow:hidden;text-overflow:ellipsis}
+:is(.cal b,.sym,.fl) sub{font-size:.6em}
+/* valeurs connues : un groupe, une ligne par grandeur ; seule l'unité est en capsule */
+.grp{background:var(--grp);border-radius:22px;overflow:hidden}
+.vr{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;min-height:58px;padding:8px 12px 8px 16px;transition:background .25s}
+.vr:not([hidden])~.vr::before{content:"";position:absolute;top:0;left:16px;right:0;height:.5px;background:var(--sep)}
+.vr:focus-within{background:color-mix(in srgb,var(--grp) 94%,var(--acc))}
+.lb{flex:1 1 96px;min-width:0;display:flex;align-items:baseline;gap:10px;font-size:15px;font-weight:600;line-height:1.25}
+.lb .ls{display:none}
+@media(max-width:599px){.lb .ln{display:none}.lb .ls{display:inline}}
+/* scientifique sur mobile : tout tient sur la ligne (champs plus compacts) */
+@media(max-width:599px){.vr:has(>.ctl.sci) .lb{flex-basis:56px}.ctl.sci{gap:5px}.ctl.sci .val{flex-basis:78px;width:78px;padding:0 10px;font-size:17px}
+.ctl.sci .exp{flex-basis:42px;width:42px}.ctl.sci .sel{flex-basis:92px;width:92px;padding:0 22px 0 11px;font-size:14px;background-position:right 8px center}}
+.sym{flex-shrink:0;min-width:28px;height:28px;padding:0 7px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;align-self:center;background:var(--sc);color:#fff;font-size:16px;font-weight:700;line-height:1;white-space:nowrap}
+.lb{align-items:center}
+.ctl{flex:1 0 auto;display:flex;align-items:center;justify-content:flex-end;gap:8px}
+/* champs modifiables : capsule bordée teintée (les unités restent des capsules grises à chevron) */
+.val,.exp{border:1.5px solid var(--fb);background:transparent;border-radius:999px;font-weight:600;cursor:text;
+transition:border-color .2s,box-shadow .2s,background .2s}
+.val{flex:0 0 112px;width:112px;min-width:0;height:42px;padding:0 14px;font-size:19px;text-align:right}
+.ctl.sci .val{flex-basis:92px;width:92px}
+.exp{flex:0 0 52px;width:52px;height:38px;font-size:16px;text-align:center}
+.val:focus,.exp:focus{border-color:var(--acc);background:var(--grp);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 22%,transparent)}
+.val::placeholder,.exp::placeholder{color:var(--tx3);font-weight:500}
+[data-fmt=std] :is(.x10,.exp){display:none}
+.x10{font-size:13px;font-weight:700;color:var(--tx2)}
+.ctl:not(.sci) :is(.x10,.exp){display:none}
+.sel{flex:0 0 108px;width:108px;height:38px;padding:0 28px 0 14px;border:0;border-radius:999px;appearance:none;-webkit-appearance:none;cursor:pointer;
+background:var(--fill) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a8f9b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e") no-repeat right 10px center/12px;
+font-size:15px;font-weight:600;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:transform .3s var(--spring)}
+.sel:active{transform:scale(.97)}
+.sel:focus-visible{box-shadow:0 0 0 2px var(--acc)}
+.sel option{background:var(--grp);color:var(--tx)}
+.sel.one{background-image:none;padding-right:14px;pointer-events:none}
+.sel.ghost{visibility:hidden}#ru .ghost{display:none}
+.fl{margin:12px 0 0;padding:12px 20px;border-radius:999px;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;
+background:color-mix(in srgb,var(--acc) 12%,transparent);border:1px solid color-mix(in srgb,var(--acc) 28%,transparent);font-size:22px;font-weight:600;font-style:normal}
+.fl small{font:700 11px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;letter-spacing:.5px;text-transform:uppercase;color:var(--acc-tx);opacity:.8}
+.fl span{font-style:italic;white-space:nowrap}
+.fl.hit{animation:lawpop .45s var(--spring)}
+@keyframes lawpop{40%{transform:scale(1.04)}}
+/* résultat : valeur + unité (capsule), équation, actions */
+.results{display:flex;flex-direction:column;min-width:0}
+.results>.gh{margin-top:0}
+.rg{background:var(--grp);border-radius:22px;overflow:hidden;text-align:center}
+.rv{min-height:92px;padding:22px 16px 8px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px}
+.num{font-size:clamp(32px,10vw,44px);font-weight:800;letter-spacing:-1px;line-height:1.1;white-space:nowrap;font-variant-numeric:tabular-nums}
+#ru .sel{flex:none;width:auto;height:42px;padding:0 34px 0 16px;background-position:right 12px center;font-size:20px;font-weight:700;color:var(--acc-tx)}
+.eq{padding:0 16px 16px;font-size:14px;font-weight:500;color:var(--tx2);line-height:1.45;overflow-wrap:anywhere}
+.acts{display:flex;border-top:.5px solid var(--sep)}
+.ab{flex:1;height:50px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:600;color:var(--acc-tx);transition:opacity .2s,color .2s}
+.ab+.ab{border-left:.5px solid var(--sep)}
+.ab .ic{font-size:17px}
+.ab:active{opacity:.5}
+.ab:disabled{opacity:.35;pointer-events:none}
+.ab.ok{color:var(--ok)}
+.bump{animation:bump .55s var(--spring)}
+@keyframes bump{40%{transform:scale(1.07)}}
+.tip{margin:10px 16px 0;display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--tx2);line-height:1.45}
+.tip:empty{display:none}
+.tip .ic{margin-top:2px;font-size:15px}
+.tip.err{color:var(--err);font-weight:600}
+.tip.warn{color:var(--warn);font-weight:600}
+.tip span{white-space:pre-line}
+
+/* ===== 5. Barre d'onglets (façon BioCampus) et résultat flottant ===== */
+.nav{position:fixed;z-index:30;bottom:max(12px,env(safe-area-inset-bottom));left:12px;right:12px;max-width:440px;height:var(--navh);margin-inline:auto;border-radius:999px;
+animation:navin .8s var(--ease) backwards .2s}
+@keyframes navin{from{opacity:0;translate:0 40px;scale:.94}}
+@keyframes navin-d{from{opacity:0;translate:0 -30px;scale:.94}}
+.nav-in{height:100%;padding:5px;border-radius:999px;display:flex;touch-action:pan-y;-webkit-user-select:none;user-select:none;cursor:grab}
+.nav-in.dragging{cursor:grabbing}
+.sl{position:absolute;top:5px;bottom:5px;left:0;width:80px;z-index:1;border-radius:999px;pointer-events:none;translate:5px 0;
+background:var(--lens);border:1px solid var(--lens-line);box-shadow:inset 0 1px 1px rgba(255,255,255,.5),0 4px 14px rgba(0,0,0,.14);
+transition:translate .6s var(--spring),width .3s var(--ease),scale .3s var(--spring)}
+.sl.interacting{scale:1.06 1.12}
+.dragging .sl{transition:scale .25s var(--spring)}
+.nb{flex:1;position:relative;z-index:2;border-radius:999px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+font-size:.66rem;font-weight:500;color:var(--tx2);white-space:nowrap;transition:color .3s,transform .45s var(--spring)}
+.nb:active{transform:scale(.92)}
+.nb .ic{font-size:20px}
+.nb.on{color:var(--acc-tx);font-weight:600}
+.nb .ic{color:var(--nc);opacity:.75;transition:opacity .3s}.nb.on .ic{opacity:1}
+.nb.on .ic{animation:ipop .35s var(--ease)}
+@keyframes ipop{from{transform:scale(.85)}}
+.mini{position:fixed;z-index:29;left:12px;right:12px;max-width:440px;margin-inline:auto;bottom:calc(max(12px,env(safe-area-inset-bottom)) + var(--navh) + 10px);
+min-height:46px;padding:8px 18px;border-radius:999px;display:flex;align-items:baseline;justify-content:center;gap:8px;font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;
+opacity:0;translate:0 16px;pointer-events:none;transition:opacity .3s,translate .45s var(--spring)}
+.mini.on{opacity:1;translate:0;pointer-events:auto}
+#bc.kb .mini{bottom:auto}
+#bc.kb .nav{visibility:hidden}
+.mini span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini .ml{font:italic 700 17px var(--serif);color:var(--acc-tx)}
+.mini .mu{font-size:16px;color:var(--acc-tx)}
+
+/* ===== 6. Historique (verre), choix d'unité composée (molettes façon horloge) ===== */
+.ov{position:fixed;inset:0;z-index:40;display:flex;justify-content:flex-end;visibility:hidden;transition:background .4s,visibility 0s .6s}
+.ov.on{background:var(--veil);visibility:visible;transition:background .4s}
+.sheet{--lg-a:.7;--blur:30px;width:88%;max-width:420px;height:100%;border-radius:32px 0 0 32px;display:flex;flex-direction:column;
+padding:max(20px,env(safe-area-inset-top)) 18px max(20px,env(safe-area-inset-bottom));transform:translateX(104%);transition:transform .6s var(--ease)}
+.ov.on .sheet{transform:none}
+.oh{display:flex;justify-content:space-between;align-items:center;padding:0 4px 12px;border-bottom:.5px solid var(--sep)}
+.ot{font-size:20px;font-weight:800}
+.x,.hdel{width:40px;height:40px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;font-size:17px;transition:transform .45s var(--spring),color .2s}
+.x{background:var(--fill)}
+.x:active{transform:scale(.85) rotate(90deg)}
+.hl{flex:1;overflow-y:auto;overscroll-behavior:contain;padding-bottom:14px}
+.hi{display:flex;align-items:center;gap:8px;padding:12px 0 12px 4px;border-bottom:.5px solid var(--sep);animation:slide .5s var(--ease) backwards}
+@keyframes slide{from{opacity:0;transform:translateY(-8px)}}
+.hi>div{flex:1;min-width:0}
+.ht{font-size:12px;font-weight:700;color:var(--acc-tx)}
+.hd{margin-top:3px;font-size:14px;font-weight:500;line-height:1.45;overflow-wrap:anywhere}
+.hd b{color:var(--acc-tx)}
+.hdel{color:var(--tx2)}
+.hdel:hover{color:var(--err)}
+.hempty{padding:30px 0;text-align:center;font-size:14px;color:var(--tx2)}
+.clr{min-height:48px;margin-top:8px;border-radius:999px;border:1.5px solid var(--err)!important;color:var(--err);font-size:14px;font-weight:700;transition:transform .35s var(--spring)}
+.clr:active{transform:scale(.95)}
+.upop{--lg-a:.86;position:fixed;z-index:60;width:min(300px,calc(100vw - 16px));padding:12px;border-radius:22px;max-height:calc(100dvh - 16px);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.up-n{display:flex;flex-wrap:wrap;gap:6px;padding-bottom:12px;margin-bottom:8px;border-bottom:.5px solid var(--sep)}
+.up-n button{min-height:34px;padding:0 12px;border-radius:999px;background:var(--fill);font-size:14px;font-weight:600}
+.up-n button.on{background:var(--acc);color:#fff}
+.up-h{display:grid;grid-template-columns:1fr 1fr;padding:4px 0 6px;text-align:center;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tx2)}
+.up-c{position:relative;height:200px;display:grid;grid-template-columns:1fr 1fr;
+-webkit-mask-image:linear-gradient(transparent,#000 28%,#000 72%,transparent);mask-image:linear-gradient(transparent,#000 28%,#000 72%,transparent)}
+.up-lens{position:absolute;left:0;right:0;top:80px;height:40px;border-radius:12px;background:var(--fill);pointer-events:none}
+.up-wh{position:relative;padding:80px 0;overflow-y:auto;scroll-snap-type:y mandatory;overscroll-behavior:contain;scrollbar-width:none}
+.up-wh::-webkit-scrollbar{display:none}
+.up-it{height:40px;line-height:40px;text-align:center;scroll-snap-align:center;font-size:19px;font-weight:500;color:var(--tx2);cursor:pointer;transition:color .15s}
+.up-it.on{color:var(--tx);font-weight:700}
+
+/* ===== 7. Pied de page (footer-global.js) : dans le flux, sous le contenu ===== */
+#bc .shell>footer{position:relative!important;z-index:1!important;margin-top:24px!important;padding:24px 0 0!important}
+[data-theme=light] #bc .shell>footer a{background:var(--grp)!important;color:#000!important;border:1px solid rgba(0,0,0,.1)!important}
+[data-theme=light] #bc .shell>footer svg{filter:brightness(0)!important}
+[data-theme=light] #bc .shell>footer :is(span,p){color:#000!important}
+
+/* ===== 8. Adaptations ===== */
+@media(max-width:599px){.sub{display:none}
+#bc .shell>footer{width:100vw!important;max-width:100vw!important;margin-left:calc(50% - 50vw)!important;padding-inline:6px!important}
+#bc .shell>footer div{flex-wrap:nowrap!important;gap:4px!important;justify-content:center!important}
+#bc .shell>footer a{padding-inline:8px!important;font-size:11px!important;white-space:nowrap!important;flex-shrink:1!important}}
+@media(max-width:389px){.tools{height:44px}.tb{width:34px;height:34px;font-size:18px}.mb{width:44px;height:44px}.nb{font-size:.62rem}.sel{flex-basis:104px;width:104px}}
+@media(max-height:480px) and (orientation:landscape) and (min-aspect-ratio:3/2) and (max-width:1023px){#bc{--navh:52px;--top:62px}.stage{grid-template-columns:1fr 1fr}.nb{flex-direction:row;gap:6px}}
+/* PC ≥ 1024 × 600 : barre en haut, saisie à gauche, résultat à droite */
+@media(min-width:1024px) and (min-height:600px){
+#bc{--top:84px;--gx:32px}
+.hin{max-width:none;padding:16px 32px}
+.logo{font-size:1.8rem}.sub{font-size:.85rem}
+.tools{height:52px}.tb{width:44px;height:44px}.mb{width:52px;height:52px}.pop{right:62px}
+.nav{top:calc(env(safe-area-inset-top) + 14px);bottom:auto;left:0;right:0;width:min(700px,calc(100vw - 640px));max-width:none;height:56px;animation-name:navin-d}
+.nb{flex-direction:row;gap:8px;font-size:.78rem}
+.mini{display:none}
+.shell{max-width:none;margin:0;padding:calc(var(--top) + env(safe-area-inset-top)) var(--gx) 24px}
+.stage{width:100%;max-width:1400px;margin:0 auto;padding-top:24px;grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);align-content:start;gap:40px}
+.inputs{display:grid;grid-template-columns:minmax(0,1fr) 250px;align-items:center;column-gap:18px}
+.thead{margin-bottom:0}
+.view{grid-column:1/-1}
+.vr{min-height:62px}
+.val{flex-basis:150px;width:150px}.ctl.sci .val{flex-basis:120px;width:120px}.sel{flex-basis:118px;width:118px}
+.results{padding-top:52px}
+.rv{min-height:170px}
+.num{font-size:clamp(44px,4.4vw,72px)}
+#ru .sel{height:48px;font-size:24px}
+#bc .shell>footer{margin-top:32px!important}}
+@media(min-width:1024px) and (min-height:600px) and (max-width:1279px){.sub{display:none}.nb{flex-direction:column;gap:2px;font-size:11.5px}.nb .ic{font-size:18px}}
+@media(prefers-reduced-motion:reduce){#bc *,#bc ::before,#bc ::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* écriture des nombres choisie par champ, dans la fenêtre de l'unité */
+.upf{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:12px;margin-bottom:10px;border-bottom:.5px solid var(--sep);font-size:12px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.4px}
+.upf:last-child{padding-bottom:0;margin-bottom:0;border-bottom:0}
+.upf .seg{flex:0 0 172px}.upf .seg button{height:32px;font-size:13.5px;text-transform:none;letter-spacing:0}
+.ucap.u0{min-width:0}
+#upop .up-n:last-child{border-bottom:0;padding-bottom:0;margin-bottom:0}
+.ucap.u1,.ucap.u0{pointer-events:none;background-image:none;padding-right:14px}.ucap.u0{visibility:hidden}#ru .ucap.u0{display:none}
+
+/* ===== 9. Options, préparation à la demande, scènes animées (repris de BioDilu) ===== */
+.inputs>.seg#fmtSeg{margin-bottom:4px}
+.pr .ctl{flex:0 1 auto}
+.prs{flex:0 0 auto;display:flex;align-items:center;gap:6px}
+.prs button{width:42px;height:42px;border-radius:50%;background:var(--fill);display:grid;place-items:center;font-size:19px;transition:transform .3s var(--spring)}
+.prs button:active{transform:scale(.88)}
+.prs output{min-width:34px;text-align:center;font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+.pl{flex:1 1 180px;min-width:0;height:42px;padding:0 14px;border:1.5px solid var(--fb);border-radius:999px;background:transparent;font-size:16px;font-weight:600;transition:border-color .2s,box-shadow .2s}
+.pl:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 22%,transparent)}
+.pseg{flex:1 1 220px}
+.psel{flex:0 1 auto;width:auto;max-width:210px}
+.acts .ab .ic{transition:transform .35s var(--ease)}
+.more{display:flex;flex-direction:column;animation:moreIn .45s var(--ease)}
+@keyframes moreIn{from{opacity:0;transform:translateY(-8px)}}
+.more .gh{margin-top:18px}
+.mst{padding:12px 16px;font-size:14.5px;line-height:1.65;font-variant-numeric:tabular-nums;white-space:pre-wrap;overflow-wrap:anywhere}
+.mst b{color:var(--acc-tx)}
+.mtb{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+.mtb th{text-align:left;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--tx2);padding:10px 8px 6px}
+.mtb td{padding:9px 8px;border-top:.5px solid var(--sep)}
+.mtb :is(td,th):first-child{padding-left:16px}.mtb :is(td,th):last-child{padding-right:16px}
+.mtb b{color:var(--acc-tx)}
+.mtw{overflow-x:auto}
+.sch{display:flex;align-items:flex-end;gap:2px;overflow-x:auto;padding:18px 12px 14px;scrollbar-width:thin}
+.tu{flex:0 0 62px;display:flex;flex-direction:column;align-items:center;gap:5px;animation:tin .5s var(--ease) backwards;animation-delay:calc(var(--k,0)*110ms)}
+.tu i{width:30px;height:84px;border:2px solid var(--fb);border-top:0;border-radius:0 0 999px 999px;position:relative;overflow:hidden}
+.tu i::before{content:"";position:absolute;inset:auto 0 0 0;height:var(--h,70%);border-radius:0 0 999px 999px;
+background:color-mix(in srgb,var(--c-orange) calc(var(--o,1)*100%),color-mix(in srgb,var(--c-cyan) 22%,transparent));animation:fill 1s var(--ease) backwards;animation-delay:calc(var(--k,0)*110ms + 220ms)}
+.tu.fk i{width:40px;height:70px;border-top:2px solid var(--fb);border-radius:10px 10px 14px 14px}
+.tu.fk i::before{border-radius:0 0 12px 12px}
+.tu b{font-size:13px;font-weight:700;white-space:nowrap}
+.tu span{font-size:11.5px;font-weight:700;color:var(--acc-tx);white-space:nowrap}
+.tu em{font-size:11px;font-style:normal;color:var(--tx2);white-space:nowrap;font-variant-numeric:tabular-nums}
+.ar{flex:0 0 auto;align-self:center;margin-bottom:30px;display:flex;flex-direction:column;align-items:center;color:var(--tx3);font-size:11px;font-weight:600;white-space:nowrap;padding:0 2px;animation:tin .5s var(--ease) backwards;animation-delay:calc(var(--k,0)*110ms + 60ms)}
+.ar .ic{font-size:18px;color:var(--acc-tx);animation:nudge 1.6s ease-in-out infinite;animation-delay:calc(var(--k,0)*110ms)}
+@keyframes tin{from{opacity:0;transform:translateY(10px) scale(.96)}}
+@keyframes fill{from{height:0}}
+@keyframes nudge{50%{transform:translateX(5px)}}
+.tp{position:relative;display:flex;gap:12px;align-items:flex-start;padding:12px 16px;font-size:14.5px;line-height:1.45;animation:tin .45s var(--ease) backwards;animation-delay:calc(var(--k,0)*50ms)}
+.tp+.tp::before{content:"";position:absolute;top:0;left:50px;right:0;height:.5px;background:var(--sep)}
+.tp>.ic{font-size:20px;margin-top:1px;color:var(--acc-tx)}
+.tp b{font-weight:700}
+.tp.warn{background:color-mix(in srgb,var(--warn) 11%,transparent)}.tp.warn>.ic{color:var(--warn)}
+.tp.bad{background:color-mix(in srgb,var(--err) 9%,transparent)}.tp.bad>.ic{color:var(--err)}
+.pr .lb{flex-wrap:wrap;row-gap:0}.pr .lb small{flex-basis:100%;font-size:12.5px;font-weight:400;color:var(--tx2)}
+.tu i.dish{width:66px;height:66px;border:2px solid var(--fb);border-radius:50%;background:color-mix(in srgb,var(--c-orange) 10%,transparent)}
+.tu i.dish::before{display:none}
+.dish u{position:absolute;width:7px;height:7px;border-radius:50%;background:var(--c-orange);animation:pop .4s var(--spring) backwards;animation-delay:calc(var(--k,2)*110ms + var(--j)*45ms + 350ms)}
+@keyframes pop{from{transform:scale(0)}}
+@media(min-width:1024px) and (min-height:600px){.stage{align-items:start}.inputs{align-self:start}}
+.cta{width:100%;margin-top:12px;display:flex;align-items:center;gap:12px;min-height:64px;padding:10px 14px 10px 12px;border-radius:22px;background:var(--grp);text-align:left;transition:transform .35s var(--spring),opacity .2s}
+.cta:active{transform:scale(.98)}.cta:disabled{opacity:.4;pointer-events:none}
+.cti{width:40px;height:40px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;background:var(--acc);color:#fff;font-size:20px}
+[data-theme=dark] .cti{color:#000}
+.ctt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}.ctt b{font-size:16px;font-weight:700}.ctt small{font-size:13px;color:var(--tx2)}
+.ctv{color:var(--tx3);font-size:18px;transition:transform .4s var(--ease)}.cta.on .ctv{transform:rotate(90deg)}
+.more .grp+.grp{margin-top:10px}
+.mpar .lb small{display:block}
+.mpar .lb{flex:1 1 100%}.mpar .vr>.ctl,.mpar .vr>.psel,.mpar .vr>.prs{margin-left:auto}
+@media(max-width:599px){.pr .lb{flex:1 1 100%}.pr>.ctl,.pr>.psel,.pr>.prs{margin-left:auto}.pr>.pl{flex-basis:100%}}
+.cap{padding:0 16px 12px;font-size:13px;color:var(--tx2);line-height:1.45}
+.cap:empty{display:none}
+#mSchW+#mHow .hs:first-child{border-top:.5px solid var(--sep)}
+.hs{position:relative;display:flex;align-items:center;gap:14px;padding:12px 16px;animation:tin .5s var(--ease) backwards;animation-delay:calc(var(--k,0)*160ms)}
+.hs+.hs::before{content:"";position:absolute;top:0;left:16px;right:0;height:.5px;background:var(--sep)}
+.hv{flex:0 0 92px;height:58px;display:flex;align-items:flex-end;justify-content:center;gap:5px}
+.hs p{flex:1;min-width:0;font-size:14.5px;line-height:1.45}
+.hs p b{font-weight:700}
+.hn{display:inline-grid;place-items:center;width:22px;height:22px;margin-right:8px;border-radius:50%;background:var(--acc);color:#fff;font-size:12px;font-weight:800;vertical-align:1px}
+[data-theme=dark] .hn{color:#000}
+.zt{display:block;width:16px;height:44px;border:2px solid var(--fb);border-top:0;border-radius:0 0 999px 999px;position:relative;overflow:hidden;flex-shrink:0}
+.zt::before{content:"";position:absolute;inset:auto 0 0 0;height:var(--h,70%);background:color-mix(in srgb,var(--c-orange) calc(var(--o,1)*100%),color-mix(in srgb,var(--c-cyan) 24%,transparent));animation:fill .9s var(--ease) backwards;animation-delay:calc(var(--k,0)*160ms + 250ms)}
+.zt.zb{width:24px;height:36px;border-top:2px solid var(--fb);border-radius:6px 6px 9px 9px}
+.zt.big{width:22px;height:54px}
+.zt.spin{animation:wob 1.4s ease-in-out infinite;transform-origin:50% 90%}
+@keyframes wob{25%{rotate:-14deg}75%{rotate:14deg}}
+.za{align-self:center;display:grid;color:var(--acc-tx);font-size:16px}.za .ic{animation:nudge 1.6s ease-in-out infinite}
+.zd{display:block;width:46px;height:46px;border:2px solid var(--fb);border-radius:50%;position:relative;background:color-mix(in srgb,var(--c-orange) 10%,transparent);align-self:center}
+.zd u{position:absolute;width:5px;height:5px;border-radius:50%;background:var(--c-orange);animation:pop .4s var(--spring) backwards;animation-delay:calc(var(--k,0)*160ms + var(--j)*50ms + 300ms)}
+.zc{align-self:center;font-size:26px;color:var(--acc-tx)}
+.tu small{font-size:10.5px;color:var(--tx3);white-space:nowrap}
+@media(min-width:1024px) and (min-height:600px){
+.stage{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:32px}
+.results{padding-top:0}.rv{min-height:120px}
+.more{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:16px;align-items:start;margin-top:-14px}
+.more.np{grid-template-columns:repeat(2,minmax(0,1fr))}.more.np.nn{grid-template-columns:minmax(0,1fr)}.more.nn:not(.np){grid-template-columns:repeat(2,minmax(0,1fr))}
+#mHowW{order:4;grid-column:1/-1}#mNotesW{order:3}
+#mHow{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}#mSchW+#mHow .hs:first-child{border-top:0}#mSchW:not([hidden])+#mHow{border-top:.5px solid var(--sep)}
+.hs{flex-direction:column;align-items:flex-start;gap:10px;padding:16px}.hs+.hs::before{top:14px;bottom:14px;left:0;right:auto;width:.5px;height:auto}.hv{flex:0 0 auto;width:100%;justify-content:flex-start}
+}
+@media(min-width:1500px) and (min-height:600px){.stage{max-width:1560px;grid-template-columns:minmax(0,.95fr) minmax(0,1.3fr)}}
+.tests{position:fixed;inset:12px;z-index:90;overflow:auto;padding:18px;border-radius:24px;background:var(--grp);box-shadow:0 20px 60px rgba(0,0,0,.4);font-size:13.5px;line-height:1.6}
+.tests .ok{color:var(--ok)}.tests .ko{color:var(--err)}
+
+/* ===== 10. BioPrep : recettes, constructeur de préparation, check-list, IA, impression ===== */
+#bc [hidden]{display:none!important}
+.stage.one{display:block;width:100%;max-width:1240px;margin:0 auto}
+.app{display:block!important}
+.thead{position:relative}
+.fx{flex-shrink:0;height:34px;padding:0 13px;border-radius:999px;background:var(--fill);color:var(--tx2);font-size:14px;font-weight:700;transition:background .3s,color .3s,transform .35s var(--spring)}
+.fx sup{font-size:.7em}
+.fx:active{transform:scale(.92)}
+.fx.on{background:var(--acc);color:#fff}[data-theme=dark] .fx.on{color:#000}
+#bc:not([data-tab="1"]) .fx{display:none}
+.lead{margin:2px 16px 0;font-size:14px;line-height:1.45;color:var(--tx2)}
+/* recherche et filtres */
+.srch{display:flex;align-items:center;gap:10px;height:48px;padding:0 16px;border-radius:999px;background:var(--grp);border:1.5px solid transparent;transition:border-color .2s,box-shadow .2s}
+.srch:focus-within{border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 20%,transparent)}
+.srch .ic{font-size:19px;color:var(--tx2);flex-shrink:0}
+.srch input{flex:1;min-width:0;height:100%;border:0;background:transparent;font-size:16px;font-weight:500}
+.srch input:focus{outline:none}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:12px 2px 2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;height:36px;padding:0 15px;border-radius:999px;background:var(--fill);font-size:14px;font-weight:600;color:var(--tx2);white-space:nowrap;transition:background .3s,color .3s,transform .35s var(--spring)}
+.chip:active{transform:scale(.94)}
+.chip.on{background:var(--acc);color:#fff}[data-theme=dark] .chip.on{color:#000}
+/* lignes de recettes, façon Réglages */
+.rr{position:relative;width:100%;display:flex;align-items:center;gap:12px;min-height:62px;padding:9px 12px 9px 14px;text-align:left;transition:background .2s}
+.rr:active{background:var(--fill)}
+.rr+.rr::before,.rr+.rw::before,.rw+.rr::before,.rw+.rw::before{content:"";position:absolute;top:0;left:62px;right:0;height:.5px;background:var(--sep)}
+.rw{position:relative;display:flex;align-items:center}
+.rw .rr{flex:1;min-width:0}
+.rw .cdel{margin-right:12px}
+.ri{flex:0 0 36px;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--cc);color:#fff;font-size:18px}
+[data-theme=dark] .ri{color:#000}
+.rtx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.rtx b{font-size:15.5px;font-weight:600;line-height:1.3}
+.rtx small{font-size:12.5px;color:var(--tx2);line-height:1.35;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.rr>.ic{flex-shrink:0;color:var(--tx3);font-size:17px}
+.empty{padding:22px 18px;text-align:center;font-size:14px;color:var(--tx2);line-height:1.5}
+.newb{margin-top:14px}
+/* constructeur */
+.pg{display:grid;grid-template-columns:minmax(0,1fr);gap:4px}
+.pnm{width:100%;height:44px;padding:0 16px;border:1.5px solid var(--fb);border-radius:999px;background:transparent;font-size:17px;font-weight:700;transition:border-color .2s,box-shadow .2s}
+.pnm:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 22%,transparent)}
+.pnm::placeholder{color:var(--tx3);font-weight:500}
+.vr.nm{padding:10px 12px}
+.txt{flex:1 1 150px;min-width:0;height:42px;padding:0 16px;border:1.5px solid var(--fb);border-radius:999px;background:transparent;font-size:16px;font-weight:600;text-align:right;transition:border-color .2s,box-shadow .2s}
+.txt:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 22%,transparent)}
+.txt::placeholder{color:var(--tx3);font-weight:500}
+.txt.l{text-align:left}
+.lb{flex-wrap:wrap;row-gap:0}.lb small{flex-basis:100%;font-size:12px;font-weight:400;color:var(--tx2)}
+.lb{flex-basis:84px}
+.cl{display:flex;flex-direction:column;gap:10px}
+.ci{animation:tin .45s var(--ease) backwards}
+.ch{min-height:58px}
+.cno{flex:0 0 28px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--cc);color:#fff;font-size:14px;font-weight:700}
+[data-theme=dark] .cno{color:#000}
+.cnm{flex:1 1 120px;min-width:0;height:42px;padding:0 16px;border:1.5px solid var(--fb);border-radius:999px;background:transparent;font-size:16px;font-weight:600;transition:border-color .2s,box-shadow .2s}
+.cnm:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 22%,transparent)}
+.cnm::placeholder{color:var(--tx3);font-weight:500}
+.cdel{flex:0 0 38px;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--fill);color:var(--err);font-size:17px;transition:transform .3s var(--spring)}
+.cdel:active{transform:scale(.88)}
+.ci .lb{font-weight:500;color:var(--tx2)}
+.tseg{flex:1 1 100%;--n:4}
+.tseg button{height:32px;font-size:13px}
+.cft{display:flex;align-items:center;gap:10px;min-height:52px;padding:6px 12px 8px 16px;border-top:.5px solid var(--sep)}
+.cft label{flex:1;min-width:0;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:500;color:var(--tx2);cursor:pointer}
+.cres{flex-shrink:0;font-size:18px;font-weight:800;color:var(--cc);font-variant-numeric:tabular-nums;white-space:nowrap}
+.cres.inc{font-size:13px;font-weight:600;color:var(--tx3)}
+.cres.err{font-size:13px;font-weight:600;color:var(--err);white-space:normal;text-align:right;max-width:60%}
+/* interrupteur façon iOS */
+.sw{appearance:none;-webkit-appearance:none;flex-shrink:0;width:46px;height:28px;border-radius:999px;background:var(--fill);position:relative;cursor:pointer;transition:background .3s}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.25);transition:transform .35s var(--spring)}
+.sw:checked{background:var(--acc)}.sw:checked::after{transform:translateX(18px)}
+.cadd{width:100%;margin-top:10px;height:50px;border-radius:999px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--grp);color:var(--acc-tx);font-size:15px;font-weight:600;transition:transform .35s var(--spring)}
+.cadd:active{transform:scale(.97)}.cadd .ic{font-size:18px}
+/* vue d'ensemble */
+.ovh{padding:16px 16px 4px;text-align:left}
+.ovh b{display:block;font-size:19px;font-weight:800;letter-spacing:-.3px}
+.ovh small{display:block;margin-top:3px;font-size:13px;color:var(--tx2)}
+.rl{padding:2px 16px 10px;text-align:left}
+.rh{margin:12px 0 2px;font-size:11.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--tx2)}
+.rli{display:flex;align-items:center;gap:12px;min-height:48px;padding:7px 0}
+.rli+.rli{border-top:.5px solid var(--sep)}
+.rn{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;font-size:15px;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
+.rn small{font-size:12.5px;font-weight:500;color:var(--tx2)}
+.rli>b{flex-shrink:0;max-width:52%;font-size:19px;font-weight:800;letter-spacing:-.3px;color:var(--acc-tx);font-variant-numeric:tabular-nums;text-align:right;overflow-wrap:anywhere}
+.rli.w>b{color:var(--tx)}
+.rli.bad>b,.rli.bad .rn small{color:var(--err)}
+.rli.inc>b{font-size:13px;color:var(--tx3)}
+.rli .rd{width:10px;height:10px;flex-shrink:0;border-radius:50%;background:var(--cc,var(--acc))}
+.acts .ab{min-width:0}
+.dt{margin-top:14px}
+.dt summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;min-height:52px;padding:0 16px;font-size:15px;font-weight:600}
+.dt summary::-webkit-details-marker{display:none}
+.dt summary .ic{color:var(--tx3);transition:transform .35s var(--ease)}
+.dt[open] summary .ic{transform:rotate(90deg)}
+.dt .mst{border-top:.5px solid var(--sep)}
+/* au labo : progression, équipe, étapes à cocher */
+.lhd{padding:16px}
+.lhd b{display:block;font-size:19px;font-weight:800;letter-spacing:-.3px}
+.lhd small{display:block;margin-top:2px;font-size:13px;color:var(--tx2)}
+.pbar{height:8px;margin:14px 0 6px;border-radius:999px;background:var(--fill);overflow:hidden}
+.pbar i{display:block;height:100%;width:calc(var(--p,0)*100%);border-radius:999px;background:var(--acc);transition:width .6s var(--spring)}
+.pct{display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--tx2)}
+.lact{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.pill{height:40px;padding:0 16px;border-radius:999px;display:inline-flex;align-items:center;gap:7px;background:var(--fill);font-size:14px;font-weight:600;color:var(--acc-tx);transition:transform .35s var(--spring)}
+.pill:active{transform:scale(.95)}.pill .ic{font-size:17px}
+.pill.pri{background:var(--acc);color:#fff}[data-theme=dark] .pill.pri{color:#000}
+.team{display:flex;flex-wrap:wrap;gap:8px;padding:12px 12px 12px 16px;align-items:center}
+.tm{height:34px;padding:0 6px 0 13px;border-radius:999px;display:inline-flex;align-items:center;gap:4px;background:color-mix(in srgb,var(--cc) 16%,transparent);color:var(--cc);font-size:14px;font-weight:700}
+.tm button{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:13px;color:inherit;opacity:.7}
+.tadd{display:flex;gap:8px;flex:1 1 100%;min-width:0}.tadd .txt{flex:1 1 0;min-width:0}.tadd .pill{flex-shrink:0}
+.tadd .txt{text-align:left;height:38px;font-size:15px}
+.tadd .pill{height:38px}
+.st{position:relative;display:flex;align-items:flex-start;gap:12px;padding:12px 12px 12px 14px;transition:background .3s}
+.st+.st::before{content:"";position:absolute;top:0;left:60px;right:0;height:.5px;background:var(--sep)}
+.ck{flex:0 0 30px;width:30px;height:30px;margin-top:1px;border-radius:50%;border:2px solid var(--fb);display:grid;place-items:center;color:transparent;font-size:16px;transition:background .3s,border-color .3s,transform .35s var(--spring)}
+.ck:active{transform:scale(.85)}
+.st.on .ck{background:var(--acc);border-color:var(--acc);color:#fff}[data-theme=dark] .st.on .ck{color:#000}
+.st.on .ck .ic{animation:ipop .35s var(--spring)}
+.sx{flex:1;min-width:0;font-size:14.5px;line-height:1.45}
+.sx b{font-weight:700}
+.sx small{color:var(--tx2)}
+.st.on .sx>p{color:var(--tx2);text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--tx2) 60%,transparent)}
+.st.on .sx>p b{color:var(--tx2)}
+.sby{display:block;margin-top:3px;font-size:12.5px;font-weight:600;color:var(--acc-tx)}
+.si{flex:0 0 auto;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--cc,var(--acc)) 14%,transparent);color:var(--cc,var(--acc-tx));font-size:16px}
+.who{flex-shrink:0;max-width:120px;height:30px;padding:0 11px;border-radius:999px;background:var(--fill);font-size:12.5px;font-weight:700;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:transform .3s var(--spring)}
+.who:active{transform:scale(.92)}
+.who.set{background:color-mix(in srgb,var(--cc) 16%,transparent);color:var(--cc)}
+/* IA */
+.ais{display:flex;gap:12px;align-items:flex-start;padding:13px 16px;font-size:14.5px;line-height:1.45}
+.ais+.ais{border-top:.5px solid var(--sep)}
+.aib{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:4px 14px 14px}
+.aib button{height:46px;border-radius:999px;display:flex;align-items:center;justify-content:center;gap:7px;background:var(--fill);font-size:15px;font-weight:700;color:var(--tx);transition:transform .35s var(--spring)}
+.aib button:active{transform:scale(.95)}
+.aib .ic{font-size:15px;color:var(--tx3)}
+.aid{width:9px;height:9px;border-radius:50%;background:var(--cc)}
+#aiIn{display:block;width:100%;min-height:170px;padding:14px 16px;border:0;background:transparent;font:500 14px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;resize:vertical}
+#aiIn:focus{outline:none}
+.pre{margin:0;padding:12px 16px 16px;border-top:.5px solid var(--sep);font:500 12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--tx2)}
+.cta.pri{background:var(--acc);color:#fff}.cta.pri small{color:color-mix(in srgb,#fff 80%,transparent)}.cta.pri .cti{background:rgba(255,255,255,.22)}.cta.pri .ctv{color:#fff}
+[data-theme=dark] .cta.pri{color:#000}[data-theme=dark] .cta.pri small{color:rgba(0,0,0,.65)}[data-theme=dark] .cta.pri .ctv{color:#000}
+/* message bref */
+.toast{position:fixed;z-index:60;left:50%;bottom:calc(max(12px,env(safe-area-inset-bottom)) + var(--navh) + 14px);translate:-50% 20px;max-width:calc(100vw - 32px);padding:12px 20px;border-radius:999px;font-size:14.5px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .3s,translate .45s var(--spring)}
+.toast.on{opacity:1;translate:-50% 0}
+@media(min-width:1024px) and (min-height:600px){
+.thead{margin-bottom:6px}
+.pg{grid-template-columns:minmax(0,1.15fr) minmax(340px,1fr);gap:36px;align-items:start}
+.pres{position:sticky;top:calc(var(--top) + 12px)}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,.8fr);gap:36px;align-items:start}
+.ia{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:36px;align-items:start}
+.rgrid{columns:2;column-gap:24px}.rgrid>*{break-inside:avoid}
+.toast{bottom:28px}
+}
+/* impression (PDF) : seule la fiche est imprimée */
+#print{display:none}
+@media print{
+@page{margin:14mm}
+html,body{background:#fff!important}
+body>*:not(#print){display:none!important}
+#print{display:block;color:#000;font:10.5pt/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+#print h1{margin:0;font-size:19pt}
+#print .meta{margin:3px 0 12px;color:#444}
+#print h2{margin:16px 0 6px;font-size:12.5pt;border-bottom:1.5px solid #000;padding-bottom:3px}
+#print table{width:100%;border-collapse:collapse}
+#print th{text-align:left;font-size:8.5pt;text-transform:uppercase;letter-spacing:.3px;color:#555;padding:4px 6px}
+#print td{border-top:1px solid #ccc;padding:6px;vertical-align:top}
+#print td.q{font-weight:700;white-space:nowrap}
+#print .bx{display:inline-block;width:11px;height:11px;border:1.5px solid #000;border-radius:3px;vertical-align:-1px}
+#print td:first-child{width:18px;font-size:13pt;line-height:1}
+#print tr,#print li{break-inside:avoid}
+#print ul{margin:4px 0;padding-left:18px}
+#print .who{display:inline;background:none;padding:0;height:auto;font-size:9pt;color:#333}
+#print .ft{margin-top:18px;font-size:8.5pt;color:#777}
+}
+
+/* composants terminés : réduits à nom + résultat */
+.cc{animation:tin .4s var(--ease) backwards}
+.cbar{width:100%;display:flex;align-items:center;gap:12px;min-height:60px;padding:9px 14px 9px 14px;text-align:left;transition:background .2s}
+.cbar:active{background:var(--fill)}
+.cbar .rn small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cbar>.cres{font-size:18px}
+.cbar>.ic{flex-shrink:0;color:var(--tx3);font-size:16px}
+.cfv{justify-content:space-between;border-top:0;padding-top:0}
+.cfv .cres{max-width:62%;text-align:left}
+.cv{height:38px}.cv:disabled{opacity:.35;pointer-events:none}
+.cft label{flex:1}
+/* écriture des nombres */
+.fseg{flex:0 0 176px;--n:2}.fseg button{height:32px;font-size:13.5px}
+#kF{margin-bottom:4px}
+/* calculs rapides */
+.cgrid{display:grid;grid-template-columns:minmax(0,1fr);gap:0 28px}
+.kres{padding:4px 16px 14px;border-top:.5px solid var(--sep)}
+.kbig{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;padding-top:12px}
+.kbig span{font-size:14px;font-weight:600;color:var(--tx2)}
+.kbig b{font-size:30px;font-weight:800;letter-spacing:-.6px;color:var(--acc-tx);font-variant-numeric:tabular-nums}
+.kbig small{flex-basis:100%;font-size:12.5px;color:var(--tx2)}
+.kx{margin-top:8px;font-size:13.5px;line-height:1.55;color:var(--tx2)}
+.kx b{color:var(--tx)}
+.kw{display:flex;gap:8px;align-items:flex-start;margin-top:10px;font-size:13px;line-height:1.45;color:var(--tx2)}
+.kw .ic{flex-shrink:0;margin-top:2px;font-size:15px}
+.kw.warn{color:var(--warn);font-weight:600}
+.kadd{margin-top:12px}
+.kres .rl{padding:0}
+/* IA : numéros d'étape */
+.ais .hn{flex:0 0 24px;width:24px;height:24px;margin:0;display:grid;place-items:center;font-size:12.5px;line-height:1}
+@media(min-width:1024px) and (min-height:600px){.cgrid{grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}}
+/* ===== 11. BioPrep v3 : parcours guidé ===== */
+.home .rr{min-height:70px}
+.home .ri{flex-basis:40px;width:40px;height:40px;font-size:20px}
+.home .rtx b{font-size:16.5px}
+#hq{font-size:16px}
+#view0>.srch{margin-bottom:14px}
+.qc{margin-top:12px;padding:16px 16px 16px}
+.qh{display:flex;gap:12px;align-items:flex-start}
+.qn{flex:0 0 26px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--acc);color:#fff;font-size:13px;font-weight:800}
+[data-theme=dark] .qn{color:#000}
+.qt{font-size:17px;font-weight:700;line-height:1.3;letter-spacing:-.2px}
+.qs{margin-top:2px;font-size:13.5px;line-height:1.4;color:var(--tx2)}
+.qs.qf{margin:12px 0 6px}
+.qb{margin-top:12px}
+.nf{display:flex;align-items:center;gap:8px}
+.nf .val{flex:1 1 auto;width:auto;min-width:0;height:50px;font-size:22px;padding:0 18px}
+[data-fmt=sci] .nf .val{flex:1 1 auto;width:auto}
+.nf .exp{flex:0 0 58px;width:58px;height:44px;font-size:17px}
+.uc{flex-shrink:0;min-width:74px;height:44px;padding:0 30px 0 16px;border-radius:999px;background:var(--fill) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a8f9b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e") no-repeat right 11px center/12px;
+  font-size:16px;font-weight:700;color:var(--acc-tx);white-space:nowrap;transition:transform .3s var(--spring)}
+.uc:active{transform:scale(.95)}
+.uc.st{display:inline-flex;align-items:center;min-width:0;height:38px;padding:0 26px 0 13px;font-size:14px;color:var(--tx2);background-position:right 9px center;cursor:pointer}
+.ctl .uc.st{flex:0 0 auto}
+.upf{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:12px;margin-bottom:10px;border-bottom:.5px solid var(--sep);font-size:13px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.3px}
+.upop .up-n{border:0;margin:0;padding:0}
+.upop:not(:has(.up-n)) .upf{border:0;margin:0;padding:0}
+.fseg{flex:0 0 170px}
+.txt.nm{width:100%;height:44px;margin-bottom:10px;text-align:left}
+.srch.in{background:transparent;border:1.5px solid var(--fb);height:48px}
+.sugg,#rsg{margin-top:4px}
+.grp.in{background:transparent;border-radius:16px}
+.rr.sm{min-height:52px;padding:8px 6px 8px 4px}
+.rr.sm+.rr.sm::before{left:4px}
+.rr.sm>.ic{color:var(--acc-tx)}
+.qsum{display:flex;align-items:center;gap:12px}
+.qsum .rtx b{font-size:17px}
+.chips.wrap{flex-wrap:wrap;overflow:visible;padding-top:0}
+.qrow{display:flex;align-items:center;gap:12px;margin-top:12px}.qrow>span{flex-shrink:0;font-size:14px;font-weight:600;color:var(--tx2)}.qrow .nf{flex:1}
+.qrow .nf .val{height:44px;font-size:18px}
+.rbox{padding-bottom:14px}
+.rbox .kbig{padding:16px 16px 0}
+.rbox .kbig b{font-size:36px}
+.rbox .kx{padding:0 16px}
+.rbox #rw{padding:0 16px}
+.ract{display:flex;flex-wrap:wrap;gap:8px;padding:14px 16px 0}
+.qb .ract{padding:12px 0 0}
+.rbox .ovh{padding-top:16px}
+#res .dt{margin-top:10px}
+#res .dt>.vr:first-of-type,#res .dt>div{border-top:.5px solid var(--sep)}
+#res .dt .cl{padding:10px}
+#res .dt .cadd{width:calc(100% - 20px);margin:0 10px 10px;background:var(--fill)}
+#res>.cadd{margin-top:12px}
+#notes .tp:first-child{border-top:.5px solid var(--sep)}
+.dt.in{margin-top:10px;background:var(--fill);border-radius:18px}
+.qc #aiIn{min-height:150px;border:1.5px solid var(--fb);border-radius:18px;padding:12px 14px}
+.qc .aib{padding:0}
+@media(min-width:1024px) and (min-height:600px){
+#view1>#flow{max-width:760px;margin:0 auto}
+#view0{max-width:860px;margin:0 auto}
+}
+
+/* v3.1 : un seul style de champ (grand champ + capsule d'unité), champs empilés libellé au-dessus */
+.qb,.nf{min-width:0}
+.nf .val{flex:1 1 0;width:0;min-width:0}
+.frs{display:flex;flex-direction:column;gap:12px;padding:12px 16px 14px}
+.frs.top{padding:14px 0 0}
+.fr{min-width:0}
+.frl{margin:0 0 6px 4px;font-size:13px;font-weight:600;color:var(--tx2)}
+.fr .seg{width:100%}
+.fr .nf .val{height:46px;font-size:19px}
+.fr .uc,.fr .uf{height:42px}
+.uf{flex-shrink:0;display:inline-flex;align-items:center;height:44px;padding:0 16px;border-radius:999px;background:var(--fill);font-size:15px;font-weight:700;color:var(--tx2);white-space:nowrap}
+.ci .frs{border-top:.5px solid var(--sep)}
+.ci .fr .txt{width:100%;height:46px}
+.dt .frs{border-top:.5px solid var(--sep)}
+.fr .prs{justify-content:flex-start}
+/* molettes Masse | Volume (comme BioChem) */
+.upw2{position:relative;display:grid;grid-template-columns:1fr 1fr;height:200px}
+.upw2.one,.up-h.one{grid-template-columns:1fr}
+.upw2 .up-wh{height:200px;padding:80px 0;box-sizing:border-box}
+.upw2 .up-lens{top:80px}
+#upop .up-n{padding-bottom:10px;margin-bottom:8px;border-bottom:.5px solid var(--sep)}
+#upop .up-n:last-child{padding-bottom:0;margin-bottom:0;border-bottom:0}
+#upop{width:min(320px,calc(100vw - 16px))}
+
+/* écriture choisie par champ */
+.nf:not(.sci) :is(.x10,.exp){display:none}
+/* gels : choix du type, deux champs côte à côte, tableau des repères, étapes numérotées */
+.gtype{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gty{display:flex;align-items:center;gap:12px;padding:14px;border-radius:22px;background:var(--fill);text-align:left;border:1.5px solid transparent;transition:border-color .2s,background .2s,transform .3s var(--spring)}
+.gty:active{transform:scale(.97)}.gty.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 10%,var(--grp))}
+.gty .rtx{min-width:0}.gty b{display:block;font-size:15px}.gty small{display:block;font-size:12.5px;color:var(--tx2);line-height:1.3}
+@media(max-width:420px){.gtype{grid-template-columns:1fr}}
+.g2c{display:grid;grid-template-columns:1fr 1fr;gap:12px}.g2c>.fr{min-width:0;display:flex;flex-direction:column;justify-content:flex-end}
+@media(max-width:420px){.g2c:not(.g2k){grid-template-columns:1fr}}
+.gtb{width:calc(100% - 32px);margin:4px 16px 12px;border-collapse:collapse;font-size:14px}
+.gtb th{text-align:left;font-size:12px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.3px;padding:6px 8px}
+.gtb td{padding:8px;border-top:.5px solid var(--sep)}.gtb tr.on td{color:var(--acc-tx);font-weight:700}
+.gk{display:inline-grid;place-items:center;min-width:22px;height:22px;margin-right:4px;border-radius:999px;background:var(--fill);font-size:12px;font-weight:800;color:var(--tx2)}
+.st.gw .sx p{color:var(--tx)}.st.gw .gk{background:color-mix(in srgb,var(--c-orange) 22%,transparent);color:var(--c-orange)}
+.gerr{color:var(--err,#d70015);font-weight:600}
+#upop .up-l{display:flex;flex-direction:column;min-width:210px;margin:-4px 0}
+#upop .up-l button{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:46px;padding:0 6px 0 4px;font-size:16px;font-weight:600;color:var(--tx);text-align:left;background:none;border-radius:0}
+#upop .up-l button+button{border-top:.5px solid var(--sep)}#upop .up-l button.on{color:var(--acc-tx)}#upop .up-l .ic{width:18px;height:18px;color:var(--acc-tx)}
+.gform .gh small{text-transform:none;letter-spacing:0;font-weight:500;color:var(--tx3);margin-left:6px}
+.gts{margin:2px 0 4px}.gts button{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:38px;font-size:15px}.gts .ic{width:18px;height:18px}
+.gg{background:var(--grp);border-radius:22px;overflow:hidden}.gg.gsp{margin-top:14px}
+.gr{position:relative;display:flex;align-items:center;gap:12px;min-height:56px;padding:7px 12px 7px 16px}
+.gr+.gr::before{content:"";position:absolute;top:0;left:16px;right:0;height:.5px;background:var(--sep)}
+.gl{flex:1 1 auto;min-width:0;font-size:15px;font-weight:600;line-height:1.25}.gl small{display:block;margin-top:1px;font-size:12.5px;font-weight:500;color:var(--tx2)}
+.gf{flex:0 0 auto;display:flex;align-items:center;gap:6px}
+.gf .gi{flex:0 0 86px;width:86px;height:40px;padding:0 12px;font-size:17px;text-align:right}
+.gf .uf,.gf .uc{height:36px;min-width:46px;padding:0 12px;font-size:14px}.gf .uc{min-width:64px;padding:0 26px 0 12px}.rbox .kw{margin:10px 16px 0}.gf .uc.gdd{min-width:120px;justify-content:space-between}
+.gf .seg{flex:0 0 140px}.gf .seg button{height:32px}
+.gf .prs button{width:36px;height:36px}.gf .prs output{min-width:26px;text-align:center;font-weight:700;font-size:17px}
+.gfoot{margin:7px 16px 0;font-size:13px;line-height:1.4;color:var(--tx2)}.gfoot:empty{display:none}.gwait{margin-top:18px;text-align:center}
+.gmore{margin-top:14px}.gmore .dt{margin:0;border-radius:0;background:none}.gmore .dt+.dt,.gmore .rr{border-top:.5px solid var(--sep)}
+@media(min-width:1024px){.gform{display:block}}
+.gcnt{float:right;text-transform:none;letter-spacing:0;font-weight:600}
+</style>
+<link rel="stylesheet" href="/verre.css">
+</head>
+<body>
+<div id="bc" data-fmt="std">
+
+<header><div class="hin">
+  <div class="logo-c"><div class="logo">Bio<i>Prep</i></div><div class="sub">Solutions, milieux et protocoles</div></div>
+  <div class="hact">
+    <div class="tools glass">
+      <button class="tb" id="findBtn" title="Rechercher une recette" aria-label="Rechercher une recette" data-ic="search"></button>
+      <button class="tb" id="themeBtn" title="Changer le thème" aria-label="Changer le thème"></button>
+    </div>
+    <button class="mb glass" id="mb" type="button" data-menu title="Menu" aria-label="Menu" data-ic="menu"></button>
+  </div>
+</div></header>
+
+<div class="shell" id="shell">
+  <main class="stage one" id="card">
+    <section class="inputs app">
+      <div class="thead"><div class="roll rnb" aria-hidden="true"><div id="rn"></div></div><div class="roll rttl"><div id="rtt"></div></div></div>
+      <div id="views" style="display:contents"></div>
+    </section>
+  </main>
+  <script src="/footer-global.js"></script>
+</div>
+
+<nav class="nav" id="navWrap" aria-label="Navigation"><div class="nav-in glass" id="nav"><span class="sl" id="sl"></span></div></nav>
+<div class="toast glass" id="toast" role="status" aria-live="polite"></div>
+<div class="upop glass" id="upop" hidden></div>
+<datalist id="subl"></datalist>
+</div>
+<div id="print"></div>
+
+<script src="/liquid-glass.js"></script>
+<script>
+(()=>{'use strict';
+/* ---------- 1. Outils ---------- */
+const $=id=>document.getElementById(id),BC=$('bc'),root=document.documentElement;
+const $$=(s,c=BC)=>[...c.querySelectorAll(s)];
+const sto={g(k){try{return localStorage.getItem(k)}catch(e){return null}},s(k,v){try{localStorage.setItem(k,v)}catch(e){}},d(k){try{localStorage.removeItem(k)}catch(e){}}};
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1;
+/* retour haptique : vibration courte (Android), sinon interrupteur natif caché (iPhone, iOS 18+) */
+function buzz(p=14){try{if(navigator.vibrate){navigator.vibrate(p);return}if(!IOS)return;
+  const l=document.createElement('label'),i=document.createElement('input');i.type='checkbox';i.setAttribute('switch','');
+  l.dataset.hap='';l.style.display='none';l.appendChild(i);document.head.appendChild(l);l.click();l.remove()}catch(e){}}
+const OK=[12,60,18];
+
+/* ---------- 2. Icônes : Lucide (ISC) ---------- */
+const IC=Object.fromEntries(Object.entries({
+  gel:'<rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M5.5 8.5h2.5"/><path d="M10.75 8.5h2.5"/><path d="M16 8.5h2.5"/><path d="M5.5 12h2.5"/><path d="M5.5 15h2.5"/><path d="M10.75 13.5h2.5"/><path d="M16 12.5h2.5"/><path d="M16 15.5h2.5"/>',
+  sds:'<rect x="3" y="3" width="18" height="18" rx="2.5"/><path d="M3 9h18"/><path d="M7.5 3v3.5"/><path d="M12 3v3.5"/><path d="M16.5 3v3.5"/><path d="M6.5 12.5h2"/><path d="M6.5 15.5h2"/><path d="M11 13.5h2"/><path d="M15.5 12.5h2"/><path d="M15.5 17.5h2"/>',
+  calc:'<rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/>',
+  beaker:'<path d="M4.5 3h15"/><path d="M6 3v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V3"/><path d="M6 14h12"/>',
+  tubes:'<path d="M9 2v17.5A2.5 2.5 0 0 1 6.5 22A2.5 2.5 0 0 1 4 19.5V2"/><path d="M20 2v17.5a2.5 2.5 0 0 1-2.5 2.5a2.5 2.5 0 0 1-2.5-2.5V2"/><path d="M3 2h7"/><path d="M14 2h7"/><path d="M9 16H4"/><path d="M20 16h-5"/>',
+  bars:'<path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/>',
+  list:'<path d="m6 9 6 6 6-6"/>',
+  tip:'<path d="M12 22 8 7h8z"/><path d="M7 2h10v5H7z"/>',
+  mix:'<path d="M21 12a9 9 0 1 1-6.22-8.56"/><path d="M21 3v5h-5"/><circle cx="12" cy="12" r="2.5"/>',
+  tube:'<path d="M14.5 2v17.5c0 1.4-1.1 2.5-2.5 2.5c-1.4 0-2.5-1.1-2.5-2.5V2"/><path d="M8.5 2h7"/><path d="M14.5 16h-5"/>',
+  tag:'<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5"/>',
+  order:'<path d="M10 12h11"/><path d="M10 18h11"/><path d="M10 6h11"/><path d="M4 10h2"/><path d="M4 6h1v4"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/>',
+  arrow:'<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+  flask:'<path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/><path d="M6.453 15h11.094"/><path d="M8.5 2h7"/>',
+  chev:'<path d="m9 18 6-6-6-6"/>',
+  plus:'<path d="M5 12h14"/><path d="M12 5v14"/>',minus:'<path d="M5 12h14"/>',
+  scale:'<path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>',
+  thermo:'<path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/>',
+  filter:'<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>',
+  trash:'<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+  pipette:'<path d="m2 22 1-1h3l9-9"/><path d="M3 21v-3l9-9"/><path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3l.4.4Z"/>',
+  shield:'<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
+  search:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  book:'<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+  checks:'<path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/>',
+  spark:'<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/>',
+  printer:'<path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/>',
+  user:'<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  reset:'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+  ext:'<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+  paste:'<path d="M15 2H9a1 1 0 0 0-1 1v2c0 .6.4 1 1 1h6c.6 0 1-.4 1-1V3c0-.6-.4-1-1-1Z"/><path d="M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2M16 4h2a2 2 0 0 1 2 2v2M11 14h10"/><path d="m17 10 4 4-4 4"/>',
+  newp:'<path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/>',
+  ph:'<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>',
+  cool:'<path d="M2 12h20"/><path d="M12 2v20"/><path d="m20 16-4-4 4-4"/><path d="m4 8 4 4-4 4"/><path d="m16 4-4 4-4-4"/><path d="m8 20 4-4 4 4"/>',
+  bottle:'<path d="M10 2v3.5c0 .8-.6 1.4-1.2 1.9C7.7 8.3 7 9.4 7 11v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-9c0-1.6-.7-2.7-1.8-3.6-.6-.5-1.2-1.1-1.2-1.9V2"/><path d="M9 2h6"/><path d="M7 14h10"/>',
+  dish:'<circle cx="12" cy="12" r="9"/><circle cx="9" cy="9.5" r="1.3"/><circle cx="14.8" cy="9" r="1"/><circle cx="13.2" cy="14.6" r="1.5"/><circle cx="8.6" cy="15" r=".9"/>',
+  cuv:'<path d="M8 2h8"/><path d="M9 2v18a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2V2"/><path d="M9 12h6"/><path d="M2 8h4"/><path d="M18 8h4"/>',
+  pip:'<path d="m12 9-8.4 8.4A2 2 0 0 0 3 18.8v1.4a2 2 0 0 1-.6 1.4 2 2 0 0 1 1.4-.6h1.4a2 2 0 0 0 1.4-.6L15 12"/><path d="m18 9 .4.4a1 1 0 1 1-3 3l-3.8-3.8a1 1 0 1 1 3-3l.4.4 3.4-3.4a1 1 0 1 1 3 3z"/>',
+  grow:'<path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/>',
+  hist:'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+  lang:'<path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+  moon:'<path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/>',
+  dl:'<path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/>',
+  menu:'<path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/>',
+  copy:'<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
+  save:'<path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  close:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+  warn:'<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>'
+}).map(([k,d])=>[k,`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`]));
+
+
+/* ---------- 3. État ---------- */
+const S={lang:'fr',dark:root.dataset.theme==='dark',fmt:'std',tab:-1,cur:null,preps:[],cat:'all',q:'',flow:null,k:{}};
+
+/* ---------- 6. Nombres : lecture souple, affichage à 4 chiffres significatifs ---------- */
+const sup=s=>String(s).replace(/./g,c=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[c]||({'-':'⁻','+':'⁺'}[c]||c));
+const clean=n=>Number.isFinite(n)&&n!==0?Number(n.toPrecision(12)):n;
+const dec=s=>S.lang==='fr'?s.replace('.',','):s;
+const grp=s=>{const p=s.split('.');p[0]=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f');return p.join('.')};
+function sciStr(c){const[m,e]=c.toExponential(11).split('e'),k=+e,mt=dec(String(Number(m)));return k?`${mt} × 10${sup(k)}`:mt}
+function fmt(n){if(!Number.isFinite(n))return'-';if(n===0)return'0';const c=Number(n.toPrecision(4)),a=Math.abs(c);
+  return a<1e-4||a>=1e6?sciStr(c):dec(grp(String(c)))}
+/* valeur saisie telle quelle dans l'équation (pleine précision) */
+const echo=v=>{if(v===0)return'0';const c=clean(v),a=Math.abs(c);return S.fmt!=='sci'&&a>=1e-6&&a<1e21?dec(String(c)):sciStr(c)};
+/* saisie : virgule ou point, 2e-3, 2×10^-3, 2x10-3 */
+function num(raw){let c=String(raw||'').replace(/\s+/g,'').replace(/,/g,'.').replace(/[−–]/g,'-').replace(/[⁻⁰¹²³⁴⁵⁶⁷⁸⁹]/g,ch=>'-0123456789'['⁻⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(ch)]).replace(/[×x*·]10\^?/i,'e');
+  const p=c.match(/^10(?:\^([+-]?\d+)|(-\d+))$/);if(p)c='1e'+(p[1]||p[2]);
+  const q=c.match(/^(\d+(?:\.\d+)?)[\/:](\d+(?:\.\d+)?(?:e[+-]?\d+)?)$/i);if(q){const v=+q[1]/+q[2];return Number.isFinite(v)?{v}:{bad:1}}
+  if(!c)return{empty:1};
+  if(!/^[+-]?(\d+(\.\d*)?|\.\d+)(e[+-]?\d+)?$/i.test(c))return{bad:1};
+  const v=Number(c);return Number.isFinite(v)?{v}:{bad:1}}
+/* lecture d'une ligne : décimale, ou mantisse × 10^exposant en mode scientifique */
+const FXK='bmi_fx',FXD='sci';let FX={};try{FX=JSON.parse(sto.g(FXK))||{}}catch(e){}
+const isSci=(id,k)=>(FX[id+'-'+k]||FXD)==='sci';
+function applyFx(){$$('.ctl').forEach(c=>{const v=c.querySelector('.val');if(v&&v.id)c.classList.toggle('sci',(FX[v.id]||FXD)==='sci')});$$('.ucap').forEach(ulab)}
+function readVal(id,k){const raw=$(`${id}-${k}`).value,r=num(raw);if(!('v' in r)||!isSci(id,k))return r;
+  if(/[e×x*^\/:⁰¹²³⁴⁵⁶⁷⁸⁹⁻]|^\s*10\s*[−–-]\s*\d/i.test(raw))return r;   // puissance déjà écrite dans le champ (8x10^-2, 1e6, 1/1000) : l'exposant à côté est ignoré
+  const e=$(`${id}-${k}-e`).value.trim().replace(/[−–]/g,'-');if(!e)return r;
+  return /^[+-]?\d+$/.test(e)?{v:r.v*10**+e}:{bad:1}}
+/* écriture d'une valeur au format courant (sig chiffres significatifs) */
+function writeVal(id,k,v,sig){const A=$(`${id}-${k}`),E=$(`${id}-${k}-e`);
+  if(v==null||v===0){A.value=v===0?'0':'';E.value='';return}
+  if(isSci(id,k)){const[m,e]=v.toExponential(sig-1).split('e');A.value=dec(String(Number(m)));E.value=String(+e)}
+  else{A.value=dec(String(Number(v.toPrecision(sig))));E.value=''}}
+
+
+/* ---------- 4. Unités : volume en mL ; poudre en g/L ou mol/L ; liquide en mL/L ; solution mère dans sa famille ---------- */
+const PU={'g/L':1,'mg/mL':1,'mg/L':1e-3,'µg/mL':1e-3,'% (m/V)':10},PM={M:1,mM:1e-3,'µM':1e-6};
+const PUL=[...Object.keys(PU),...Object.keys(PM)];
+const LU={'mL/L':1,'µL/mL':1,'% (V/V)':10,'µL/L':1e-3};
+const CUF={M:1,mM:1e-3,'µM':1e-6,nM:1e-9,'g/L':1,'mg/mL':1,'mg/L':1e-3,'µg/mL':1e-3,'ng/µL':1e-3,'% (m/V)':10,'% (V/V)':1,X:1,'U/µL':1e3,'U/mL':1};
+const CUL=Object.keys(CUF);
+const MASSF={kg:1e3,g:1,mg:1e-3,'µg':1e-6,ng:1e-9},VOLF={L:1,mL:1e-3,'µL':1e-6};
+const compMass=u=>{const k=String(u).indexOf('/');if(k<0)return NaN;const a=MASSF[u.slice(0,k)],b=VOLF[u.slice(k+1)];return a&&b?a/b:NaN};
+const pu=u=>u in PU?PU[u]:compMass(u),cuf=u=>u in CUF?CUF[u]:compMass(u);
+const FAM=u=>/^(M|mM|µM|nM)$/.test(u)?'mol':u==='% (V/V)'?'vv':u==='X'?'x':/^U\//.test(u)?'u':'mass';
+const EPS=1e-9,CC=['blue','orange','teal','purple','pink','indigo','cyan','brown'];
+const D=v=>String(v).replace('.',',');
+const VS=ml=>!Number.isFinite(ml)?'-':ml<1-EPS?`${fmt(ml*1000)} µL`:ml>=1000-EPS?`${fmt(ml/1000)} L`:`${fmt(ml)} mL`;
+const MS=g=>!Number.isFinite(g)?'-':g<1e-3-1e-15?`${fmt(g*1e6)} µg`:g<1-EPS?`${fmt(g*1e3)} mg`:g>=1000-EPS?`${fmt(g/1000)} kg`:`${fmt(g)} g`;
+/* matériel : micropipette, pipette sérologique, éprouvette ; balance ; bécher ; flacon */
+const MICRO=[['P2',.2,2],['P10',1,10],['P20',2,20],['P200',20,200],['P1000',100,1000],['P5000',500,5000]];
+function tool(uL){if(!(uL>0))return null;
+  if(uL<.2-EPS)return{err:1,txt:'trop petit pour être pipeté'};
+  const m=MICRO.find(([,a,b])=>uL>=a-EPS&&uL<=b+EPS);if(m)return{id:m[0],txt:m[0]};
+  const s=[5,10,25].find(x=>uL<=x*1000+EPS);if(s)return{id:'S'+s,txt:`pipette sérologique de ${s} mL`};
+  return{id:'E',txt:`éprouvette de ${VS([50,100,250,500,1000,2000].find(x=>uL<=x*1000+EPS)||Math.ceil(uL/1e6)*1000)}`}}
+const tl=ml=>{const p=tool(ml*1000);return p?p.txt:''};
+const bal=g=>g<1-EPS?'balance analytique au 0,1 mg':g<=600?'balance de précision au 0,01 g':'balance au 0,1 g';
+const bec=ml=>{const b=[25,50,100,250,400,600,1000,2000,3000,5000].find(x=>ml<=x+EPS);return b?`bécher de ${VS(b)}`:'grand récipient'};
+const bot=ml=>{const b=[100,250,500,1000,2000,5000].find(x=>ml*1.5<=x+EPS);return b?`flacon de ${VS(b)}`:'grand flacon'};
+const epr=ml=>{const f=[5,10,20,25,50,100,200,250,500,1000,2000].find(x=>Math.abs(x-ml)<=x*.005);
+  if(f&&ml<=250)return`fiole jaugée de ${VS(f)}`;const e=[10,25,50,100,250,500,1000,2000].find(x=>ml<=x+EPS);return e?`éprouvette de ${VS(e)}`:'éprouvette (en plusieurs fois)'};
+/* lecture d'un nombre : décimale, ou mantisse × 10^exposant (champ exposant en mode scientifique) */
+function pnum(raw,e,sci){const r=num(raw);if(!('v' in r)||!sci||!String(e||'').trim()||/[e×x*^\/:⁰¹²³⁴⁵⁶⁷⁸⁹⁻]/i.test(String(raw)))return r;
+  const x=String(e).trim().replace(/[−–]/g,'-');return/^[+-]?\d+$/.test(x)?{v:r.v*10**+x}:{bad:1}}
+const nrm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[₀-₉]/g,c=>'0123456789'['₀₁₂₃₄₅₆₇₈₉'.indexOf(c)]);
+const nkey=s=>nrm(s).replace(/[^a-z0-9]/g,'');
+
+/* ---------- 5. Substances : masse molaire et précautions ----------
+   drapeaux : h formes hydratées, y hygroscopique, x corrosif, t Tris, o s'oxyde, s sucre, d SDS, e EDTA, p PEG, g agar,
+   b tampon de Good, u urée, f thermolabile, T nocif, R reprotoxique, P phosphate, c calcium, m magnésium */
+const SUB={nacl:['NaCl',58.44,'',['chlorure de sodium']],kcl:['KCl',74.55,'',['chlorure de potassium']],tris:['Tris base',121.14,'t',['tris','trizma','trizma base']],trishcl:['Tris-HCl',157.60,'t'],
+  cacl2:['CaCl₂ anhydre',110.98,'hyc',['cacl2','chlorure de calcium']],cacl22:['CaCl₂ · 2H₂O',147.01,'hc'],mgcl2:['MgCl₂ · 6H₂O',203.30,'hym',['mgcl2','chlorure de magnesium']],
+  mgso4:['MgSO₄ anhydre',120.37,'hm'],mgso47:['MgSO₄ · 7H₂O',246.47,'hm',['mgso4','sulfate de magnesium']],
+  kh2po4:['KH₂PO₄',136.09,'P'],k2hpo4:['K₂HPO₄',174.18,'hP'],k2hpo43:['K₂HPO₄ · 3H₂O',228.22,'hP'],
+  nah2po4:['NaH₂PO₄ anhydre',119.98,'hP',['nah2po4']],nah2po41:['NaH₂PO₄ · H₂O',137.99,'hP'],nah2po42:['NaH₂PO₄ · 2H₂O',156.01,'hP'],
+  na2hpo4:['Na₂HPO₄ anhydre',141.96,'hP',['na2hpo4']],na2hpo42:['Na₂HPO₄ · 2H₂O',177.99,'hP'],na2hpo47:['Na₂HPO₄ · 7H₂O',268.07,'hP'],na2hpo412:['Na₂HPO₄ · 12H₂O',358.14,'hP'],
+  nano3:['NaNO₃',84.99,'',['nitrate de sodium']],kno3:['KNO₃',101.10,'',['nitrate de potassium']],nh4cl:['NH₄Cl',53.49,'',['chlorure d\'ammonium']],nh42so4:['(NH₄)₂SO₄',132.14,'',['sulfate d\'ammonium']],
+  feso4:['FeSO₄ · 7H₂O',278.01,'ho',['feso4','sulfate de fer']],cuso4:['CuSO₄ · 5H₂O',249.69,'hT',['cuso4']],znso4:['ZnSO₄ · 7H₂O',287.56,'h',['znso4']],mnso4:['MnSO₄ · H₂O',169.02,'h',['mnso4']],
+  h3bo3:['Acide borique',61.83,'R',['h3bo3']],na2moo4:['Na₂MoO₄ · 2H₂O',241.95,'h',['na2moo4']],
+  naoac:['Acétate de sodium anhydre',82.03,'h',['acetate de sodium']],naoac3:['Acétate de sodium · 3H₂O',136.08,'h'],citrate:['Citrate trisodique · 2H₂O',294.10,'h',['citrate de sodium']],
+  edta:['EDTA disodique · 2H₂O',372.24,'e',['edta','na2edta']],naoh:['NaOH',40.00,'xy',['soude','hydroxyde de sodium']],koh:['KOH',56.11,'xy',['potasse','hydroxyde de potassium']],
+  glucose:['Glucose anhydre',180.16,'hs',['glucose','dextrose','d-glucose']],glucose1:['Glucose · H₂O',198.17,'hs'],sucrose:['Saccharose',342.30,'s',['sucrose']],lactose:['Lactose · H₂O',360.31,'s',['lactose']],
+  sorbitol:['Sorbitol',182.17,'',['d-sorbitol']],mannitol:['Mannitol',182.17,'',['d-mannitol']],glycine:['Glycine',75.07,''],uree:['Urée',60.06,'u',['uree','urea']],
+  mops:['MOPS',209.26,'b'],hepes:['HEPES',238.30,'b'],mes:['MES',195.24,'b'],sds:['SDS',288.38,'d',['dodecylsulfate de sodium']],
+  iptg:['IPTG',238.30,'f'],dtt:['DTT',154.25,'fT'],
+  peg:['PEG 4000',null,'p',['peg','peg 6000','polyethylene glycol']],agar:['Agar',null,'g',['bacto-agar','agar-agar']],ye:['Extrait de levure',null,'',['yeast extract']],
+  tryp:['Tryptone',null,''],pept:['Peptone',null,'']};
+const SIDX=(()=>{const m=new Map();Object.entries(SUB).forEach(([k,[n,,,al]])=>{m.set(nkey(n),k);(al||[]).forEach(a=>m.set(nkey(a),k))});return m})();
+/* substance reconnue d'après un nom saisi : nom exact, sinon le plus long nom connu en début de saisie */
+function subFind(name){const k=nkey(name);if(!k)return null;if(SIDX.has(k))return SIDX.get(k);
+  let best=null,bl=0;SIDX.forEach((v,key)=>{if(key.length>=3&&k.startsWith(key)&&key.length>bl){best=v;bl=key.length}});return best}
+const NOTE={h:['warn','<b>Plusieurs formes hydratées</b> : vérifiez la formule exacte sur l\'étiquette du flacon (anhydre, · 2H₂O, · 7H₂O…) : la masse molaire, donc la masse à peser, en dépend.','warn'],
+  y:['tip','<b>Hygroscopique</b> : pesez rapidement et refermez le flacon aussitôt après la pesée.',''],
+  x:['warn','<b>Soude ou potasse : corrosif, dissolution très exothermique</b>. Lunettes et gants ; versez les pastilles petit à petit dans l\'eau froide, sous agitation (jamais l\'eau sur les pastilles) ; conservez la solution en flacon plastique.','warn'],
+  acid:['warn','<b>Acide concentré</b> : manipulez sous hotte, avec lunettes et gants. Versez toujours l\'acide dans l\'eau, jamais l\'inverse.','warn'],
+  t:['info','<b>Tris</b> : son pH baisse d\'environ 0,03 unité par °C. Ajustez le pH à la température d\'utilisation du tampon.',''],
+  o:['warn','<b>Sulfate de fer</b> : il s\'oxyde à l\'air (la solution jaunit puis brunit) ; préparez la solution juste avant usage.','warn'],
+  s:['info','<b>Sucre</b> : un autoclavage prolongé le caramélise et, avec des peptones, fait brunir le milieu (réaction de Maillard). Pour un milieu clair, stérilisez le sucre à part (autoclavage ou filtration) et ajoutez-le après.',''],
+  d:['warn','<b>SDS</b> : poudre très irritante ; pesez à l\'abri des courants d\'air, avec un masque. Agitez doucement (il mousse). Il précipite au froid.','warn'],
+  e:['info','<b>EDTA</b> : il ne se dissout qu\'à pH 8 environ ; ajoutez du NaOH sous agitation jusqu\'à pH 8,0, puis complétez au volume final.',''],
+  p:['info','<b>PEG</b> : très visqueux ; dissolvez-le dans moins d\'eau que le volume final en chauffant doucement, puis complétez au volume final.',''],
+  b:['info','<b>MOPS, HEPES, MES</b> : ajustez le pH avec du NaOH ou du KOH ; stérilisez par filtration plutôt qu\'à l\'autoclave (le MOPS jaunit à la chaleur et à la lumière).',''],
+  u:['warn','<b>Urée</b> : ne chauffez pas au-dessus de 30 °C et ne l\'autoclavez pas (elle se décompose) ; stérilisez par filtration.','warn'],
+  f:['info','<b>Thermolabile</b> (IPTG, DTT…) : n\'autoclavez pas ; stérilisez par filtration sur membrane 0,22 µm, aliquotez, conservez à −20 °C.',''],
+  T:['warn','<b>Nocif</b> : gants obligatoires ; éliminez les déchets dans le bidon de récupération prévu.','warn'],
+  R:['warn','<b>Acide borique</b> : toxique pour la reproduction ; portez des gants et pesez sans soulever de poussière.','warn'],
+  PCa:['warn','<b>Phosphate + calcium ou magnésium</b> : risque de précipité blanc si le pH dépasse 6 environ, surtout à chaud. Gardez le pH bas, ou autoclavez le phosphate à part.','warn'],
+  z:['info','<b>Enzyme</b> : ajoutez-la en dernier, gardez-la sur glace et mélangez sans vortex.',''],
+  alc:['warn','<b>Inflammable</b> : manipulez loin de la flamme du bec Bunsen.','warn'],
+  visc:['info','<b>Liquide visqueux</b> (glycérol, Triton, Tween) : pipetez lentement et laissez le cône se vider complètement.',''],
+  dm:['warn','<b>DMSO / DMF</b> : ils traversent la peau (portez des gants en nitrile) ; le DMF attaque le polystyrène.','warn'],
+  L:['info','<b>Sensible à la lumière</b> (tétracycline, X-gal, zéocine…) : flacon opaque, boîtes conservées à l\'obscurité.',''],
+  tox:['warn','<b>Antibiotique toxique</b> (hygromycine, puromycine…) : gants, sans projection ; éliminez les déchets en filière chimique.','warn']};
+const ABX=/ampic|kanam|hygrom|chloramph|t[ée]tracyc|strepto|spectino|gentam|g418|g[ée]n[ée]ticine|puromyc|z[ée]ocin|nours|clonnat|carb[ée]nic|antibio|n[ée]omyc|rifamp/i;
+const NF=[[/\b(naoh|koh)\b|soude|potasse/i,'x'],[/(?<![\w-])(hcl|h2so4|hno3)\b|acide (chlorhydrique|sulfurique|nitrique|ac[ée]tique)/i,'acid'],[/tris/i,'t'],
+  [/phosph|po4|po₄/i,'P'],[/calc|cacl/i,'c'],[/magn|mgso|mgcl|mgso₄|mgcl₂/i,'m'],[/\bsds\b|dod[ée]cyl/i,'d'],[/edta/i,'e'],[/\bpeg\b|polyéthylène/i,'p'],
+  [/glucose|saccharose|sucrose|sucre|lactose|maltose|galactose|dextrose/i,'s'],[/feso|sulfate de fer/i,'o'],
+  [/taq|polym[ée]rase|lysozyme|dnase|rnase|prot[ée]inase|ligase|transcriptase/i,'z'],[/[ée]thanol|m[ée]thanol|isopropanol/i,'alc'],
+  [/triton|tween|glyc[ée]rol/i,'visc'],[/\bdtt\b|mercapto|pmsf/i,'T'],[/ur[ée]e\b|urea/i,'u'],[/dmso|dmf|x-?gal/i,'dm'],[/mops|hepes|\bmes\b/i,'b'],
+  [/t[ée]tracyc|x-?gal|z[ée]ocin/i,'L'],[/hygrom|puromyc|g418|g[ée]n[ée]ticine/i,'tox'],[/iptg/i,'f']];
+
+/* ---------- 6. Recettes prêtes (pour 1 L de milieu, quantités converties en concentrations finales) ---------- */
+const CAT={mine:['Mes préparations','save','blue'],bact:['Milieux bactériens','tubes','orange'],fung:['Levures et champignons','flask','teal'],buf:['Tampons','beaker','indigo'],sto:['Solutions mères','bottle','purple'],abx:['Antibiotiques et additifs','pipette','pink']};
+const REC=[
+{id:'lb',n:'LB (Miller), bouillon',c:'bact',d:'Culture courante d\'E. coli',V:1000,pH:'7,0',it:[['Tryptone','pdr',10,'g/L'],['Extrait de levure','pdr',5,'g/L'],['NaCl','pdr',10,'g/L']]},
+{id:'lba',n:'LB gélose + ampicilline',c:'bact',d:'Sélection des bactéries résistantes à l\'ampicilline',V:500,ag:15,pH:'7,0',it:[['Tryptone','pdr',10,'g/L'],['Extrait de levure','pdr',5,'g/L'],['NaCl','pdr',10,'g/L'],['Ampicilline','sto',100,'mg/mL',100,'µg/mL','post']]},
+{id:'lbl',n:'LB (Lennox)',c:'bact',d:'LB à 5 g/L de NaCl',V:1000,pH:'7,0',it:[['Tryptone','pdr',10,'g/L'],['Extrait de levure','pdr',5,'g/L'],['NaCl','pdr',5,'g/L']]},
+{id:'soc',n:'SOC',c:'bact',d:'Phase de récupération après transformation',V:100,pH:'7,0',it:[['Tryptone','pdr',20,'g/L'],['Extrait de levure','pdr',5,'g/L'],['NaCl','pdr',10,'mM',58.44],['KCl','pdr',2.5,'mM',74.55],['MgCl₂','sto',1,'M',10,'mM','post'],['MgSO₄','sto',1,'M',10,'mM','post'],['Glucose','sto',1,'M',20,'mM','post']],no:['MgCl₂, MgSO₄ et glucose : solutions mères stériles, ajoutées après autoclavage et refroidissement.']},
+{id:'mac',n:'MacConkey gélose (formule)',c:'bact',d:'Entérobactéries, fermentation du lactose',V:500,ag:13.5,pH:'7,1',it:[['Peptone','pdr',17,'g/L'],['Protéose peptone','pdr',3,'g/L'],['Lactose','pdr',10,'g/L'],['Sels biliaires','pdr',1.5,'g/L'],['NaCl','pdr',5,'g/L'],['Rouge neutre','pdr',0.03,'g/L'],['Cristal violet','pdr',0.001,'g/L']],no:['Composition classique de la gélose MacConkey. Avec une poudre du commerce, prenez plutôt « MacConkey (poudre prête) ».']},
+{id:'macp',n:'MacConkey (poudre prête)',c:'bact',d:'Poudre déshydratée du commerce',V:500,pH:'7,1',it:[['Gélose MacConkey (poudre)','pdr',50,'g/L']],no:['La dose dépend du fabricant : vérifiez-la sur le flacon (souvent 50 g/L). L\'agar est déjà contenu dans la poudre.']},
+{id:'gn',n:'Gélose nutritive',c:'bact',d:'Culture non sélective',V:500,ag:15,pH:'6,8',it:[['Extrait de viande','pdr',3,'g/L'],['Peptone','pdr',5,'g/L']]},
+{id:'tsb',n:'TSB, bouillon trypticase soja',c:'bact',d:'Bouillon riche non sélectif',V:1000,pH:'7,3',it:[['Peptone de caséine','pdr',17,'g/L'],['Peptone de soja','pdr',3,'g/L'],['NaCl','pdr',5,'g/L'],['K₂HPO₄','pdr',2.5,'g/L'],['Glucose','pdr',2.5,'g/L']]},
+{id:'tsa',n:'TSA, gélose trypticase soja',c:'bact',d:'Gélose riche non sélective',V:500,ag:15,pH:'7,3',it:[['Peptone de caséine','pdr',15,'g/L'],['Peptone de soja','pdr',5,'g/L'],['NaCl','pdr',5,'g/L']]},
+{id:'mh',n:'Mueller-Hinton gélose',c:'bact',d:'Antibiogrammes',V:500,ag:17,pH:'7,3',it:[['Extrait de bœuf','pdr',2,'g/L'],['Hydrolysat acide de caséine','pdr',17.5,'g/L'],['Amidon','pdr',1.5,'g/L']]},
+{id:'chap',n:'Chapman (mannitol salt agar)',c:'bact',d:'Isolement des staphylocoques',V:500,ag:15,pH:'7,4',it:[['Protéose peptone','pdr',10,'g/L'],['Extrait de bœuf','pdr',1,'g/L'],['NaCl','pdr',75,'g/L'],['D-mannitol','pdr',10,'g/L'],['Rouge de phénol','pdr',0.025,'g/L']]},
+{id:'m9',n:'M9 minimum + glucose',c:'bact',d:'Milieu minimum de composition définie',V:1000,it:[['Sels M9 5X','sto',5,'X',1,'X'],['MgSO₄','sto',1,'M',2,'mM','post'],['Glucose 20 %','sto',20,'% (m/V)',0.4,'% (m/V)','post'],['CaCl₂','sto',1,'M',0.1,'mM','post']],no:['Préparez d\'abord les sels M9 5X (recette « Sels M9 5X »). MgSO₄, glucose et CaCl₂ : solutions mères stériles, ajoutées après autoclavage et refroidissement.']},
+{id:'ypd',n:'YPD',c:'fung',d:'Culture des levures',V:500,it:[['Extrait de levure','pdr',10,'g/L'],['Peptone','pdr',20,'g/L'],['Glucose','pdr',20,'g/L']],no:['Pour une gélose (boîtes), indiquez 20 g/L d\'agar dans « Gélose, pH, stérilisation ».']},
+{id:'sab',n:'Sabouraud dextrose gélose',c:'fung',d:'Levures et moisissures',V:500,ag:15,pH:'5,6',it:[['Peptone','pdr',10,'g/L'],['Glucose','pdr',40,'g/L']]},
+{id:'pda',n:'PDA (poudre prête)',c:'fung',d:'Gélose pomme de terre dextrose',V:500,pH:'5,6',it:[['Gélose PDA (poudre)','pdr',39,'g/L']],no:['Dose habituelle 39 g/L : vérifiez-la sur le flacon. L\'agar est déjà contenu dans la poudre.']},
+{id:'pbs',n:'PBS 1X',c:'buf',d:'Tampon phosphate salin, pH 7,4',V:1000,pH:'7,4',it:[['NaCl','pdr',8,'g/L'],['KCl','pdr',0.2,'g/L'],['Na₂HPO₄ anhydre','pdr',1.44,'g/L'],['KH₂PO₄','pdr',0.24,'g/L']]},
+{id:'pbs10',n:'PBS 10X',c:'buf',d:'Solution mère 10X, à diluer au 1/10',V:1000,it:[['NaCl','pdr',80,'g/L'],['KCl','pdr',2,'g/L'],['Na₂HPO₄ anhydre','pdr',14.4,'g/L'],['KH₂PO₄','pdr',2.4,'g/L']]},
+{id:'m9s',n:'Sels M9 5X',c:'buf',d:'Base du milieu M9',V:1000,it:[['Na₂HPO₄ · 7H₂O','pdr',64,'g/L'],['KH₂PO₄','pdr',15,'g/L'],['NaCl','pdr',2.5,'g/L'],['NH₄Cl','pdr',5,'g/L']]},
+{id:'tae',n:'TAE 50X',c:'buf',d:'Tampon d\'électrophorèse, à diluer au 1/50',V:1000,st:'none',it:[['Tris base','pdr',242,'g/L'],['Acide acétique glacial','liq',57.1,'mL/L'],['EDTA 0,5 M pH 8','sto',0.5,'M',50,'mM']]},
+{id:'tbe',n:'TBE 10X',c:'buf',d:'Tampon d\'électrophorèse, à diluer au 1/10',V:1000,st:'none',it:[['Tris base','pdr',108,'g/L'],['Acide borique','pdr',55,'g/L'],['EDTA 0,5 M pH 8','sto',0.5,'M',20,'mM']]},
+{id:'tbe5',n:'TBE 5X',c:'buf',d:'Tampon d\'électrophorèse, à diluer au 1/5 (1X) ou au 1/10 (0,5X)',V:1000,st:'none',it:[['Tris base','pdr',54,'g/L'],['Acide borique','pdr',27.5,'g/L'],['EDTA 0,5 M pH 8','sto',0.5,'M',10,'mM']]},
+{id:'tgs10',n:'Tris-glycine-SDS 10X',c:'buf',d:'Tampon de migration SDS-PAGE, à diluer au 1/10',V:1000,st:'none',it:[['Tris base','pdr',30.3,'g/L'],['Glycine','pdr',144,'g/L'],['SDS','pdr',10,'g/L']],no:['Ne pas ajuster le pH (environ 8,3). 1X : 25 mM Tris, 192 mM glycine, 0,1 % SDS.']},
+{id:'tris88',n:'Tris-HCl 1,5 M pH 8,8',c:'sto',d:'Gel de séparation SDS-PAGE, pH ajusté à l\'HCl',V:500,pH:'8,8',it:[['Tris base','pdr',1.5,'M',121.14]]},
+{id:'tris68',n:'Tris-HCl 0,5 M pH 6,8',c:'sto',d:'Gel de concentration SDS-PAGE, pH ajusté à l\'HCl',V:500,pH:'6,8',it:[['Tris base','pdr',0.5,'M',121.14]]},
+{id:'tris681',n:'Tris-HCl 1,0 M pH 6,8',c:'sto',d:'Gel de concentration SDS-PAGE, pH ajusté à l\'HCl',V:500,pH:'6,8',it:[['Tris base','pdr',1,'M',121.14]]},
+{id:'aps10',n:'APS 10 % (persulfate d\'ammonium)',c:'sto',d:'Polymérisation des gels d\'acrylamide, à préparer frais',V:10,st:'none',it:[['Persulfate d\'ammonium (APS)','pdr',10,'% (m/V)']],no:['À préparer le jour même, ou en aliquots conservés à −20 °C.']},
+{id:'te',n:'TE pH 8,0',c:'buf',d:'Conservation de l\'ADN',V:100,pH:'8,0',it:[['Tris-HCl 1 M pH 8','sto',1,'M',10,'mM'],['EDTA 0,5 M pH 8','sto',0.5,'M',1,'mM']]},
+{id:'tris1',n:'Tris-HCl 1 M',c:'sto',d:'Solution mère de tampon, pH ajusté à l\'HCl',V:500,pH:'8,0',it:[['Tris base','pdr',1,'M',121.14]]},
+{id:'edta',n:'EDTA 0,5 M pH 8,0',c:'sto',d:'Ne se dissout qu\'à pH 8 environ',V:500,pH:'8,0',it:[['EDTA disodique · 2H₂O','pdr',0.5,'M',372.24],['NaOH (pastilles)','txt','environ 20 g/L, jusqu\'à pH 8,0']]},
+{id:'nacl5',n:'NaCl 5 M',c:'sto',d:'Solution mère saline',V:500,it:[['NaCl','pdr',5,'M',58.44]]},
+{id:'phys',n:'Eau physiologique 0,9 %',c:'sto',d:'NaCl 9 g/L, pour les dilutions bactériennes',V:1000,it:[['NaCl','pdr',9,'g/L']]},
+{id:'glc20',n:'Glucose 20 %',c:'sto',d:'Solution mère de sucre',V:100,st:'filt',it:[['Glucose anhydre','pdr',20,'% (m/V)']]},
+{id:'mg1',n:'MgSO₄ 1 M',c:'sto',d:'Solution mère de magnésium',V:100,it:[['MgSO₄ · 7H₂O','pdr',1,'M',246.47]]},
+{id:'sds10',n:'SDS 10 %',c:'sto',d:'Détergent',V:100,st:'none',it:[['SDS','pdr',10,'% (m/V)']]},
+{id:'naoh1',n:'NaOH 1 M',c:'sto',d:'Ajustement du pH',V:100,st:'none',it:[['NaOH (pastilles)','pdr',1,'M',40.00]]},
+{id:'eth70',n:'Éthanol 70 %',c:'sto',d:'Désinfection des surfaces',V:500,st:'none',it:[['Éthanol 96 %','sto',96,'% (V/V)',70,'% (V/V)']]},
+{id:'amp',n:'Ampicilline 100 mg/mL',c:'abx',d:'Solution mère 1000X (pour 100 µg/mL)',V:10,st:'filt',it:[['Ampicilline sodique','pdr',100,'mg/mL']]},
+{id:'kan',n:'Kanamycine 50 mg/mL',c:'abx',d:'Solution mère 1000X (pour 50 µg/mL)',V:10,st:'filt',it:[['Kanamycine (sulfate)','pdr',50,'mg/mL']]},
+{id:'iptg',n:'IPTG 1 M',c:'abx',d:'Induction de l\'expression',V:10,st:'filt',it:[['IPTG','pdr',1,'M',238.30]]}];
+
+/* ---------- 7. Préparation : modèle, recette → préparation, calcul ---------- */
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const blankItem=()=>({id:uid(),n:'',t:'pdr',c:'',ce:'',cu:'g/L',mm:'',r:'',re:'',ru:'mL/L',ci:'',cie:'',ciu:'M',cf:'',cfe:'',cfu:'mM',q:'',post:false});
+const blankPrep=()=>({id:uid(),kind:'med',rec:null,name:'',V:'',Ve:'',Vu:'mL',nb:1,np:1,ag:'',pl:'',pH:'',ster:'auto',items:[blankItem()],steps:[],notes:[],team:[],who:{},chk:{}});
+function fromRec(r){const P=blankPrep(),L=r.V>=1000&&r.V%1000===0;Object.assign(P,{kind:'med',rec:r.id,nameSet:1,name:r.n,V:D(L?r.V/1000:r.V),Vu:L?'L':'mL',nb:r.nb||1,np:r.nb||1,ag:r.ag?D(r.ag):'',pH:r.pH||'',ster:r.st||'auto',notes:[...(r.no||[])]});
+  P.items=r.it.map(a=>{const o={...blankItem(),n:a[0],t:a[1],post:a[a.length-1]==='post'};
+    if(a[1]==='pdr'){o.c=D(a[2]);o.cu=a[3];const k=subFind(a[0]);o.mm=typeof a[4]==='number'?D(a[4]):k&&SUB[k][1]?D(SUB[k][1]):''}
+    else if(a[1]==='liq'){o.r=D(a[2]);o.ru=a[3]}
+    else if(a[1]==='sto'){o.ci=D(a[2]);o.ciu=a[3];o.cf=D(a[4]);o.cfu=a[5]}
+    else o.q=a[2];o.cl=true;return o});return P}
+/* calcul de toute la préparation ; un composant incomplet ou faux n'empêche pas les autres */
+function compute(P){const R={items:[],V:null};const Vr=pnum(P.V,P.Ve,P.VS);
+  if(!('v' in Vr)||!(Vr.v>0)){R.wait=Vr.empty?'vol':'bad';return R}
+  const V=Vr.v*({L:1000,mL:1,'µL':1e-3}[P.Vu]||1),nb=Math.max(1,Math.min(50,+P.nb||1)),np=Math.max(1,Math.min(nb,+P.np||nb)),Vb=V/nb;
+  const ag0=num(P.ag),ag='v' in ag0&&ag0.v>0?ag0.v:0,pl0=num(P.pl),pl='v' in pl0&&pl0.v>0?pl0.v:25;
+  Object.assign(R,{V,nb,np,Vb,ag,pl,agb:ag*Vb/1000,plates:Math.floor(Vb/pl+1e-9)});
+  let vpre=0;
+  P.items.forEach((it,i)=>{const o={i,id:it.id,it,t:it.t,name:String(it.n||'').trim()||`Composant ${i+1}`,post:!!it.post};
+    o.Vt=o.post?Vb:V;o.mult=o.post?np:1;R.items.push(o);
+    if(!String(it.n||'').trim()&&['c','r','ci','cf','q'].every(f=>!String(it[f]||'').trim())){o.skip=1;return}
+    if(it.t==='txt'){o.kind='txt';o.txt=String(it.q||'').trim()||'à ajuster';return}
+    const need=f=>{const r=pnum(it[f],it[f+'e'],it[f+'S']);if(r.empty){o.inc=o.inc||'Valeur à compléter';return null}if(r.bad){o.err='Nombre non reconnu : écrivez par ex. 1,5 ou 2e-3';return null}if(r.v<0){o.err='Valeur négative : indiquez une valeur positive';return null}return r.v};
+    if(it.t==='pdr'){const c=need('c');if(c==null)return;
+      if(it.cu in PM){const M=need('mm');if(M==null){if(!o.err)o.inc='Masse molaire manquante : indiquez-la (g/mol)';return}if(!(M>0)){o.err='Masse molaire nulle : indiquez une valeur > 0';return}
+        o.cb=c*PM[it.cu];o.M=M;o.amt=o.cb*M*o.Vt/1000}
+      else{o.cb=c*pu(it.cu);o.amt=o.cb*o.Vt/1000}
+      o.kind='mass'}
+    else if(it.t==='liq'){const r=need('r');if(r==null)return;o.rb=r*LU[it.ru];o.amt=o.rb*o.Vt/1000;o.kind='vol'}
+    else{const ci=need('ci'),cf=need('cf');if(ci==null||cf==null)return;
+      if(FAM(it.ciu)!==FAM(it.cfu)){o.err='Unités incompatibles';return}
+      const a=ci*cuf(it.ciu),b=cf*cuf(it.cfu);if(!(a>0)){o.err='Solution mère à 0 : indiquez sa concentration';return}if(b>a*(1+1e-12)){o.err='Concentration finale > solution mère : impossible par dilution';return}
+      o.amt=b*o.Vt/a;o.F=a/b;o.kind='vol'}
+    if(!Number.isFinite(o.amt)){o.err='Calcul impossible : vérifiez les valeurs et les unités';delete o.kind;return}
+    if(o.kind==='vol'&&!o.post)vpre+=o.amt});
+  R.vpre=vpre;R.water=V-vpre;R.over=vpre>V*(1+1e-9);
+  R.ok=R.items.filter(o=>!o.skip&&!o.err&&!o.inc&&o.kind);return R}
+const Q=o=>o.kind==='mass'?MS(o.amt):o.kind==='vol'?VS(o.amt):o.txt;
+const QX=(o,R)=>Q(o)+(o.post&&R.np>1&&o.kind!=='txt'?` × ${R.np}`:'');
+const sub=o=>o.kind==='mass'?bal(o.amt):o.kind==='vol'?tl(o.amt):'';
+
+/* étapes au labo, dans l'ordre (identifiants stables pour la check-list) */
+function buildSteps(R,P){const L=[],add=(id,ic,h,txt)=>L.push({id,ic,h,txt:txt||h.replace(/<[^>]+>/g,'')});if(!R.V)return L;
+  const ok=R.ok,pre=ok.filter(o=>!o.post),post=ok.filter(o=>o.post),pw=pre.filter(o=>o.kind==='mass'),lq=pre.filter(o=>o.kind==='vol');
+  pw.forEach(o=>add('w'+o.id,'scale',`Peser <b>${MS(o.amt)}</b> de ${esc(o.name)} <small>(${bal(o.amt)}, nacelle de pesée, spatule propre)</small>`));
+  add('dis','beaker',`Verser environ <b>${VS(R.V*.8)}</b> d'eau distillée dans un ${bec(R.V)} avec un barreau aimanté${pw.length?' et y dissoudre les poudres sous agitation magnétique':''}${lq.length?' (moins d\'eau si les liquides à ajouter sont volumineux : le total ne doit pas dépasser le volume final)':''}.`);
+  lq.forEach(o=>add('v'+o.id,'pipette',`Ajouter <b>${VS(o.amt)}</b> de ${esc(o.name)} <small>(${tl(o.amt)}, cône neuf)</small>`));
+  pre.filter(o=>o.kind==='txt').forEach(o=>add('x'+o.id,'flask',`${esc(o.name)} : <b>${esc(o.txt)}</b>`));
+  if(String(P.pH||'').trim())add('ph','ph',`Ajuster le pH à <b>${esc(P.pH)}</b> au pH-mètre étalonné, sous agitation, en ajoutant goutte à goutte du HCl (pour l'abaisser) ou du NaOH (pour l'augmenter).`);
+  add('qsp','bottle',`Compléter au volume final de <b>${VS(R.V)}</b> avec de l'eau distillée (${epr(R.V)}), puis homogénéiser.`);
+  if(R.nb>1)add('rep','bottle',`Répartir <b>${VS(R.Vb)}</b> dans chacun des ${R.nb} ${bot(R.Vb).replace('flacon','flacons')} (remplis aux deux tiers au plus).`);
+  else if(R.ag)add('rep','bottle',`Verser dans un ${bot(R.Vb)} (rempli aux deux tiers au plus).`);
+  if(R.ag)add('ag','scale',`Peser et ajouter <b>${MS(R.agb)}</b> d'agar dans ${R.nb>1?`chacun des ${R.nb} flacons`:'le flacon'} <small>(il se dissout pendant l'autoclavage)</small>`);
+  if(P.ster==='auto')add('ster','thermo','Stériliser à l\'autoclave <b>20 min à 121 °C</b>, bouchons dévissés d\'un quart de tour.');
+  else if(P.ster==='filt')add('ster','filter','Stériliser par <b>filtration sur membrane 0,22 µm</b> (seringue et filtre stériles), dans un flacon stérile.');
+  if(post.length){add('cool','cool',`Laisser refroidir vers <b>50 °C</b> (le flacon se tient à main nue).`);
+    const dans=R.nb>1?(R.np<R.nb?` dans ${R.np} des ${R.nb} flacons (les autres restent sans ajout)`:` dans chacun des ${R.nb} flacons`):'';
+    post.forEach(o=>add('p'+o.id,o.kind==='mass'?'scale':'pipette',o.kind==='txt'?`${esc(o.name)} : <b>${esc(o.txt)}</b>`:`Ajouter <b>${Q(o)}</b> de ${esc(o.name)}${dans}, près de la flamme du bec Bunsen, puis mélanger doucement par rotation.`))}
+  if(R.ag)add('pour','dish',`Couler ${VS(R.pl)} par boîte : environ <b>${R.plates} boîtes</b>${R.nb>1?` par flacon (${R.plates*R.nb} au total)`:''} ; laisser solidifier couvercle fermé, sur une surface plane.`);
+  add('lab','tag','Étiqueter : nom de la préparation, date et initiales.');
+  (P.steps||[]).forEach((s,k)=>add('u'+k+nkey(s).slice(0,12),'book',esc(s)));
+  return L}
+/* précautions : substance reconnue, nom saisi, cohérence de la préparation */
+function notesFor(R,P){if(!R.V)return[];const ok=R.ok,F=new Set();
+  ok.forEach(o=>{NF.forEach(([re,f])=>{if(re.test(o.name))F.add(f)});const k=subFind(o.name);if(k)SUB[k][2].split('').forEach(f=>F.add(f))});
+  const N=[];
+  ok.filter(o=>!o.post&&ABX.test(o.name)).forEach(o=>N.push(['warn',`<b>${esc(o.name)}</b> est un antibiotique : détruit par la chaleur, il s'ajoute <b>après l'autoclavage</b>, une fois le milieu refroidi. Activez « Ajouté après autoclavage » sur ce composant.`,'warn']));
+  if(P.ster==='auto'&&ok.some(o=>{const k=subFind(o.name);return!o.post&&k&&/[fbu]/.test(SUB[k][2])}))N.push(['warn','<b>Composant thermolabile : ne pas autoclaver</b>. Choisissez la stérilisation par filtration, ou ajoutez ce composant stérile après l\'autoclavage.','warn']);
+  if(R.over)N.push(['warn','<b>Volume dépassé</b> : les liquides ajoutés dépassent le volume final. Utilisez des solutions mères plus concentrées ou augmentez le volume final.','bad']);
+  ok.filter(o=>o.kind==='mass'&&o.amt<.01).forEach(o=>N.push(['warn',`<b>${esc(o.name)} : ${MS(o.amt)}</b>, trop peu pour être pesé précisément. Préparez une solution mère de ce composant et prélevez-en le volume nécessaire (type « Sol. mère »).`,'warn']));
+  ok.filter(o=>o.kind==='vol'&&(tool(o.amt*1000)||{}).err).forEach(o=>N.push(['warn',`<b>${esc(o.name)} : ${VS(o.amt)}</b>, volume trop petit pour être pipeté (moins de 0,2 µL) : faites d'abord une dilution intermédiaire de la solution mère.`,'warn']));
+  if(F.has('P')&&(F.has('c')||F.has('m')))N.push(NOTE.PCa);
+  ['x','acid','tox','h','y','o','T','R','u','d','e','p','s','t','b','f','z','alc','visc','dm','L'].forEach(f=>{if(F.has(f))N.push(NOTE[f])});
+  if(ok.some(o=>o.post&&ABX.test(o.name)))N.push(['info','<b>Antibiotique</b> : ajoutez-le seulement quand le milieu est redescendu vers 50 °C, jamais avant l\'autoclavage. Conservez les boîtes à 4 °C et utilisez-les dans les semaines qui suivent.','']);
+  if(R.ag)N.push(['info','<b>Gélose</b> : encore liquide à 50 °C, elle se solidifie en dessous de 40 °C environ. Coulez près de la flamme, sans bulles ; conservez les boîtes à 4 °C, retournées (couvercle en bas).','']);
+  if(ok.some(o=>o.kind==='mass'))N.push(['tip','<b>Pourquoi compléter au volume final</b> plutôt que verser d\'emblée tout le volume d\'eau : les solutés dissous occupent eux aussi un volume ; on dissout dans moins d\'eau, puis on complète.','']);
+  if(ok.some(o=>o.kind==='vol'))N.push(['tip','<b>Un cône neuf pour chaque solution</b> : un cône qui a touché le mélange contaminerait la solution mère suivante.','']);
+  (P.notes||[]).forEach(s=>N.push(['shield',esc(s),'']));
+  return N}
+/* détail du calcul */
+function calcLines(R){if(!R.V)return'';const L=[];
+  R.ok.forEach(o=>{const v=` × ${fmt(o.Vt/1000)} L`,pf=o.post&&R.nb>1?' par flacon':'',x=o.post&&R.np>1&&o.kind!=='txt'?` ; × ${R.np} flacons = ${o.kind==='mass'?MS(o.amt*R.np):VS(o.amt*R.np)}`:'';
+    if(o.kind==='mass')L.push(o.M?`${esc(o.name)} : m = C × M × V = ${fmt(o.cb)} mol/L × ${fmt(o.M)} g/mol${v} = <b>${MS(o.amt)}</b>${pf}${x}`:`${esc(o.name)} : m = γ × V = ${fmt(o.cb)} g/L${v} = <b>${MS(o.amt)}</b>${pf}${x}`);
+    else if(o.kind==='vol')L.push(o.F?`${esc(o.name)} : Vᵢ = C<sub>f</sub> × V<sub>f</sub> / Cᵢ = ${esc(o.it.cf)} ${o.it.cfu} × ${VS(o.Vt)} / ${esc(o.it.ci)} ${o.it.ciu} = <b>${VS(o.amt)}</b>${pf} (dilution au 1/${fmt(o.F)})${x}`
+      :`${esc(o.name)} : V = ${fmt(o.rb)} mL/L${v} = <b>${VS(o.amt)}</b>${pf}${x}`)});
+  if(R.vpre>0)L.push(`Eau ≈ ${VS(R.V)} − ${VS(R.vpre)} de liquides = <b>${VS(Math.max(0,R.water))}</b> (un peu moins s'il y a beaucoup de poudre : compléter au volume final)`);
+  if(R.nb>1)L.push(`Par flacon : ${VS(R.V)} / ${R.nb} = <b>${VS(R.Vb)}</b>`);
+  if(R.ag)L.push(`Agar : ${fmt(R.ag)} g/L × ${fmt(R.Vb/1000)} L = <b>${MS(R.agb)}</b> par flacon`,`Boîtes : ${VS(R.Vb)} / ${VS(R.pl)} = <b>${R.plates}</b>${R.nb>1?' par flacon':''}`);
+  return L.join('\n')}
+
+/* ---------- 8. IA extérieure : prompt, puis lecture du texte rendu ---------- */
+const AIS=[['ChatGPT','https://chatgpt.com/','teal'],['Claude','https://claude.ai/new','orange'],['Gemini','https://gemini.google.com/app','blue'],['Le Chat','https://chat.mistral.ai/chat','pink']];
+const PROMPT=`Tu es assistant de laboratoire. Lis le protocole joint (photo ou PDF) et extrais CHAQUE solution ou milieu à préparer.
+Réponds UNIQUEMENT avec le format ci-dessous, en texte brut (pas de tableau, pas de commentaire). N'invente rien : si une information manque, n'écris pas la ligne.
+
+PREPARATION: nom de la solution ou du milieu
+VOLUME: volume final à préparer (ex. 750 mL)
+RECETTE_POUR: volume auquel se rapportent les quantités du protocole, s'il est différent (ex. 1 L)
+FLACONS: nombre de flacons
+FLACONS_AJOUT: nombre de flacons qui reçoivent les ajouts après autoclavage
+AGAR: concentration de l'agar (ex. 15 g/L)
+PH: pH à ajuster (ex. 7,5 ou 5,5-5,8)
+STERILISATION: autoclave, filtration ou aucune
+BOITE: volume coulé par boîte de Petri (ex. 25 mL)
+COMPOSANT: nom | quantité
+ETAPE: étape importante du protocole, dans l'ordre
+PRECAUTION: précaution indiquée dans le protocole
+FIN
+
+Pour la quantité d'un COMPOSANT, recopie ce qu'indique le protocole, sous l'une de ces formes :
+- masse ou volume pour la recette : 200 g ; 20 mL ; 1,5 mL
+- concentration finale d'une poudre : 15 g/L ; 0,6 M ; 50 mM ; 2 %
+- solution mère vers concentration finale : 1 M -> 50 mM ; 100 mg/mL -> 240 µg/mL
+Ajoute « | après autoclave » à la fin de la ligne si le composant est ajouté après l'autoclavage (antibiotiques…).
+Une ligne COMPOSANT par composant. Un bloc PREPARATION … FIN par solution ou milieu.
+
+Exemple :
+PREPARATION: LB gélose ampicilline
+VOLUME: 500 mL
+RECETTE_POUR: 1 L
+AGAR: 15 g/L
+STERILISATION: autoclave
+COMPOSANT: Tryptone | 10 g
+COMPOSANT: Extrait de levure | 5 g
+COMPOSANT: NaCl | 10 g
+COMPOSANT: Ampicilline | 100 mg/mL -> 100 µg/mL | après autoclave
+FIN`;
+const UMAP={g:'g',mg:'mg','µg':'µg',ug:'µg',kg:'kg',ml:'mL','µl':'µL',ul:'µL',l:'L',m:'M',mm:'mM','µm':'µM',um:'µM',nm:'nM','mol/l':'M','mmol/l':'mM','µmol/l':'µM',
+  'g/l':'g/L','mg/ml':'mg/mL','mg/l':'mg/L','µg/ml':'µg/mL','ug/ml':'µg/mL','ng/µl':'ng/µL','ng/ul':'ng/µL','%':'% (m/V)','%(m/v)':'% (m/V)','%m/v':'% (m/V)','%(v/v)':'% (V/V)','%v/v':'% (V/V)',
+  x:'X','u/µl':'U/µL','u/ul':'U/µL','u/ml':'U/mL','ml/l':'mL/L','µl/ml':'µL/mL','ul/ml':'µL/mL'};
+const MASSU={g:1,mg:1e-3,'µg':1e-6,kg:1e3},VOLU={mL:1,'µL':1e-3,L:1e3};
+/* « 1,5 mL », « 2x10^-3 M », « 15g/L » → {v, u} */
+function nu(s){s=String(s||'').trim().replace(/\s+/g,' ');const m=s.match(/^([0-9][0-9.,]*(?:\s?(?:[x×*·]\s?10\^?\s?[−-]?\d+|e[−-]?\d+))?)\s*(.*)$/i);if(!m)return null;
+  const r=num(m[1].replace(/\s/g,''));if(!('v' in r))return null;const u0=m[2].trim(),uk=u0.toLowerCase().replace(/\s/g,'');
+  return{v:r.v,u:UMAP[uk]||UMAP[uk.replace(/\.$/,'')]||u0}}
+function qty(raw,V0,o){const parts=String(raw).split(/->|→|=>|➝/);
+  if(parts.length===2){const a=nu(parts[0]),b=nu(parts[1]);if(a&&b&&cuf(a.u)>0&&cuf(b.u)>0&&FAM(a.u)===FAM(b.u)){Object.assign(o,{t:'sto',ci:D(a.v),ciu:a.u,cf:D(b.v),cfu:b.u});return true}}
+  const a=nu(parts[0]);if(a){
+    if(a.u in MASSU){Object.assign(o,{t:'pdr',c:D(+(a.v*MASSU[a.u]/(V0/1000)).toPrecision(8)),cu:'g/L'});return true}
+    if(a.u in VOLU){Object.assign(o,{t:'liq',r:D(+(a.v*VOLU[a.u]/(V0/1000)).toPrecision(8)),ru:'mL/L'});return true}
+    if(pu(a.u)>0||a.u in PM){Object.assign(o,{t:'pdr',c:D(a.v),cu:a.u});if(a.u in PM){const k=subFind(o.n);if(k&&SUB[k][1])o.mm=D(SUB[k][1])}return true}
+    if(a.u in LU){Object.assign(o,{t:'liq',r:D(a.v),ru:a.u});return true}}
+  Object.assign(o,{t:'txt',q:String(raw).trim()});return false}
+const volML=s=>{const a=nu(s);return a&&a.u in VOLU?a.v*VOLU[a.u]:null};
+function parseAI(text){const out=[],skipped=[];let P=null,V0=null,raw=[];
+  const close=()=>{if(!P)return;const V=volML(P._V)||V0||1000,R0=V0||V;
+    raw.forEach(([n,q,fl])=>{const o={...blankItem(),n,cl:true};qty(q,R0,o);if(fl)o.post=true;
+      if(/^(bacto[- ]?)?agar\b/i.test(n.trim())&&o.t==='pdr'&&o.cu==='g/L'&&!P.ag){P.ag=o.c;return}P.items.push(o)});
+    const L=V>=1000&&V%1000===0;P.V=D(L?V/1000:+V.toPrecision(8));P.Vu=L?'L':'mL';delete P._V;if(!P.items.length)P.items=[blankItem()];P.np=Math.min(P.np||P.nb,P.nb);out.push(P);P=null;V0=null;raw=[]};
+  String(text||'').replace(/\r/g,'').split('\n').forEach(line=>{let l=line.replace(/^\s*(?:[-*•]|\d+[.)])\s+/,'').replace(/\*\*/g,'').replace(/^`+|`+$/g,'').trim();if(!l)return;
+    const m=l.match(/^([A-Za-zÀ-ÿ_ ]{2,22}?)\s*:\s*(.*)$/);if(!m){if(P)skipped.push(l);return}
+    const k=nrm(m[1]).toUpperCase().replace(/\s+/g,'_'),v=m[2].trim();
+    if(k==='PREPARATION'){close();P={...blankPrep(),items:[],name:v||'Préparation importée',_V:''};return}
+    if(!P){if(k==='COMPOSANT'||k==='VOLUME'){P={...blankPrep(),items:[],name:'Préparation importée',_V:''}}else return}
+    if(k==='VOLUME')P._V=v;else if(k==='RECETTE_POUR')V0=volML(v);else if(k==='FLACONS')P.nb=Math.max(1,Math.min(50,parseInt(v,10)||1));
+    else if(k==='FLACONS_AJOUT')P.np=Math.max(1,parseInt(v,10)||1);
+    else if(k==='AGAR'){const a=nu(v);if(a)P.ag=D(a.u==='g/L'?a.v:a.u==='% (m/V)'?a.v*10:a.v)}
+    else if(k==='PH')P.pH=v;else if(k==='STERILISATION')P.ster=/filt/i.test(v)?'filt':/aucun|non|sans/i.test(v)?'none':'auto';
+    else if(k==='BOITE'||k==='BOITES'){const a=nu(v);if(a&&a.u in VOLU)P.pl=D(a.v*VOLU[a.u])}
+    else if(k==='COMPOSANT'){const p=v.split('|').map(x=>x.trim());if(p[0])raw.push([p[0],p[1]||'',/apr[eè]s|autoclav/i.test(p.slice(2).join(' '))])}
+    else if(k==='ETAPE')P.steps.push(v);else if(k==='PRECAUTION')P.notes.push(v);else if(k==='FIN')close();else skipped.push(l)});
+  close();return{preps:out,skipped}}
+
+/* ---------- 11b. Conversions (fonctions pures, testées) ---------- */
+/* fonctions pures (testées) */
+const kMass=(c,cu,mm,vml)=>cu in PM?c*PM[cu]*mm*vml/1000:c*pu(cu)*vml/1000;
+function kConv(v,u,mm){const mol=FAM(u)==='mol',b=v*cuf(u);return{mol:mol?b:mm>0?b/mm:null,gl:mol?(mm>0?b*mm:null):b}}
+const KD={c:{n:'',sq:'',sk:null,sok:false,mm:'',v:'',ve:'',u:'M'}};
+
+/* ---------- 11c. Gels d'électrophorèse : agarose (TAE, TBE) et SDS-PAGE (Laemmli) ----------
+   agarose : m = % · V / 100 (g, % m/V) dans V de tampon 1X ; tampon = V_concentré (C_f / C_concentré) + eau ;
+   colorant au 1/10 000 (SYBR Safe, GelRed 10 000X) ou BET 0,5 µg/mL (solution à 10 mg/mL).
+   SDS-PAGE (d'après Sambrook et Russell) : gel de séparation Tris-HCl pH 8,8 0,375 M, SDS 0,1 %, APS 0,1 %,
+   TEMED 0,08 % (< 7 %), 0,06 % (< 9 %) ou 0,04 % ; gel de concentration Tris-HCl pH 6,8 0,125 M, SDS 0,1 %, APS 0,1 %, TEMED 0,1 %. */
+const GD=()=>({t:'',a:{p:'1',V:'50',Vu:'mL',buf:'tae',cs:'',cf:'',vt:'',vtu:'mL',st:'sybr',lc:'',lf:'',ls:'',ln:''},s:{p:'12',ps:'4',n:1,th:'1',vr:'5',vs:'2',ac:'30',t6:'0,5'},chk:{}});
+S.g=(()=>{let o=null;try{o=JSON.parse(sto.g('bpr3_gel'))}catch(e){}const d=GD();if(!o)return d;return{...d,...o,a:{...d.a,...(o.a||{})},s:{...d.s,...(o.s||{})},chk:o.chk||{}}})();
+const saveG=()=>sto.s('bpr3_gel',JSON.stringify(S.g));
+/* plage de séparation de l'ADN linéaire (repères usuels, mêmes valeurs que BioBand) */
+const AGR=[[0.5,1000,30000],[0.7,800,12000],[1,500,10000],[1.2,400,7000],[1.5,200,3000],[2,50,2000],[2.5,20,1000]];
+const bpS=n=>n>=1000?`${D(n/1000)} kb`:`${n} pb`;
+/* pourcentage entre deux repères : les deux repères qui l'encadrent */
+const agNear=p=>{const i=AGR.findIndex(x=>x[0]>p),lo=AGR[i-1],hi=AGR[i];return lo&&hi?`Entre les repères ${D(lo[0])} % (${bpS(lo[1])} à ${bpS(lo[2])}) et ${D(hi[0])} % (${bpS(hi[1])} à ${bpS(hi[2])}).`:'Pourcentage en dehors des repères usuels (0,5 à 2,5 %).'};
+const agRange=p=>{const r=AGR.find(x=>Math.abs(x[0]-p)<1e-9);return r?`${bpS(r[1])} à ${bpS(r[2])}`:''};
+/* plage de séparation linéaire des protéines (Sambrook et Russell, repères) */
+const SDR=[[15,12,43],[10,16,68],[7.5,36,94],[5,57,212]];
+const GBUF={tae:{n:'TAE',cs:['50','10'],cf:['1','0,5'],x1:[['Tris-acétate',40,'mM'],['EDTA',1,'mM']],rec:'tae'},
+  tbe:{n:'TBE',cs:['10','5'],cf:['0,5','1'],x1:[['Tris',89,'mM'],['Borate',89,'mM'],['EDTA',2,'mM']],rec:'tbe'}};
+const GST=[['none','Aucun','Coloration après migration'],['sybr','SYBR Safe','10 000X, au 1/10 000'],['gelred','GelRed','10 000X, au 1/10 000'],['bet','BET','10 mg/mL, 0,5 µg/mL final']];
+/* épaisseur des plaques → volumes par mini-gel (≈ 8 × 7 cm), repères avec un léger excès */
+const SDT=[['0,75','0,75 mm',3.5,1.5],['1','1,0 mm',5,2],['1,5','1,5 mm',7.5,2.5]];
+const gv=(o,f,uf)=>{const r=pnum(o[f],o[f+'e'],o[f+'S']);return'v' in r?r.v*(uf?VOLU[o[uf]]||1:1):NaN};
+const erl=V=>[50,100,250,500,1000,2000].find(x=>x>=4*V)||2000;
+function gelA(a){const p=gv(a,'p'),V=gv(a,'V','Vu'),cs=gv(a,'cs'),cf=gv(a,'cf'),vt=String(a.vt||'').trim()?gv(a,'vt','vtu'):0;
+  if(!(p>0)||!(V>0)||!(cs>0)||!(cf>0))return{wait:1};
+  if(p>5)return{err:'Pourcentage d\'agarose trop élevé : au-delà de 3 à 4 %, l\'agarose ne se dissout plus correctement. Saisissez un pourcentage entre 0,3 et 4 %.'};
+  if(cf>cs*(1+EPS))return{err:`La concentration voulue (${D(cf)}X) dépasse celle du tampon concentré (${D(cs)}X) : une dilution ne peut que diminuer la concentration. Vérifiez les deux valeurs.`};
+  if(!(vt>=0))return{err:'Volume de tampon pour la cuve non reconnu : corrigez-le ou laissez le champ vide.'};
+  const tot=V+vt,stock=tot*cf/cs,st=a.st;
+  return{p,V,vt,cs,cf,tot,stock,water:tot-stock,m:p*V/100,erl:erl(V),stain:st==='bet'?V*.05:st==='none'?0:V/10,st,ld:gelLd(a)}}
+/* tampon de charge (dépôt des produits de PCR) : C_f = Cᵢ · V_charge / (V_éch + V_charge) → V_charge = C_f · V_éch / (Cᵢ − C_f) ; volumes en µL */
+function gelLd(a){const lc=gv(a,'lc'),lf=gv(a,'lf'),ls=gv(a,'ls'),ln=String(a.ln||'').trim()?gv(a,'ln'):1;
+  if(!(lc>0)||!(lf>0)||!(ls>0))return null;
+  if(lf>=lc*(1-EPS))return{err:`La concentration finale du tampon de charge (${D(lf)}X) doit être inférieure à sa concentration initiale (${D(lc)}X) : le tampon est dilué par l'échantillon.`};
+  if(!(ln>=1)||Math.abs(ln-Math.round(ln))>EPS)return{err:'Nombre d\'échantillons : saisissez un nombre entier (1 ou plus).'};
+  const vd=lf*ls/(lc-lf);return{lc,lf,ls,ln:Math.round(ln),vd,vw:ls+vd}}
+function gelS(s){const p=gv(s,'p'),ps=gv(s,'ps'),n=gv(s,'n'),vr=gv(s,'vr'),vs=gv(s,'vs'),ac=gv(s,'ac'),t6=gv(s,'t6');
+  if(!(p>0)||!(ps>0)||!(vr>0)||!(vs>0)||!(ac>0)||!(t6>0))return{wait:1};
+  if(!(n>=1&&n<=20)||Math.abs(n-Math.round(n))>EPS)return{err:'Nombre de gels : saisissez un nombre entier, de 1 à 20.'};
+  if(t6<=.125)return{err:'Le Tris-HCl pH 6,8 doit être plus concentré que 0,125 M (concentration finale du gel de concentration) : prenez une solution à 0,5 M ou 1,0 M.'};
+  const Vr=n*vr,Vs=n*vs,tm=p<7?.0008:p<9?.0006:.0004,
+    R={V:Vr,acr:p*Vr/ac,tris:Vr*.375/1.5,sds:Vr*.01,aps:Vr*.01,tem:Vr*tm,tm},C={V:Vs,acr:ps*Vs/ac,tris:Vs*.125/t6,sds:Vs*.01,aps:Vs*.01,tem:Vs*.001};
+  R.w=Vr-R.acr-R.tris-R.sds-R.aps-R.tem;C.w=Vs-C.acr-C.tris-C.sds-C.aps-C.tem;
+  if(R.w<-EPS)return{err:`Gel de séparation à ${D(p)} % impossible avec une solution d'acrylamide à ${D(ac)} % : il ne reste pas assez de volume pour les autres réactifs. Baissez le pourcentage ou prenez une solution à 40 %.`};
+  if(C.w<-EPS)return{err:'Gel de concentration impossible avec ces solutions mères : vérifiez le pourcentage et la concentration du Tris-HCl pH 6,8.'};
+  return{p,ps,n,ac,t6,R,C}}
+/* étapes (identifiants stables pour la check-list) */
+function gelSteps(){const g=S.g,L=[],add=(id,h,w)=>L.push({id,h,w});
+  if(g.t==='aga'){const r=gelA(g.a);if(!r.m)return L;const B=GBUF[g.a.buf].n,X1=`${B} ${D(r.cf)}X`,stn=GST.find(x=>x[0]===r.st);
+    if(Math.abs(r.cs-r.cf)>EPS)add('buf',`Préparer <b>${VS(r.tot)}</b> de ${X1} : <b>${VS(r.stock)}</b> de ${B} ${D(r.cs)}X + <b>${VS(r.water)}</b> d'eau distillée <small>(éprouvette graduée)</small>, puis homogénéiser.`);
+    add('w',`Peser <b>${MS(r.m)}</b> d'agarose <small>(${bal(r.m)})</small> dans un erlenmeyer de <b>${r.erl} mL</b> <small>(3 à 5 fois le volume du gel)</small>.`);
+    add('add',`Ajouter <b>${VS(r.V)}</b> de ${X1} et agiter doucement pour disperser la poudre.`);
+    add('heat',`Chauffer au micro-ondes par périodes de 20 à 30 s, en agitant entre chaque, jusqu'à dissolution complète : solution <b>limpide, sans grains ni filaments</b>. Gants anti-chaleur : risque d'ébullition brutale.`,1);
+    add('evap',`Si une partie de l'eau s'est évaporée, compléter à la masse de départ avec de l'eau distillée <small>(peser l'erlenmeyer avant et après chauffage)</small>.`);
+    add('cool',`Laisser refroidir vers <b>55 à 60 °C</b> <small>(l'erlenmeyer se tient en main)</small> en agitant de temps en temps.`);
+    if(r.st!=='none')add('stain',`Ajouter <b>${VS(r.stain/1000)}</b> de ${stn[1]} <small>(${stn[2]})</small> et mélanger par rotation, sans faire de bulles.${r.st==='bet'?' <b>BET : gants nitrile obligatoires</b>.':''}`,r.st==='bet');
+    add('pour','Placer le peigne dans le support de coulage (bords étanches), couler le gel et chasser les bulles avec un cône.');
+    add('sol','Laisser solidifier <b>20 à 30 min</b> à température ambiante : le gel devient opaque et ferme.');
+    add('tank',`Retirer le peigne verticalement et placer le gel dans la cuve, <b>puits du côté de la cathode (−, noir)</b> : l'ADN, chargé négativement, migre vers l'anode (+, rouge).`);
+    add('run',`Recouvrir de ${X1} (le même tampon que celui du gel), 3 à 5 mm au-dessus du gel${r.vt?` : environ <b>${VS(r.vt)}</b>`:''}.`);
+    if(r.ld&&!r.ld.err)add('load',`Mélanger chaque échantillon (<b>${VS(r.ld.ls/1000)}</b>) avec <b>${VS(r.ld.vd/1000)}</b> de tampon de charge ${D(r.ld.lc)}X (pipetage), centrifuger brièvement, puis déposer <b>${VS(r.ld.vw/1000)}</b> par puits, sans percer le fond, avec un marqueur de taille dans un puits.`);
+    if(r.st==='none')add('post','Après migration : colorer le gel 15 à 30 min dans du tampon contenant le colorant, puis observer sous UV ou lumière bleue.');
+    return L}
+  const r=gelS(g.s);if(!r.R)return L;const R=r.R,C=r.C,mix=(o,t)=>`eau <b>${VS(o.w)}</b>, acrylamide/bis ${D(r.ac)} % <b>${VS(o.acr)}</b>, Tris-HCl ${t} <b>${VS(o.tris)}</b>, SDS 10 % <b>${VS(o.sds)}</b>`;
+  add('pl','Nettoyer les plaques à l\'éthanol 70 %, monter le système de coulage et vérifier l\'étanchéité avec de l\'eau distillée, puis bien égoutter.');
+  add('r1',`Gel de séparation ${D(r.p)} % : dans un tube de ${R.V>12?'50':'15'} mL, mélanger ${mix(R,'1,5 M pH 8,8')}.`);
+  add('r2',`Ajouter <b>${VS(R.aps)}</b> d'APS 10 % puis <b>${VS(R.tem)}</b> de TEMED <b>en dernier</b> : la polymérisation commence. Mélanger par 2 ou 3 retournements doux (sans vortex ni bulles) et couler aussitôt.`,1);
+  add('r3','Couler entre les plaques jusqu\'à environ 1 cm sous le bas des dents du peigne.');
+  add('r4','Recouvrir aussitôt d\'une fine couche d\'isopropanol (ou d\'eau) : le front du gel reste plat et l\'oxygène de l\'air, qui freine la polymérisation, est écarté.');
+  add('r5','Laisser polymériser <b>20 à 30 min</b> : une ligne nette apparaît sous la couche d\'isopropanol.');
+  add('r6','Éliminer l\'isopropanol, rincer à l\'eau distillée et sécher le bord avec un papier filtre, sans toucher le gel.');
+  add('c1',`Gel de concentration ${D(r.ps)} % : mélanger ${mix(C,`${D(r.t6)} M pH 6,8`)}, puis <b>${VS(C.aps)}</b> d'APS 10 % et <b>${VS(C.tem)}</b> de TEMED en dernier.`,1);
+  add('c2','Couler jusqu\'en haut des plaques et insérer aussitôt le peigne, sans bulle sous les dents.');
+  add('c3','Laisser polymériser <b>20 à 30 min</b>, retirer le peigne verticalement et rincer les puits avec du tampon de migration.');
+  add('run','Placer le gel dans la cuve et la remplir de tampon de migration Tris-glycine-SDS 1X <small>(25 mM Tris, 192 mM glycine, 0,1 % SDS)</small>.');
+  return L}
+function gelNotes(){const g=S.g,L=[];
+  if(g.t==='aga'){const r=gelA(g.a),p=r.p||gv(g.a,'p');
+    if(p&&(p<.5||p>3))L.push(['warn',p<.5?'Gel à moins de 0,5 % : très fragile, à manipuler avec précaution (support sous le gel).':'Gel à plus de 3 % : dissolution difficile et gel cassant ; vérifiez que ce pourcentage est utile pour vos fragments.','warn']);
+    L.push(['info',g.a.buf==='tae'?'<b>TAE</b> : bonne séparation des grands fragments et récupération de l\'ADN (extraction sur gel) ; pouvoir tampon plus faible, il s\'épuise lors des migrations longues.':'<b>TBE</b> : meilleure résolution des petits fragments et pouvoir tampon plus élevé ; le borate inhibe de nombreuses enzymes, à éviter si l\'ADN doit être extrait du gel.','']);
+    L.push(['info','Utilisez <b>le même tampon, à la même concentration</b>, pour le gel et pour la cuve : sinon les bandes se déforment.','']);
+    L.push(['info','<b>Tampon de charge</b> : il alourdit l\'échantillon (glycérol ou Ficoll), qui tombe au fond du puits, et ses colorants permettent de suivre la migration. Certains mix de PCR en contiennent déjà : déposez alors le produit de PCR directement. Vérifiez que le volume à déposer tient dans un puits.','']);
+    L.push(['info','Repère usuel pour la tension : environ <b>5 V par cm</b> de distance entre les électrodes (plus pour une migration rapide des petits fragments).','']);
+    if(r.st==='bet')L.push(['shield','<b>BET (bromure d\'éthidium)</b> : agent intercalant mutagène. Gants nitrile, zone et matériel dédiés, déchets à éliminer selon les règles du laboratoire. SYBR Safe ou GelRed sont des alternatives moins dangereuses.','warn']);
+    else if(r.st!=='none')L.push(['shield','Les colorants de l\'ADN se fixent à l\'ADN : manipulez-les avec des gants et protégez-les de la lumière.',''])}
+  else{L.push(['shield','<b>L\'acrylamide non polymérisé est neurotoxique</b> : gants nitrile, blouse et lunettes ; ne jamais pipeter à la bouche. Le gel polymérisé se manipule aussi avec des gants (traces de monomère).','warn']);
+    L.push(['info','<b>APS 10 %</b> : à préparer frais (ou en aliquots congelés à −20 °C) ; une APS ancienne polymérise mal. L\'APS et le TEMED déclenchent la polymérisation : ajoutez-les en dernier, juste avant de couler.','']);
+    L.push(['info','Ne pas inverser les tampons : <b>pH 8,8</b> pour le gel de séparation, <b>pH 6,8</b> pour le gel de concentration (pH ajustés à l\'HCl).','']);
+    L.push(['info','Acrylamide/bis 29:1 ou 37,5:1 : les deux conviennent pour le SDS-PAGE ; gardez le même rapport pour des gels à comparer.','']);
+    L.push(['info','Volumes par gel : repères pour un mini-gel d\'environ 8 × 7 cm, à adapter à votre système de coulage.',''])}
+  return L}
+/* questions */
+/* ligne façon Réglages : libellé à gauche, valeur et unité à droite */
+const gin=(b,ph)=>`<input class="val gi" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" data-b="${b}" value="${esc(bget(b)||'')}" placeholder="${ph}" aria-label="Valeur">`;
+const grw=(lab,sub_,ctl)=>`<div class="gr"><span class="gl">${lab}${sub_?`<small>${sub_}</small>`:''}</span><div class="gf">${ctl}</div></div>`;
+const gfx=(b,ph,u)=>gin(b,ph)+(u?`<span class="uf">${u}</span>`:'');
+const guc=(b,ph,ub,ul)=>gin(b,ph)+`<button type="button" class="uc" data-b="${ub}" data-ul="${ul}">${esc(bget(ub))}</button>`;
+const gch=(b,L,cur)=>`<div class="chips wrap">${L.map(([v,l])=>`<button type="button" class="chip${String(cur)===String(v)?' on':''}" data-gc="${b}:${v}">${l}</button>`).join('')}</div>`;
+function gelHTML(){const g=S.g,a=g.a,s=g.s;if(!g.t)g.t='aga';
+  g.tl=GTY.find(x=>x[0]===g.t)[1];a.bufl=GBUF[a.buf].n;
+  let h=`<div class="gg">${grw('Type de gel',g.t==='aga'?'ADN, ARN':'protéines',`<button type="button" class="uc gdd" data-b="gt.tl" data-ul="GTYN">${esc(g.tl)}</button>`)}</div>`;
+  if(g.t==='aga'){const B=GBUF[a.buf];a.stl=a.stl||(GST.find(x=>x[0]===a.st)||GST[1])[1];
+    h+=`<p class="gh">Gel</p><div class="gg">${grw('Agarose','',gfx('ga.p','1','%'))}${grw('Volume du gel','',guc('ga.V','50','ga.Vu','VOL'))}</div><p class="gfoot" id="gRng"></p>
+<p class="gh">Tampon</p><div class="gg">${grw('Tampon','',`<button type="button" class="uc gdd" data-b="ga.bufl" data-ul="GBN">${esc(a.bufl)}</button>`)}
+${grw(`Concentration initiale C<sub>i</sub>`,'',gfx('ga.cs','','X'))}${grw(`Concentration finale C<sub>f</sub>`,'',gfx('ga.cf','','X'))}${grw('Pour remplir la cuve','facultatif',guc('ga.vt','','ga.vtu','VOL'))}</div>
+<p class="gh">Colorant de l'ADN</p><div class="gg">${grw('Dans le gel','ajouté vers 55 à 60 °C',`<button type="button" class="uc gdd" data-b="ga.stl" data-ul="GSTN">${esc(a.stl)}</button>`)}</div>
+<p class="gh">Tampon de charge <small>facultatif</small></p><div class="gg">${grw(`Concentration initiale C<sub>i</sub>`,'',gfx('ga.lc','','X'))}${grw(`Concentration finale C<sub>f</sub>`,'',gfx('ga.lf','','X'))}${grw('Volume par échantillon','produit de PCR',gfx('ga.ls','','µL'))}${grw('Nombre d\'échantillons','',gfx('ga.ln','',''))}</div><p class="gfoot" id="gLd"></p>`}
+  else{h+=`<p class="gh">Gel de séparation</p><div class="gg">${grw('Acrylamide','',gfx('gs.p','12','%'))}${grw('Volume par gel','',gfx('gs.vr','5','mL'))}</div><p class="gfoot" id="gRng"></p>
+<p class="gh">Gel de concentration</p><div class="gg">${grw('Acrylamide','',gfx('gs.ps','4','%'))}${grw('Volume par gel','',gfx('gs.vs','2','mL'))}</div>
+<p class="gfoot">Repères par mini-gel : 0,75 mm : 3,5 + 1,5 mL ; 1,0 mm : 5 + 2 mL ; 1,5 mm : 7,5 + 2,5 mL.</p>
+<div class="gg gsp">${grw('Nombre de gels','',gfx('gs.n','1',''))}</div>
+<p class="gh">Solutions mères</p><div class="gg">${grw('Acrylamide/bis','',gfx('gs.ac','30','%'))}${grw('Tris-HCl pH 6,8','gel de concentration',gfx('gs.t6','0,5','M'))}</div>
+<p class="gfoot">Aussi : Tris-HCl 1,5 M pH 8,8, SDS 10 %, APS 10 % (frais) et TEMED.</p>`}
+  return`<div class="gform">${h}</div>`}
+function gelRes(){const g=S.g,N=gelNotes(),warn=N.filter(n=>n[2]==='warn'),info=N.filter(n=>n[2]!=='warn'),L=gelSteps(),done=L.filter(x=>g.chk[g.t+x.id]).length;
+  const li=(n,q,sb,cc)=>`<div class="rli"${cc?` style="--cc:var(--c-${cc})"`:''}>${cc?'<i class="rd"></i>':''}<span class="rn">${n}${sb?`<small>${sb}</small>`:''}</span><b>${q}</b></div>`;
+  let top='',calc='';
+  if(g.t==='aga'){const r=gelA(g.a),B=GBUF[g.a.buf].n,stn=GST.find(x=>x[0]===r.st);if(r.err)return`<div class="grp rbox"><p class="kw bad">${IC.warn}<span>${r.err}</span></p></div>`;
+    top=`<div class="ovh"><b>Gel d'agarose ${D(r.p)} %</b><small>${[VS(r.V),`${B} ${D(r.cf)}X`,stn[0]==='none'?'sans colorant':stn[1],agRange(r.p)?`sépare ${agRange(r.p)}`:''].filter(Boolean).join(' · ')}</small></div><div class="rl">`
+      +`<p class="rh">À peser</p>`+li('Agarose',MS(r.m),bal(r.m),'purple')
+      +`<p class="rh">${VS(r.tot)} de ${B} ${D(r.cf)}X${r.vt?` · ${VS(r.V)} pour le gel + ${VS(r.vt)} pour la cuve`:''}</p>`
+      +(Math.abs(r.cs-r.cf)>EPS?li(`${B} ${D(r.cs)}X`,VS(r.stock),`dilution au 1/${fmt(r.cs/r.cf)}`,'indigo')+li('Eau distillée',VS(r.water),'','cyan'):li(`${B} ${D(r.cf)}X`,VS(r.tot),'prêt à l\'emploi','indigo'))
+      +(r.st!=='none'?`<p class="rh">Colorant</p>`+li(stn[1],VS(r.stain/1000),stn[2],'orange'):'')
+      +(r.ld&&!r.ld.err?`<p class="rh">Tampon de charge ${D(r.ld.lc)}X → ${D(r.ld.lf)}X</p>`+li('Par échantillon',VS(r.ld.vd/1000),`avec ${VS(r.ld.ls/1000)} d'échantillon : ${VS(r.ld.vw/1000)} à déposer`,'pink')+(r.ld.ln>1?li(`Pour ${r.ld.ln} échantillons`,VS(r.ld.vd*r.ld.ln/1000),'tampon de charge au total',null):''):'')+`</div>`;
+    calc=`m = % × V / 100 = ${D(r.p)} × ${fmt(r.V)} / 100 = <b>${MS(r.m)}</b><br>V<sub>${B} ${D(r.cs)}X</sub> = V<sub>total</sub> × C<sub>f</sub> / C<sub>i</sub> = ${fmt(r.tot)} × ${D(r.cf)} / ${D(r.cs)} = <b>${VS(r.stock)}</b>${r.st!=='none'?`<br>Colorant : ${r.st==='bet'?`0,5 µg/mL × ${fmt(r.V)} mL / 10 µg/µL`:`${fmt(r.V)} mL / 10 000`} = <b>${VS(r.stain/1000)}</b>`:''}${r.ld&&!r.ld.err?`<br>Tampon de charge : V<sub>charge</sub> = C<sub>f</sub> · V<sub>éch</sub> / (C<sub>i</sub> − C<sub>f</sub>) = ${D(r.ld.lf)} × ${fmt(r.ld.ls)} / (${D(r.ld.lc)} − ${D(r.ld.lf)}) = <b>${VS(r.ld.vd/1000)}</b>`:''}`}
+  else{const r=gelS(g.s);if(r.err)return`<div class="grp rbox"><p class="kw bad">${IC.warn}<span>${r.err}</span></p></div>`;const R=r.R,C=r.C;
+    const tbl=(o,t,tris)=>`<p class="rh">${t}</p>`+li('Eau distillée',VS(o.w),'','cyan')+li(`Acrylamide/bis ${D(r.ac)} %`,VS(o.acr),'','purple')+li(`Tris-HCl ${tris}`,VS(o.tris),'','indigo')+li('SDS 10 %',VS(o.sds),'','teal')+li('APS 10 %',VS(o.aps),'en avant-dernier','orange')+li('TEMED',VS(o.tem),'en dernier, juste avant de couler','pink');
+    top=`<div class="ovh"><b>SDS-PAGE ${D(r.p)} %</b><small>${r.n} gel${r.n>1?'s':''} · séparation ${VS(R.V)} · concentration ${VS(C.V)}</small></div><div class="rl">`
+      +tbl(R,`Gel de séparation ${D(r.p)} % · ${VS(R.V)}`,'1,5 M pH 8,8')+tbl(C,`Gel de concentration ${D(r.ps)} % · ${VS(C.V)}`,`${D(r.t6)} M pH 6,8`)+`</div>`;
+    calc=`Acrylamide : V = % × V<sub>gel</sub> / ${D(r.ac)} = ${D(r.p)} × ${fmt(R.V)} / ${D(r.ac)} = <b>${VS(R.acr)}</b><br>Tris-HCl pH 8,8 : 0,375 M final = V<sub>gel</sub> / 4 = <b>${VS(R.tris)}</b> ; pH 6,8 : 0,125 M final = <b>${VS(C.tris)}</b><br>SDS et APS : 0,1 % final = V<sub>gel</sub> / 100 ; TEMED : ${D(R.tm*100)} % (séparation), 0,1 % (concentration)<br>Eau = V<sub>gel</sub> − somme des autres volumes`}
+  const tb=g.t==='aga'?`<table class="gtb"><tr><th>Agarose</th><th>Fragments séparés</th></tr>${AGR.map(([p,a_,b_])=>`<tr${Math.abs(p-(gelA(g.a).p||0))<1e-9?' class="on"':''}><td>${D(p)} %</td><td>${bpS(a_)} à ${bpS(b_)}</td></tr>`).join('')}</table>`
+    :`<table class="gtb"><tr><th>Acrylamide</th><th>Protéines séparées</th></tr>${SDR.map(([p,a_,b_])=>`<tr><td>${D(p)} %</td><td>${a_} à ${b_} kDa</td></tr>`).join('')}</table><p class="qs">Plage de séparation linéaire (repères usuels).</p>`;
+  const rec=g.t==='aga'?[GBUF[g.a.buf].rec,`Préparer le ${GBUF[g.a.buf].n} concentré`]:['tgs10','Préparer le tampon de migration Tris-glycine-SDS 10X'];
+  return`<p class="gh">À préparer</p><div class="grp rbox">${top}${warn.map(([,t_])=>`<p class="kw warn">${IC.warn}<span>${t_}</span></p>`).join('')}
+<div class="ract"><button type="button" class="pill pri" data-gact="lab">${IC.checks}Étapes au labo · ${done?`${done} / `:''}${L.length}</button><button type="button" class="pill" data-gact="pdf">${IC.printer}PDF</button></div></div>
+<div class="grp gmore">${det('gCalc','Détail du calcul',`<div class="mst">${calc}</div>`)}${det('gTab',g.t==='aga'?'Choisir le pourcentage d\'agarose':'Choisir le pourcentage d\'acrylamide',tb)}
+${det('gNotes','Bon à savoir',info.map(([i,t_,cl])=>`<div class="tp ${cl}">${IC[i]||IC.info}<div>${t_}</div></div>`).join(''))}
+<button type="button" class="rr sm" data-rec="${rec[0]}"><span class="rtx"><b>${rec[1]}</b></span>${IC.chev}</button></div>`}
+const gstHTML=(x,k)=>{const c=S.g.chk[S.g.t+x.id];return`<div class="st${c?' on':''}${x.w?' gw':''}" data-gs="${x.id}"><button type="button" class="ck" aria-pressed="${!!c}" aria-label="Fait">${IC.check}</button><div class="sx"><p><b class="gk">${k+1}</b> ${x.h}</p></div></div>`};
+function updGel(first){const g=S.g;if(g.a.stl){const x=GST.find(z=>z[1]===g.a.stl);if(x)g.a.st=x[0]}
+  const ty=g.tl&&GTY.find(z=>z[1]===g.tl),bu=g.a.bufl&&{TAE:'tae',TBE:'tbe'}[g.a.bufl];
+  if(ty&&ty[0]!==g.t||bu&&bu!==g.a.buf){if(ty)g.t=ty[0];if(bu)g.a.buf=bu;saveG();renderFlow();return}
+  saveG();setTitle();
+  const show=(id,on)=>{const e=$(id);if(!e)return;if(on&&e.hidden){e.hidden=false;if(!first&&!RM)e.animate([{opacity:0,transform:'translateY(14px)'},{opacity:1,transform:'none'}],{duration:480,easing:'cubic-bezier(.22,1,.36,1)'})}else if(!on)e.hidden=true};
+  let done=false;
+  if(g.t==='aga'){const a=g.a,p=gv(a,'p'),V=gv(a,'V','Vu');done=p>0&&V>0&&gv(a,'cs')>0&&gv(a,'cf')>0;
+    const e=$('gRng');if(e)e.innerHTML=p>0?(agRange(p)?`Sépare environ <b>${agRange(p)}</b> (repère usuel).`:agNear(p)):'';
+    const l=gelLd(a),f=$('gLd');if(f)f.innerHTML=l&&l.err?`<span class="gerr">${l.err}</span>`:l?`Par échantillon : <b>${VS(l.vd/1000)}</b> de tampon de charge + ${VS(l.ls/1000)} d'échantillon = <b>${VS(l.vw/1000)}</b> à déposer.`:'V<sub>charge</sub> = C<sub>f</sub> · V<sub>éch</sub> / (C<sub>i</sub> − C<sub>f</sub>)'}
+  else{const s_=g.s,p=gv(s_,'p');done=p>0&&gv(s_,'vr')>0&&gv(s_,'vs')>0;
+    const e=$('gRng'),r=SDR.find(x=>Math.abs(x[0]-p)<1e-9);if(e)e.innerHTML=p>0?(r?`Sépare environ <b>${r[1]} à ${r[2]} kDa</b> (repère usuel).`:'Repères : 15 % : 12 à 43 kDa ; 10 % : 16 à 68 kDa ; 7,5 % : 36 à 94 kDa.'):''}
+  const box=$('res');if(!box)return;
+  if(!done){box.innerHTML=`<p class="gfoot gwait">${g.t==='aga'?'Saisissez le pourcentage, le volume et les concentrations du tampon : la préparation s\'affiche ici.':'Saisissez le pourcentage et les volumes : la préparation s\'affiche ici.'}</p>`;resOn=false;return}
+  box.innerHTML=gelRes();icons(box);if(!resOn&&!first&&!RM)box.animate([{opacity:0,transform:'translateY(16px)'},{opacity:1,transform:'none'}],{duration:520,easing:'cubic-bezier(.22,1,.36,1)'});resOn=true}
+/* au labo : mêmes étapes, avec progression et impression */
+function renderGelLab(){const g=S.g,box=$('labB'),L=gelSteps(),ok=g.t==='aga'?gelA(g.a):gelS(g.s);
+  if(!L.length||ok.err){box.innerHTML=`<div class="grp empty">Complétez d'abord le gel dans l'onglet Préparation : ses étapes à cocher apparaîtront ici.</div><button class="cadd" type="button" data-go="1">${IC.flask}<span>Aller à la préparation</span></button>`;return}
+  const done=L.filter(x=>g.chk[g.t+x.id]).length,ti=g.t==='aga'?`Gel d'agarose ${D(ok.p)} %`:`SDS-PAGE ${D(ok.p)} %`,N=gelNotes().filter(n=>n[0]==='shield'||n[2]==='warn');
+  box.innerHTML=`<div class="lab"><div><div class="grp lhd"><b>${ti}</b><small>${g.t==='aga'?`${VS(ok.V)} · ${GBUF[g.a.buf].n} ${D(ok.cf)}X`:`${ok.n} gel${ok.n>1?'s':''}`}</small>
+<div class="pbar"><i style="--p:${done/L.length}"></i></div><div class="pct"><span>${done} / ${L.length} étapes</span><span>${Math.round(done/L.length*100)} %</span></div>
+<div class="lact"><button type="button" class="pill pri" data-gact="pdf">${IC.printer}Imprimer / PDF</button><button type="button" class="pill" data-gact="reset">${IC.reset}Tout décocher</button></div></div>
+<p class="gh">Étapes</p><div class="grp">${L.map((x,k)=>gstHTML(x,k)).join('')}</div></div><div>
+${N.length?`<p class="gh">À ne pas oublier</p><div class="grp">${N.map(([i,t_,cl])=>`<div class="tp ${cl}">${IC[i]||IC.info}<div>${t_}</div></div>`).join('')}</div>`:''}</div></div>`}
+function printGel(){const g=S.g,L=gelSteps();if(!L.length)return;const box=document.createElement('div');box.innerHTML=gelRes();
+  const items=[...box.querySelectorAll('.rli')].map(e=>`<tr><td>☐</td><td>${e.querySelector('.rn').innerHTML}</td><td class="q">${e.querySelector('b').innerHTML}</td></tr>`).join(''),hd=box.querySelector('.ovh');
+  $('print').innerHTML=`<h1>${hd?hd.querySelector('b').textContent:'Gel'}</h1><div class="meta">${hd?hd.querySelector('small').textContent:''}<br>Préparé le ____ / ____ / ________ par ______________________</div>
+<h2>Ce qu'il faut</h2><table>${items}</table><h2>Étapes</h2><table>${L.map((x,k)=>`<tr><td>${g.chk[g.t+x.id]?'☑':'☐'}</td><td>${k+1}. ${x.h}</td></tr>`).join('')}</table>
+<h2>Précautions</h2><ul>${gelNotes().map(n=>`<li>${n[1]}</li>`).join('')}</ul><div class="ft">BioPrep · www.biostudy.xyz · vérifiez toujours avec votre protocole de référence.</div>`;
+  buzz(OK);setTimeout(()=>window.print(),60)}
+/* ---------- 9. Construction : accueil (que voulez-vous faire ?), parcours guidé, au labo ---------- */
+const TABS=[{ic:'book',nav:'Accueil',t:'Que voulez-vous faire ?'},{ic:'flask',nav:'Préparation',t:'Préparation'},{ic:'checks',nav:'Au labo',t:'Au labo'}];
+const FL={pdr:['Solution à partir d\'une poudre','scale','blue','Ex. NaCl 0,5 M, glucose 20 %'],dil:['Diluer une solution mère','pipette','indigo','Ex. Tris 1 M → 50 mM'],
+  med:['Milieu de culture ou recette','flask','orange','LB, MacConkey, PBS… ou la vôtre'],gel:['Couler un gel','gel','purple','Agarose ou SDS-PAGE'],ai:['Protocole complet (photo)','spark','pink','L\'IA lit votre feuille de TP'],conv:['Convertir une concentration','calc','teal','g/L ↔ mol/L ↔ %']};
+const GTY=[['aga','Agarose'],['sds','SDS-PAGE']];
+/* listes de choix (pas des unités) : liste déroulante verticale avec coche */
+const CHOICE=new Set(['GSTN','GTYN','GBN']);
+const UL={GSTN:GST.map(x=>x[1]),GTYN:GTY.map(x=>x[1]),GBN:['TAE','TBE'],LIQ:Object.keys(LU),PUL,VOL:['L','mL','µL'],CUL,KCU:['M','mM','µM','nM','g/L','mg/mL','mg/L','µg/mL','ng/µL','% (m/V)'],AGU:['g/L','% (m/V)']};
+const POP=['nacl','kcl','tris','glucose','sucrose','edta','naoh','mgso47','cacl22','agar'];
+const POPR=['lb','lba','macp','gn','tsa','ypd','pbs','tae'];
+const HYD=[['cacl2','cacl22'],['mgso4','mgso47'],['k2hpo4','k2hpo43'],['nah2po4','nah2po41','nah2po42'],['na2hpo4','na2hpo42','na2hpo47','na2hpo412'],['glucose','glucose1'],['naoac','naoac3']];
+const hydOf=k=>HYD.find(g=>g.includes(k));
+const opt=(L,u)=>L.map(x=>`<option${x===u?' selected':''}>${x}</option>`).join('');
+const fld=(f,v,ph,e,cls='val')=>`<input class="${cls}" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" data-f="${f}" value="${esc(v||'')}" placeholder="${ph}" aria-label="${ph}">${e!=null?`<span class="x10">×10</span><input class="exp" type="text" inputmode="text" autocomplete="off" data-f="${f}e" value="${esc(e||'')}" placeholder="0" aria-label="Exposant de 10">`:''}`;
+const row=(ic,cc,b,s,attr)=>`<button type="button" class="rr" ${attr}><span class="ri" style="--cc:var(--c-${cc})">${IC[ic]}</span><span class="rtx"><b>${esc(b)}</b><small>${esc(s)}</small></span>${IC.chev}</button>`;
+const fRow=k=>{const[t_,ic,c,d]=FL[k];return row(ic,c,t_,d,`data-flow="${k}"`)};
+$('views').innerHTML=`
+<section class="view" id="view0">
+  <div class="srch"><span data-ic="search"></span><input id="hq" type="search" placeholder="Rechercher un milieu, une solution…" autocomplete="off" enterkeyhint="search"></div>
+  <div id="hres"></div>
+  <div id="hmain"><p class="gh">Préparer une solution</p><div class="grp home">${['pdr','dil','med'].map(fRow).join('')}</div>
+<p class="gh">Électrophorèse</p><div class="grp home">${row('gel','purple','Gel d\'agarose','ADN · TAE ou TBE','data-gel="aga"')}${row('sds','cyan','Gel SDS-PAGE','Protéines','data-gel="sds"')}</div>
+<p class="gh">Autres outils</p><div class="grp home">${['ai','conv'].map(fRow).join('')}</div><div id="resume"></div><div id="saved"></div></div>
+</section>
+<section class="view" id="view1"><div id="flow"></div></section>
+<section class="view" id="view2"><div id="labB"></div></section>`;
+$('nav').insertAdjacentHTML('beforeend',TABS.map((tb,i)=>`<button class="nb" data-tab="${i}">${IC[tb.ic]}<span>${tb.nav}</span></button>`).join(''));
+$('rn').innerHTML=TABS.map(tb=>`<span>${IC[tb.ic]}</span>`).join('');
+$('rtt').innerHTML=TABS.map(tb=>`<span>${tb.t}</span>`).join('');
+$('subl').innerHTML=[...Object.values(SUB).map(s=>s[0]),'Extrait de levure','Peptone','Tryptone','Agar','Ampicilline','Kanamycine','Hygromycine B','Chloramphénicol','Tétracycline','Glycérol','Éthanol','Acide acétique glacial'].map(n=>`<option value="${esc(n)}">`).join('');
+const icons=box=>$$('[data-ic]',box).forEach(e=>{e.insertAdjacentHTML('afterbegin',IC[e.dataset.ic]);e.removeAttribute('data-ic')});icons(BC);
+const nbs=$$('.nb'),segSet=(seg,i)=>{seg.style.setProperty('--i',i);seg.querySelectorAll('button').forEach((b,j)=>{b.classList.toggle('on',j===i);b.setAttribute('aria-pressed',j===i)})};
+let tTm=0;function toast(m){const e=$('toast');e.textContent=m;e.classList.add('on');clearTimeout(tTm);tTm=setTimeout(()=>e.classList.remove('on'),2200)}
+const autoName=P=>{const it=P.items[0]||{};return P.kind==='pdr'&&it.n?`${it.n} ${it.c} ${it.cu}`:P.kind==='dil'&&it.cf?`${it.n||'Dilution'} ${it.cf} ${it.cfu}`:P.name||'Préparation'};
+
+/* ---------- 10. Accueil : choix, recherche, reprendre, mes préparations ---------- */
+function renderHome(){const P=S.cur,R=compute(P),q=nrm($('hq').value).trim(),words=q.split(/\s+/).filter(Boolean);
+  $('hmain').hidden=!!q;
+  if(q){const hit=t_=>words.every(w=>t_.includes(w));
+    const mine=S.preps.filter(p=>hit(nrm(p.name+' '+p.items.map(i=>i.n).join(' ')))),rec=REC.filter(r=>hit(nrm(r.n+' '+r.d+' '+r.it.map(a=>a[0]).join(' '))));
+    const subs=Object.entries(SUB).filter(([k,s])=>hit(nrm(s[0]+' '+(s[3]||[]).join(' ')))).slice(0,4);
+    const gels=[['aga','gel','purple','Gel d\'agarose','ADN · TAE ou TBE','agarose adn arn tae tbe electrophorese couler'],['sds','sds','cyan','Gel SDS-PAGE','Protéines · séparation et concentration','sds page acrylamide proteines laemmli electrophorese couler']].filter(x=>hit(nrm(x[3]+' '+x[5])));
+    $('hres').innerHTML=(gels.length?`<p class="gh">Couler un gel</p><div class="grp">${gels.map(x=>row(x[1],x[2],x[3],x[4],`data-gel="${x[0]}"`)).join('')}</div>`:'')+(mine.length?`<p class="gh">Mes préparations</p><div class="grp">${mine.map(p=>row('save','blue',p.name,`${p.V} ${p.Vu}`,`data-mine="${p.id}"`)).join('')}</div>`:'')
+      +(rec.length?`<p class="gh">Recettes</p><div class="grp">${rec.map(r=>row(CAT[r.c][1],CAT[r.c][2],r.n,r.d,`data-rec="${r.id}"`)).join('')}</div>`:'')
+      +(subs.length?`<p class="gh">Préparer une solution de…</p><div class="grp">${subs.map(([k,s])=>row('scale','blue',s[0],s[1]?`M = ${D(s[1])} g/mol`:'poudre',`data-subgo="${k}"`)).join('')}</div>`:'')
+      +(!gels.length&&!mine.length&&!rec.length&&!subs.length?`<div class="grp empty">Rien trouvé pour « ${esc($('hq').value)} ». Choisissez « Milieu de culture ou recette » pour créer la vôtre, ou importez votre protocole avec l'IA.</div>`:'');return}
+  $('hres').innerHTML='';
+  $('resume').innerHTML=R.V&&R.ok&&R.ok.length?`<p class="gh">En cours</p><div class="grp">${row(FL[P.kind]?FL[P.kind][1]:'flask','blue',autoName(P),'Reprendre où vous en étiez','data-resume')}</div>`:'';
+  $('saved').innerHTML=S.preps.length?`<p class="gh">Mes préparations</p><div class="grp">${S.preps.slice(0,8).map(p=>`<div class="rw">${row('save','blue',p.name||'Sans nom',`${p.V||'?'} ${p.Vu} · ${p.items.filter(i=>i.n).length} composant${p.items.filter(i=>i.n).length>1?'s':''}`,`data-mine="${p.id}"`)}<button type="button" class="cdel" data-delp="${p.id}" aria-label="Supprimer">${IC.trash}</button></div>`).join('')}</div>`:''}
+function newPrep(kind){const P=blankPrep();P.kind=kind;P.items=kind==='pdr'?[{...blankItem(),t:'pdr',cu:'M'}]:kind==='dil'?[{...blankItem(),t:'sto',ciu:'M',cfu:'mM'}]:[];return P}
+function startFlow(k,P){S.flow=k;sto.s('bpr3_flow',k);if(P)S.cur=P;else if(k!=='conv'&&k!=='ai'&&k!=='gel')S.cur=newPrep(k);saveCur();renderFlow(true);setTab(1)}
+
+/* ---------- 11. Parcours guidé : une question à la fois ---------- */
+const qc=(id,n,t_,h,body)=>`<div class="grp qc" id="${id}" hidden><div class="qh"><b class="qn">${n}</b><div><p class="qt">${t_}</p>${h?`<p class="qs">${h}</p>`:''}</div></div><div class="qb">${body}</div></div>`;
+const tgt=o=>o==='it'?S.cur.items[0]:o==='P'?S.cur:o==='ga'?S.g.a:o==='gs'?S.g.s:o==='gt'?S.g:S.k.c;
+const bget=b=>{const[o,f]=b.split('.');return tgt(o)[f]},bset=(b,v)=>{const[o,f]=b.split('.');tgt(o)[f]=v};
+/* champ numérique : valeur (+ exposant en écriture ×10ⁿ) et capsule d'unité qui ouvre le choix des unités et de l'écriture */
+const nf=(b,ph,ub,ul)=>`<div class="nf${bget(b+'S')?' sci':''}"><input class="val" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" data-b="${b}" value="${esc(bget(b)||'')}" placeholder="${ph}" aria-label="Valeur"><span class="x10">×10</span><input class="exp" type="text" inputmode="text" autocomplete="off" data-b="${b}e" value="${esc(bget(b+'e')||'')}" placeholder="0" aria-label="Exposant de 10"><button type="button" class="uc" data-b="${ub}" data-ul="${ul}">${esc(bget(ub))}</button></div>`;
+const nfFix=(b,ph,u)=>`<div class="nf"><input class="val" type="text" inputmode="decimal" autocomplete="off" data-b="${b}" value="${esc(bget(b)||'')}" placeholder="${ph}" aria-label="Valeur">${u?`<span class="uf">${u}</span>`:''}</div>`;
+/* même champ pour les cartes de composants (data-f) et les options (data-p) */
+const nfc=(f,v,e,ph,uf,u,ul,sci)=>`<div class="nf${sci?' sci':''}"><input class="val" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" data-f="${f}" value="${esc(v||'')}" placeholder="${ph}" aria-label="Valeur">${e!=null?`<span class="x10">×10</span><input class="exp" type="text" inputmode="text" autocomplete="off" data-f="${f}e" value="${esc(e||'')}" placeholder="0" aria-label="Exposant de 10">`:''}${ul?`<button type="button" class="uc" data-f="${uf}" data-ul="${ul}">${esc(u)}</button>`:`<span class="uf">${u}</span>`}</div>`;
+const nfp=(p,ph,u,ti)=>`<div class="nf"><input class="val" type="text" inputmode="${ti?'text':'decimal'}" autocomplete="off" data-p="${p}" value="${esc(S.cur[p]||'')}" placeholder="${ph}" aria-label="Valeur">${u?`<span class="uf">${u}</span>`:''}</div>`;
+const fr=(lab,inner,id)=>`<div class="fr"${id?` id="${id}"`:''}><p class="frl">${lab}</p>${inner}</div>`;
+/* substance : recherche, puis résumé (nom, masse molaire, forme hydratée) */
+function subW(sc){const o=tgt(sc);
+  if(!o.sok)return`<div class="srch in"><span>${IC.search}</span><input data-subq="${sc}" value="${esc(o.sq||'')}" placeholder="Ex. NaCl, glucose, Tris…" autocomplete="off" enterkeyhint="search"></div><div class="sugg" id="sg-${sc}">${suggHTML(sc,o.sq||'')}</div>`;
+  const g=o.sk&&hydOf(o.sk);
+  return`<div class="qsum"><div class="rtx"><b>${esc(o.n)}</b><small>${o.mm?`Masse molaire : ${esc(o.mm)} g/mol`:o.sk?'Sans masse molaire : concentration en g/L ou en %':'Masse molaire à indiquer pour une concentration en mol/L'}</small></div><button type="button" class="pill" data-subed="${sc}">Changer</button></div>`
+    +(g?`<p class="qs qf">Quelle forme est indiquée sur l'étiquette du flacon ?</p><div class="chips wrap">${g.map(x=>`<button type="button" class="chip${x===o.sk?' on':''}" data-hyd="${sc}:${x}">${SUB[x][0]}</button>`).join('')}</div>`:'')
+    +(!o.sk?`<div class="frs top">${fr('Masse molaire (sur l\'étiquette du flacon)',nfFix(sc+'.mm','58,44','g/mol'))}</div>`:'')}
+function suggHTML(sc,q){const n=nrm(q).trim();
+  const L=n?Object.entries(SUB).filter(([k,[nm,,,al]])=>nrm(nm).includes(n)||(al||[]).some(a=>nrm(a).includes(n))).slice(0,6):POP.map(k=>[k,SUB[k]]);
+  return(n?'':'<p class="qs qf">Fréquentes</p>')+`<div class="grp in">${L.map(([k,s])=>`<button type="button" class="rr sm" data-pick="${sc}:${k}"><span class="rtx"><b>${esc(s[0])}</b><small>${s[1]?`M = ${D(s[1])} g/mol`:'sans masse molaire'}</small></span>${IC.plus}</button>`).join('')}
+${n?`<button type="button" class="rr sm" data-pick="${sc}:"><span class="rtx"><b>Utiliser « ${esc(q.trim())} »</b><small>Autre substance : vous indiquerez sa masse molaire</small></span>${IC.plus}</button>`:''}</div>`}
+function pickSub(sc,k,name){const o=tgt(sc),s=k&&SUB[k];o.sk=k||null;o.n=s?s[0]:name.trim();o.mm=s&&s[1]?D(s[1]):'';o.sok=true;
+  if(sc==='it'){if(s&&!s[1]&&o.cu in PM)o.cu='g/L';const f=s?s[2]:'';S.cur.ster=/[fbuo]/.test(f)?'filt':/[xd]/.test(f)?'none':'auto'}}
+/* milieu : choix d'une recette */
+function medW(){const P=S.cur;
+  if(P.rec)return`<div class="qsum"><div class="rtx"><b>${esc(P.name||'Ma recette')}</b><small>${P.rec==='custom'?'Votre recette : ajoutez les composants ci-dessous':P.rec==='ai'?'Importée avec l\'IA':'Recette de référence, modifiable'}</small></div><button type="button" class="pill" data-recchg>Changer</button></div>`
+    +(P.rec==='custom'?`<input class="txt l nm" data-p="name" value="${esc(P.name)}" placeholder="Nom de votre préparation">`:'');
+  return`<div class="srch in"><span>${IC.search}</span><input data-recq value="" placeholder="Ex. LB, MacConkey, PBS…" autocomplete="off" enterkeyhint="search"></div><div id="rsg">${recSugg('')}</div>`}
+function recSugg(q){const n=nrm(q).trim(),w=n.split(/\s+/).filter(Boolean);
+  const L=n?REC.filter(r=>w.every(x=>nrm(r.n+' '+r.d+' '+r.it.map(a=>a[0]).join(' ')).includes(x))).slice(0,8):POPR.map(id=>REC.find(r=>r.id===id));
+  return(n?'':'<p class="qs qf">Les plus utilisées</p>')+`<div class="grp in">${L.map(r=>`<button type="button" class="rr sm" data-pickrec="${r.id}"><span class="rtx"><b>${esc(r.n)}</b><small>${esc(r.d)}</small></span>${IC.chev}</button>`).join('')}
+<button type="button" class="rr sm" data-pickrec="custom"><span class="rtx"><b>Créer ma propre recette</b><small>Vous ajoutez les composants un par un</small></span>${IC.plus}</button>
+<button type="button" class="rr sm" data-flow="ai"><span class="rtx"><b>Importer mon protocole</b><small>Photo de la feuille de TP, lue par une IA</small></span>${IC.spark}</button></div>`}
+function setTitle(){const f=FL[S.flow],gl=S.flow==='gel'&&S.g.t;$('rtt').children[1].textContent=gl?(S.g.t==='sds'?'Gel SDS-PAGE':'Gel d\'agarose'):f?f[0]:'Préparation';$('rn').children[1].innerHTML=IC[gl?(S.g.t==='sds'?'sds':'gel'):f?f[1]:'flask']}
+function renderFlow(first){const f=S.flow,P=S.cur;setTitle();let h='';resOn=false;
+  if(f==='pdr')h=qc('q1',1,'Quelle substance ?','Saisissez son nom : la masse molaire s\'affiche si la substance est connue.',subW('it'))
+    +qc('q2',2,'À quelle concentration ?','Concentration finale de la solution à préparer.',nf('it.c','0,5','it.cu','PUL'))+qc('q3',3,'Quel volume voulez-vous préparer ?','',nf('P.V','100','P.Vu','VOL'));
+  else if(f==='dil')h=qc('q1',1,'Quelle solution mère avez-vous ?','Sa concentration est écrite sur l\'étiquette.',`<input class="txt l nm" data-b="it.n" value="${esc((P.items[0]||{}).n||'')}" placeholder="Nom (facultatif), ex. Tris-HCl" autocomplete="off">`+nf('it.ci','1','it.ciu','CUL'))
+    +qc('q2',2,'Quelle concentration voulez-vous obtenir ?','Concentration finale (C<sub>f</sub>) après dilution.',nf('it.cf','50','it.cfu','CUL'))+qc('q3',3,'Quel volume final ?','Volume total : solution mère + diluant.',nf('P.V','100','P.Vu','VOL'));
+  else if(f==='med')h=qc('q1',1,'Quel milieu ou quelle solution ?','Choisissez une recette, ou créez la vôtre.',medW())
+    +qc('q2',2,'Quel volume voulez-vous préparer ?','',nf('P.V','500','P.Vu','VOL'))+qc('q3',3,'En combien de flacons ?','Le volume est réparti à parts égales.',`<div class="chips wrap" id="nbc"></div>`);
+  else if(f==='conv')h=qc('q1',1,'Quelle concentration voulez-vous convertir ?','',nf('k.v','0,5','k.u','KCU'))
+    +qc('q2',2,'De quelle substance ?','Facultatif : sa masse molaire est nécessaire pour passer des g/L aux mol/L.',subW('k'));
+  else if(f==='ai')h=aiHTML();
+  else if(f==='gel')h=gelHTML();
+  else h=`<div class="grp empty">Choisissez ce que vous voulez faire dans l'accueil.</div><button class="cadd" type="button" data-go="0">${IC.book}<span>Accueil</span></button>`;
+  $('flow').innerHTML=h+'<div id="res"></div>';updFlow(first)}
+let resOn=false;
+/* affiche la question suivante quand la précédente est remplie, puis le résultat */
+function updFlow(first){const f=S.flow,P=S.cur;if(f==='gel')return updGel(first);if(f==='ai'||!FL[f])return;
+  const show=(id,on)=>{const e=$(id);if(!e)return;if(on&&e.hidden){e.hidden=false;if(!first&&!RM)e.animate([{opacity:0,transform:'translateY(14px)'},{opacity:1,transform:'none'}],{duration:480,easing:'cubic-bezier(.22,1,.36,1)'})}else if(!on)e.hidden=true};
+  const ok=(o,f_)=>{const r=pnum(o[f_],o[f_+'e'],o[f_+'S']);return'v' in r&&r.v>0};let done=false;
+  if(f==='conv'){const c=S.k.c;show('q1',1);show('q2',ok(c,'v'));done=ok(c,'v');resConv(done);return}
+  const it=P.items[0]||{};
+  if(f==='pdr'){const a=!!it.sok,b=a&&ok(it,'c')&&(!(it.cu in PM)||ok(it,'mm'));show('q1',1);show('q2',a);show('q3',b);done=b&&ok(P,'V');
+    const w=$('q2')&&$('q2').querySelector('.qmw');if(a&&it.cu in PM&&!ok(it,'mm')){if(!w)$('q2').querySelector('.qb').insertAdjacentHTML('beforeend',`<p class="kw warn qmw">${IC.warn}<span>Concentration en mol/L : indiquez la masse molaire de la substance (question 1), ou choisissez g/L ou %.</span></p>`)}else if(w)w.remove()}
+  else if(f==='dil'){const a=ok(it,'ci'),b=a&&ok(it,'cf');show('q1',1);show('q2',a);show('q3',b);done=b&&ok(P,'V')}
+  else{const a=!!P.rec;show('q1',1);show('q2',a);show('q3',a&&ok(P,'V'));done=a&&ok(P,'V');
+    $('nbc').innerHTML=[1,2,3,4,5,6].map(n=>`<button type="button" class="chip${+P.nb===n?' on':''}" data-nb="${n}">${n}</button>`).join('')}
+  if(!P.nameSet&&P.kind!=='med')P.name=autoName(P);
+  const R=compute(P);R0=R;saveCur();
+  if(!done){$('res').innerHTML='';resOn=false;return}
+  if(!resOn){$('res').innerHTML=resSkel(f);resOn=true;icons($('res'));if(f==='med')renderList();if(!first&&!RM)$('res').animate([{opacity:0,transform:'translateY(16px)'},{opacity:1,transform:'none'}],{duration:520,easing:'cubic-bezier(.22,1,.36,1)'})}
+  fillRes(R)}
+const STER=[['auto','Autoclave'],['filt','Filtration'],['none','Aucune']];
+const optRows=med=>{const P=S.cur,si=Math.max(0,STER.findIndex(x=>x[0]===P.ster));return'<div class="frs">'+(med?fr('Agar (pour une gélose) · laisser vide pour un bouillon',nfp('ag','15','g/L'))+fr('Volume coulé par boîte de Petri',nfp('pl','25','mL'),'rPl')
+  +`<div class="fr" id="rNp"><p class="frl">Flacons qui reçoivent les ajouts après autoclavage</p><div class="prs"><button type="button" data-st="np:-1" aria-label="Moins">${IC.minus}</button><output id="npo">${Math.min(P.np,P.nb)}</output><button type="button" data-st="np:1" aria-label="Plus">${IC.plus}</button></div></div>`:'')
+  +fr('pH à ajuster · facultatif',nfp('pH','7,0','',1))+fr('Stérilisation',`<div class="seg" id="sterSeg" style="--n:3;--i:${si}"><i class="th"></i>${STER.map(([v,n],k)=>`<button type="button" data-ster="${v}"${k===si?' class="on"':''}>${n}</button>`).join('')}</div>`)+'</div>'};
+const det=(id,t_,body,open)=>`<details class="grp dt" id="${id}"${open?' open':''}><summary>${t_}<span data-ic="chev"></span></summary>${body}</details>`;
+const ACT=`<div class="ract"><button type="button" class="pill pri" data-act="lab">${IC.checks}Étapes au labo</button><button type="button" class="pill" data-act="pdf">${IC.printer}PDF</button><button type="button" class="pill" data-act="save">${IC.save}Enregistrer</button></div>`;
+function resSkel(f){const P=S.cur;
+  if(f==='med')return`<p class="gh">Ce qu'il faut</p><div class="grp rbox"><div class="ovh" id="ovh"></div><div class="rl" id="ov"></div><div id="rw"></div>${ACT}</div>
+${det('dComp','Composition',`<div class="cl" id="cl"></div><button type="button" class="cadd" id="cAdd">${IC.plus}<span>Ajouter un composant</span></button>`,P.rec==='custom')}
+${det('dOpt','Gélose, pH, stérilisation',optRows(true))}${det('dCalc','Détail du calcul','<div class="mst" id="calc"></div>')}${det('dNotes','Bon à savoir','<div id="notes"></div>')}`;
+  return`<p class="gh">Résultat</p><div class="grp rbox"><div class="kbig" id="rbig"></div><p class="kx" id="rx"></p><div id="rw"></div>${ACT}</div>
+${det('dOpt','pH, stérilisation',optRows(false))}${det('dCalc','Détail du calcul','<div class="mst" id="calc"></div>')}${det('dNotes','Bon à savoir','<div id="notes"></div>')}
+<button type="button" class="cadd" data-act="addc">${IC.plus}<span>Ajouter un autre composant à cette solution</span></button>`}
+function fillRes(R){const P=S.cur,f=S.flow,N=notesFor(R,P),warn=N.filter(n=>n[2]==='warn'||n[2]==='bad'),info=N.filter(n=>!(n[2]==='warn'||n[2]==='bad'));
+  $('rw').innerHTML=warn.slice(0,3).map(([,t_])=>`<p class="kw warn">${IC.warn}<span>${t_}</span></p>`).join('');
+  $('notes').innerHTML=info.map(([i,t_,cl])=>`<div class="tp ${cl}">${IC[i]||IC.info}<div>${t_}</div></div>`).join('');$('dNotes').hidden=!info.length;
+  $('calc').innerHTML=calcLines(R);
+  if(f==='med')return fillMed(R);
+  const o=R.ok[0];if(!o){$('rbig').innerHTML='';$('rx').innerHTML='';return}
+  if(f==='pdr'){$('rbig').innerHTML=`<span>Pesez</span><b>${MS(o.amt)}</b><small>de ${esc(o.name)} · ${bal(o.amt)}</small>`;
+    $('rx').innerHTML=`Dissolvez dans environ <b>${VS(R.V*.8)}</b> d'eau distillée, puis complétez au volume final de <b>${VS(R.V)}</b>.${o.M?`<br>Soit ${fmt(o.cb*o.M)} g/L = ${fmt(o.cb*o.M/10)} % (m/V)`:''}`}
+  else{$('rbig').innerHTML=`<span>Prélevez</span><b>${VS(o.amt)}</b><small>de solution mère · ${tl(o.amt)}</small>`;
+    $('rx').innerHTML=`Complétez à <b>${VS(R.V)}</b> avec le diluant (eau ou tampon, environ <b>${VS(Math.max(0,R.V-o.amt))}</b>) : dilution au 1/${fmt(o.F)}.`}}
+function fillMed(R){const P=S.cur,ok=R.ok||[],pre=ok.filter(o=>!o.post),post=ok.filter(o=>o.post),bad=R.items.filter(o=>!o.skip&&(o.err||o.inc));
+  $('rPl').hidden=!(num(P.ag).v>0);$('rNp').hidden=!(P.nb>1&&post.length);
+  $('ovh').innerHTML=`<b>${esc(P.name||'Ma recette')}</b><small>${[VS(R.V),R.nb>1?`${R.nb} flacons de ${VS(R.Vb)}`:'',R.ag?`gélose ${fmt(R.ag)} g/L`:'',P.pH?`pH ${esc(P.pH)}`:'',{auto:'autoclave',filt:'filtration',none:''}[P.ster]].filter(Boolean).join(' · ')}</small>`;
+  const li=o=>`<div class="rli" style="--cc:var(--c-${CC[o.i%CC.length]})"><i class="rd"></i><span class="rn">${esc(o.name)}${sub(o)?`<small>${sub(o)}</small>`:''}</span><b>${esc(QX(o,R))}</b></div>`;
+  let h='';const grp=(t_,L)=>{if(L.length)h+=`<p class="rh">${t_}</p>`+L.join('')};
+  grp('À peser',pre.filter(o=>o.kind==='mass').map(li));grp('À prélever',pre.filter(o=>o.kind==='vol').map(li));grp('Autres',pre.filter(o=>o.kind==='txt').map(li));
+  h+=`<p class="rh">Eau et répartition</p><div class="rli w"><span class="rn">Eau distillée<small>${R.vpre>0?`environ ${VS(Math.max(0,R.water))}, compléter au volume final`:'compléter au volume final'}</small></span><b>qsp ${VS(R.V)}</b></div>`;
+  if(R.nb>1)h+=`<div class="rli w"><span class="rn">Flacons</span><b>${R.nb} × ${VS(R.Vb)}</b></div>`;
+  if(R.ag)h+=`<div class="rli"><span class="rn">Agar<small>${R.nb>1?`dans chacun des ${R.nb} flacons`:'dans le flacon'}</small></span><b>${MS(R.agb)}${R.nb>1?` × ${R.nb}`:''}</b></div>`;
+  grp(`Après autoclavage, vers 50 °C${R.nb>1&&R.np<R.nb?` (${R.np} flacon${R.np>1?'s':''})`:''}`,post.map(li));
+  if(R.ag)h+=`<div class="rli w"><span class="rn">Boîtes de Petri<small>${VS(R.pl)} par boîte</small></span><b>≈ ${R.plates*R.nb}</b></div>`;
+  if(bad.length)h+=`<p class="rh">À compléter</p>`+bad.map(o=>`<div class="rli ${o.err?'bad':'inc'}"><span class="rn">${esc(o.name)}<small>${esc(o.err||o.inc)}</small></span><b>${o.err?'!':'…'}</b></div>`).join('');
+  if(!ok.length&&!bad.length)h+=`<p class="kw">${IC.info}<span>Ajoutez les composants de votre recette dans « Composition ».</span></p>`;
+  $('ov').innerHTML=h;
+  $$('#cl .ci').forEach((c,i)=>{if(c.classList.contains('cc'))return;const o=R.items[i],e=c.querySelector('.cres'),v=c.querySelector('.cv');if(v)v.disabled=!okItem(o);if(!o)return;
+    e.className='cres'+(o.err?' err':o.inc||o.skip?' inc':'');e.textContent=o.skip?'Composant à remplir':o.err||o.inc||'= '+QX(o,R)})}
+/* conversion */
+function resConv(done){if(!done){$('res').innerHTML='';return}const c=S.k.c,x=pnum(c.v,c.ve,c.vS),M=pnum(c.mm),r=kConv(x.v,c.u,'v' in M?M.v:0),L=[];
+  if(r.gl!=null)L.push(['g/L = mg/mL',fmt(r.gl)],['µg/mL = mg/L',fmt(r.gl*1000)],['% (m/V)',fmt(r.gl/10)]);
+  if(r.mol!=null)L.push(['mol/L (M)',fmt(r.mol)],['mM',fmt(r.mol*1e3)],['µM',fmt(r.mol*1e6)],['nM',fmt(r.mol*1e9)]);
+  $('res').innerHTML=`<p class="gh">Équivalences</p><div class="grp rbox"><div class="rl">${L.map(([u,v])=>`<div class="rli"><span class="rn">${u}</span><b>${v}</b></div>`).join('')}</div>${r.gl==null||r.mol==null?`<p class="kw" style="padding:0 16px 14px">${IC.info}<span>Indiquez la substance (question 2) pour convertir entre g/L et mol/L.</span></p>`:''}</div>`}
+/* composants d'une recette : cartes réduites une fois terminées (repris de la v2) */
+const TY=[['pdr','Poudre'],['liq','Liquide'],['sto','Sol. mère'],['txt','Autre']];
+const TYN={pdr:'Poudre',liq:'Liquide',sto:'Solution mère',txt:'Autre'};
+function desc(it){const u=it.t==='pdr'?`${it.c} ${it.cu}${it.cu in PM?` (M ${it.mm} g/mol)`:''}`:it.t==='liq'?`${it.r} ${it.ru}`:it.t==='sto'?`${it.ci} ${it.ciu} → ${it.cf} ${it.cfu}`:it.q;return`${TYN[it.t]} · ${u}${it.post?' · après autoclavage':''}`}
+const okItem=o=>o&&o.kind&&!o.err&&!o.inc&&!o.skip;
+let R0=null;
+function cardHTML(it,i){const o=R0&&R0.items[i];
+  if(it.cl&&okItem(o))return`<div class="grp ci cc" data-i="${i}" style="--cc:var(--c-${CC[i%CC.length]})"><button type="button" class="cbar" data-open aria-label="Modifier ${esc(o.name)}"><span class="cno">${i+1}</span><span class="rn">${esc(o.name)}<small>${esc(desc(it))}</small></span><b class="cres">${esc(QX(o,R0))}</b>${IC.chev}</button></div>`;
+  let body='';
+  if(it.t==='pdr'){body=fr('Concentration finale',nfc('c',it.c,it.ce,'10','cu',it.cu,'PUL',it.cS));if(it.cu in PM)body+=fr('Masse molaire',nfc('mm',it.mm,null,'58,44','','g/mol',''))}
+  else if(it.t==='liq')body=fr('Quantité de liquide',nfc('r',it.r,it.re,'20','ru',it.ru,'LIQ',it.rS));
+  else if(it.t==='sto')body=fr('Solution mère',nfc('ci',it.ci,it.cie,'1','ciu',it.ciu,'CUL',it.ciS))+fr('Concentration finale',nfc('cf',it.cf,it.cfe,'50','cfu',it.cfu,'CUL',it.cfS));
+  else body=fr('Quantité',`<input class="txt l" data-f="q" value="${esc(it.q)}" placeholder="Ex. quelques gouttes, qsp pH 7,0" aria-label="Quantité">`);
+  body=`<div class="frs">${body}</div>`;
+  return`<div class="grp ci" data-i="${i}" style="--cc:var(--c-${CC[i%CC.length]})">
+<div class="vr ch"><span class="cno">${i+1}</span><input class="cnm" data-f="n" list="subl" value="${esc(it.n)}" placeholder="Nom, ex. Glucose" autocomplete="off" aria-label="Nom du composant"><button type="button" class="cdel" aria-label="Supprimer">${IC.trash}</button></div>
+<div class="vr"><div class="seg tseg" style="--n:4;--i:${TY.findIndex(x=>x[0]===it.t)}"><i class="th"></i>${TY.map(([v,n])=>`<button type="button" data-t="${v}"${v===it.t?' class="on"':''}>${n}</button>`).join('')}</div></div>
+${body}
+<div class="cft"><label><input type="checkbox" class="sw" data-f="post"${it.post?' checked':''}>Ajouté après autoclavage</label></div>
+<div class="cft cfv"><span class="cres"></span><button type="button" class="pill pri cv" disabled>${IC.check}Valider</button></div></div>`}
+function renderList(focus){if(!$('cl'))return;R0=compute(S.cur);$('cl').innerHTML=S.cur.items.map(cardHTML).join('');
+  if(focus!=null){const c=$('cl').children[focus];if(c){if(!RM)c.scrollIntoView({behavior:'smooth',block:'nearest'});c.querySelector('.cnm').focus({preventScroll:true})}}}
+function collapseAll(keep){if(!$('cl'))return 0;R0=compute(S.cur);const L=[];S.cur.items.forEach((it,i)=>{if(i!==keep&&!it.cl&&it._ed&&okItem(R0.items[i])){it.cl=true;L.push(i)}});
+  L.forEach(i=>{const c=$('cl').children[i];if(c)c.outerHTML=cardHTML(S.cur.items[i],i)});if(L.length){saveCur();updFlow()}return L.length}
+const later=e=>{if(S.tab!==1||S.flow!=='med')return;const t_=e.target,c=t_.closest&&t_.closest('#cl .ci');if(t_.closest&&t_.closest('#cAdd,[data-open],.cv'))return;setTimeout(()=>collapseAll(c?+c.dataset.i:-1),0)};
+BC.addEventListener('focusin',later);BC.addEventListener('click',later);
+/* IA */
+const aiHTML=()=>qcOpen(1,'Envoyez le prompt à une IA','Touchez une IA : le prompt est copié et elle s\'ouvre. Collez-le, joignez la photo de votre protocole, envoyez.',
+  `<div class="aib">${AIS.map(([n,,c],i)=>`<button type="button" data-ai="${i}" style="--cc:var(--c-${c})"><i class="aid"></i>${n}${IC.ext}</button>`).join('')}</div><details class="dt in"><summary>Voir le prompt<span>${IC.chev}</span></summary><pre class="pre">${esc(PROMPT)}</pre></details>`)
+  +qcOpen(2,'Collez sa réponse ici','BioPrep calcule les quantités ; vous pourrez ensuite modifier les volumes.',`<textarea id="aiIn" placeholder="PREPARATION: …&#10;VOLUME: …&#10;COMPOSANT: … | …&#10;FIN" spellcheck="false"></textarea><div class="ract"><button class="pill" id="aiPaste" type="button">${IC.paste}Coller</button><button class="pill pri" id="aiGo" type="button">${IC.spark}Importer</button></div>`)
+  +'<div id="aiRes"></div>';
+const qcOpen=(n,t_,h,body)=>`<div class="grp qc"><div class="qh"><b class="qn">${n}</b><div><p class="qt">${t_}</p>${h?`<p class="qs">${h}</p>`:''}</div></div><div class="qb">${body}</div></div>`;
+function copyTxt(t_){const fb=()=>{const a=document.createElement('textarea');a.value=t_;a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(_){}a.remove()};
+  try{navigator.clipboard.writeText(t_).catch(fb)}catch(e){fb()}}
+/* capsule d'unité : choix de l'unité et de l'écriture des nombres (1,5 ou 1,5 × 10ⁿ), comme les unités composées de BioChem */
+const upop=$('upop');let upB=null,upTouched=false;
+const ucGet=b=>b.dataset.b?bget(b.dataset.b):S.cur.items[+b.closest('.ci').dataset.i][b.dataset.f];
+function ucSet(b,u){if(b.dataset.b){bset(b.dataset.b,u);if(b.dataset.b.startsWith('k.'))saveK()}else{const ci=b.closest('.ci'),i=+ci.dataset.i,it=S.cur.items[i];it[b.dataset.f]=u;it._ed=1;
+    if(b.dataset.f==='cu'&&u in PM&&!it.mm){const k=subFind(it.n);if(k&&SUB[k][1])it.mm=D(SUB[k][1])}if(b.dataset.f==='cu'){R0=compute(S.cur);ci.outerHTML=cardHTML(it,i)}}
+  b.textContent=u;saveCur();updFlow()}
+const WM=['kg','g','mg','µg','ng'],WV=['L','mL','µL'];
+function setFx(b,f){const box=b.parentNode,v=box.querySelector('.val'),e=box.querySelector('.exp'),sci=f==='sci';if(box.classList.contains('sci')===sci)return;buzz();
+  const isB=!!v.dataset.b,key=isB?v.dataset.b:v.dataset.f,it=isB?null:S.cur.items[+b.closest('.ci').dataset.i];
+  const get=k=>isB?bget(k):it[k],set=(k,x)=>{if(isB)bset(k,x);else it[k]=x};
+  const r=pnum(get(key),get(key+'e'),get(key+'S'));set(key+'S',sci?1:0);
+  if('v' in r&&r.v){if(sci){const[m,x]=r.v.toExponential(11).split('e');set(key,D(String(Number(m))));set(key+'e',String(+x))}else{set(key,D(String(Number(r.v.toPrecision(12)))));set(key+'e','')}v.value=get(key);e.value=get(key+'e')}
+  box.classList.toggle('sci',sci);const sg=upop.querySelector('.fseg');if(sg)segSet(sg,sci?1:0);if(key.startsWith('k.'))saveK();saveCur();updFlow()}
+function upOpen(b){upB=b;upY=scrollY;upTouched=false;const key=b.dataset.ul,L=UL[key]||[],cur=ucGet(b),hasExp=!!b.parentNode.querySelector('.exp'),fsci=b.parentNode.classList.contains('sci');
+  const named=L.filter(u=>!(u.includes('/')&&compMass(u)>0)),comp=key!=='VOL'&&key!=='LIQ'&&L.some(u=>compMass(u)>0),vol=key==='VOL';
+  const k=String(cur).indexOf('/'),pair=compMass(cur)>0?[cur.slice(0,k),cur.slice(k+1)]:['g','L'];
+  const wheel=(items,sel,c)=>`<div class="up-wh" data-c="${c}">${items.map(x=>`<div class="up-it${x===sel?' on':''}" data-k="${x}">${x}</div>`).join('')}</div>`;
+  if(CHOICE.has(key)){upop.innerHTML=`<div class="up-l">${L.map(u=>`<button type="button" data-uv="${esc(u)}"${u===cur?' class="on"':''}><span>${esc(u)}</span>${u===cur?IC.check:''}</button>`).join('')}</div>`;upop.hidden=false;
+    const r=b.getBoundingClientRect(),w=upop.offsetWidth,h=upop.offsetHeight;upop.style.left=Math.max(8,Math.min(innerWidth-w-8,r.right-w))+'px';upop.style.top=(r.bottom+8+h<=innerHeight-8?r.bottom+8:Math.max(8,r.top-8-h>=8?r.top-8-h:innerHeight-8-h))+'px';return}
+  upop.innerHTML=(hasExp?`<div class="upf"><span>Écriture</span><div class="seg fseg" style="--n:2;--i:${fsci?1:0}"><i class="th"></i><button type="button" data-fm="std"${fsci?'':' class="on"'}>1,5</button><button type="button" data-fm="sci"${fsci?' class="on"':''}>1,5 × 10ⁿ</button></div></div>`:'')
+    +(!vol&&named.length?`<div class="up-n">${named.map(u=>`<button type="button" data-uv="${esc(u)}"${u===cur?' class="on"':''}>${esc(u)}</button>`).join('')}</div>`:'')
+    +(comp?`<div class="up-h"><span>Masse</span><span>Volume</span></div><div class="upw2"><i class="up-lens"></i>${wheel(WM,pair[0],0)}${wheel(WV,pair[1],1)}</div>`:'')
+    +(vol?`<div class="up-h one"><span>Volume</span></div><div class="upw2 one"><i class="up-lens"></i>${wheel(L,cur,0)}</div>`:'');
+  upop.hidden=false;
+  upop.querySelectorAll('.up-wh').forEach(w=>{const on=w.querySelector('.on')||w.children[w.dataset.c==='1'?1:1];w.scrollTop=on.offsetTop-80;let last=Math.round(w.scrollTop/40),tm=0;
+    ['pointerdown','touchstart','wheel'].forEach(ev=>w.addEventListener(ev,()=>upTouched=true,{passive:true}));
+    w.addEventListener('scroll',()=>{const i=Math.max(0,Math.min(w.children.length-1,Math.round(w.scrollTop/40)));if(i!==last){last=i;if(upTouched)buzz(8);[...w.children].forEach((c,j)=>c.classList.toggle('on',j===i))}
+      clearTimeout(tm);tm=setTimeout(()=>{if(!upTouched)return;const ws=[...upop.querySelectorAll('.up-wh')],v=ws.map(x=>x.children[Math.round(x.scrollTop/40)].dataset.k),u=vol?v[0]:v[0]+'/'+v[1];
+        if(u!==ucGet(b)){ucSet(b,u);upop.querySelectorAll('.up-n .on').forEach(x=>x.classList.remove('on'))}},140)},{passive:true})});
+  const r=b.getBoundingClientRect(),w=upop.offsetWidth,h=upop.offsetHeight;
+  upop.style.left=Math.max(8,Math.min(innerWidth-w-8,r.right-w))+'px';upop.style.top=(r.bottom+8+h<=innerHeight-8?r.bottom+8:Math.max(8,r.top-8-h>=8?r.top-8-h:innerHeight-8-h))+'px'}
+const upClose=()=>{if(upop.hidden)return;upB=null;if(RM||!window.bsUpOut){upop.hidden=true;return}bsUpOut(upop,()=>{if(!upB)upop.hidden=true})};
+let upY=0;addEventListener('resize',upClose);addEventListener('scroll',()=>{if(upB&&Math.abs(scrollY-upY)>40)upClose()},{passive:true});
+/* ---------- 12. Au labo : check-list, équipe, qui fait quoi ---------- */
+function renderLab(){if(S.flow==='gel')return renderGelLab();const P=S.cur,R=R0||compute(P),L=buildSteps(R,P),box=$('labB');
+  if(!R.V||!R.ok||!R.ok.length){box.innerHTML=`<div class="grp empty">Commencez une préparation depuis l'accueil : ses étapes à cocher apparaîtront ici.</div><button class="cadd" type="button" data-go="0">${IC.book}<span>Aller à l'accueil</span></button>`;return}
+  const done=L.filter(s=>P.chk[s.id]).length,team=P.team||[],col=n=>CC[(team.indexOf(n)+3)%CC.length];
+  const N=notesFor(R,P).filter(n=>n[2]==='warn'||n[0]==='shield');
+  box.innerHTML=`<div class="lab"><div>
+<div class="grp lhd"><b>${esc(P.name||'Préparation')}</b><small>${[VS(R.V),R.nb>1?`${R.nb} flacons`:'',R.ag?`${R.plates*R.nb} boîtes`:''].filter(Boolean).join(' · ')}</small>
+  <div class="pbar"><i style="--p:${L.length?done/L.length:0}"></i></div><div class="pct"><span>${done} / ${L.length} étapes</span><span>${L.length?Math.round(done/L.length*100):0} %</span></div>
+  <div class="lact"><button type="button" class="pill pri" id="lPrint">${IC.printer}Imprimer / PDF</button><button type="button" class="pill" id="lReset">${IC.reset}Tout décocher</button></div></div>
+<p class="gh">Étapes</p>
+<div class="grp">${L.map(s=>{const c=P.chk[s.id],w=P.who[s.id];return`<div class="st${c?' on':''}" data-s="${s.id}"><button type="button" class="ck" aria-pressed="${!!c}" aria-label="Fait">${IC.check}</button><div class="sx"><p>${s.h}</p>${c?`<span class="sby">Fait${c.by?` par ${esc(c.by)}`:''} à ${esc(c.at)}</span>`:''}</div>${team.length?`<button type="button" class="who${w?' set':''}" style="--cc:var(--c-${w?col(w):'blue'})">${esc(w||'Qui ?')}</button>`:''}</div>`}).join('')}</div>
+</div><div>
+<details class="grp dt"${team.length?' open':''}><summary>Travail à plusieurs<span>${IC.chev}</span></summary><div><div class="team">${team.map(n=>`<span class="tm" style="--cc:var(--c-${col(n)})">${esc(n)}<button type="button" data-rm="${esc(n)}" aria-label="Retirer">${IC.close}</button></span>`).join('')}
+  <div class="tadd"><input class="txt" id="tIn" placeholder="${team.length?'Ajouter un nom':'Qui participe ? (ex. Amar)'}" autocomplete="off" enterkeyhint="done"><button type="button" class="pill" id="tAdd">${IC.plus}Ajouter</button></div></div></div>
+</details>${team.length>1?`<button type="button" class="cadd" id="tAuto">${IC.users}<span>Répartir les étapes entre ${team.length} personnes</span></button>`:''}
+<p class="lead" style="margin-top:10px">${team.length?'Touchez « Qui ? » sur une étape pour l\'attribuer ; en la cochant, BioPrep note qui l\'a faite et à quelle heure.':'Ajoutez les noms des personnes qui préparent : chaque étape peut être attribuée et le suivi indique qui l\'a faite.'}</p>
+${N.length?`<p class="gh">À ne pas oublier</p><div class="grp">${N.map(([i,t_,cl])=>`<div class="tp ${cl}">${IC[i]||IC.info}<div>${t_}</div></div>`).join('')}</div>`:''}
+</div></div>`}
+
+/* ---------- 13. Impression (PDF) : fiche complète à préparer ---------- */
+function printPrep(){const P=S.cur,R=compute(P),L=buildSteps(R,P);if(!R.V||!R.ok.length)return;
+  const bx=on=>on?'☑':'☐',ok=R.ok,who=id=>P.who[id]?` <span class="who">— ${esc(P.who[id])}</span>`:'';
+  const rows=ok.map(o=>`<tr><td>${bx()}</td><td>${esc(o.name)}${o.post?'<br><small>après autoclavage</small>':''}</td><td class="q">${esc(QX(o,R))}</td><td>${esc(sub(o))}</td></tr>`).join('')
+    +(R.ag?`<tr><td>${bx()}</td><td>Agar</td><td class="q">${MS(R.agb)}${R.nb>1?` × ${R.nb}`:''}</td><td>par flacon</td></tr>`:'')
+    +`<tr><td>${bx()}</td><td>Eau distillée</td><td class="q">qsp ${VS(R.V)}</td><td>${epr(R.V)}</td></tr>`;
+  const N=notesFor(R,P).filter(n=>n[2]==='warn'||n[0]==='shield'||n[0]==='info');
+  $('print').innerHTML=`<h1>${esc(P.name||'Préparation')}</h1><div class="meta">${[VS(R.V),R.nb>1?`${R.nb} flacons de ${VS(R.Vb)}`:'',R.ag?`gélose ${fmt(R.ag)} g/L, environ ${R.plates*R.nb} boîtes`:'',P.pH?`pH ${esc(P.pH)}`:'',{auto:'autoclave 20 min à 121 °C',filt:'filtration 0,22 µm',none:''}[P.ster]].filter(Boolean).join(' · ')}<br>Préparé le ____ / ____ / ________ par ${(P.team||[]).length?esc(P.team.join(', ')):'______________________'}</div>
+<h2>Composants</h2><table><tr><th></th><th>Composant</th><th>Quantité</th><th>Matériel</th></tr>${rows}</table>
+<h2>Étapes</h2><table>${L.map((s,k)=>`<tr><td>${bx(P.chk[s.id])}</td><td>${k+1}. ${s.h}${who(s.id)}</td></tr>`).join('')}</table>
+${N.length?`<h2>Précautions</h2><ul>${N.map(n=>`<li>${n[1]}</li>`).join('')}</ul>`:''}
+<div class="ft">BioPrep · www.biostudy.xyz · quantités calculées pour ${VS(R.V)} ; vérifiez toujours avec votre protocole de référence.</div>`;
+  buzz(OK);setTimeout(()=>window.print(),60)}
+
+
+/* ---------- 14. Événements ---------- */
+let svT=0;const saveCur=()=>{clearTimeout(svT);svT=setTimeout(()=>sto.s('bpr2_cur',JSON.stringify(S.cur)),250)};
+const savePreps=()=>sto.s('bpr2_preps',JSON.stringify(S.preps));
+const saveK=()=>sto.s('bpr2_calc',JSON.stringify(S.k));
+const scrub=(el,re)=>{if(re.test(el.value))el.value=el.value.replace(re,'')};
+BC.addEventListener('input',e=>{const el=e.target;
+  if(el.id==='hq'){renderHome();return}
+  if(el.dataset.subq){const o=tgt(el.dataset.subq);o.sq=el.value;$('sg-'+el.dataset.subq).innerHTML=suggHTML(el.dataset.subq,el.value);return}
+  if(el.hasAttribute('data-recq')){$('rsg').innerHTML=recSugg(el.value);return}
+  if(el.dataset.b){if(el.matches('.val')&&!/\.n$/.test(el.dataset.b))scrub(el,/[^0-9.,eE+\-−×x^*\/:]/g);if(el.matches('.exp'))scrub(el,/[^0-9+\-−]/g);
+    bset(el.dataset.b,el.value);if(el.dataset.b.startsWith('k.'))saveK();updFlow();return}
+  if(el.dataset.p){S.cur[el.dataset.p]=el.value;if(el.dataset.p==='name')S.cur.nameSet=1;saveCur();updFlow();return}
+  const ci=el.closest('.ci');if(ci&&el.dataset.f&&el.type!=='checkbox'){const it=S.cur.items[+ci.dataset.i];
+    if(el.matches('.val'))scrub(el,/[^0-9.,eE+\-−×x^*\/:]/g);if(el.matches('.exp'))scrub(el,/[^0-9+\-−]/g);
+    it[el.dataset.f]=el.value;it._ed=1;saveCur();updFlow()}});
+BC.addEventListener('change',e=>{const el=e.target;
+  if(el.dataset.p){buzz();S.cur[el.dataset.p]=el.value;saveCur();updFlow();return}
+  const ci=el.closest('.ci');if(!ci)return;const i=+ci.dataset.i,it=S.cur.items[i];
+  if(el.type==='checkbox'){buzz();it.post=el.checked;it.postSet=1;saveCur();updFlow();return}
+  if(el.matches('select')){buzz();it[el.dataset.f]=el.value;
+    if(el.dataset.f==='cu'&&el.value in PM&&!it.mm){const k=subFind(it.n);if(k&&SUB[k][1])it.mm=D(SUB[k][1])}
+    saveCur();R0=compute(S.cur);if(el.dataset.f==='cu')ci.outerHTML=cardHTML(it,i);updFlow();return}
+  if(el.dataset.f==='n'){const k=subFind(it.n);let re=false;
+    if(k&&SUB[k][1]&&!it.mm){it.mm=D(SUB[k][1]);re=it.t==='pdr'&&it.cu in PM}
+    if(it.t==='sto'&&!it.postSet&&ABX.test(it.n)&&!it.post){it.post=true;re=true}
+    if(re){R0=compute(S.cur);ci.outerHTML=cardHTML(it,i);saveCur();updFlow()}}});
+BC.addEventListener('keydown',e=>{const el=e.target;
+  if(e.key==='Enter'&&el.id==='tIn'){e.preventDefault();$('tAdd').click();return}
+  if(e.key==='Enter'&&el.dataset.subq){const b=$('sg-'+el.dataset.subq).querySelector('[data-pick]');if(b)b.click();return}
+  if(e.key==='Enter'&&el.matches('.val,.exp,.cnm,.txt'))el.blur()});
+document.addEventListener('click',e=>{const T_=e.target,g=s=>T_.closest(s);let b;
+  if(upB&&!g('#upop')&&!g('.uc'))upClose();
+  if(b=g('#upop [data-uv]')){buzz(8);const u=b.dataset.uv,t0=upB;upClose();ucSet(t0,u);return}
+  if(b=g('#upop .up-it')){upTouched=true;const w=b.parentNode;w.scrollTo({top:b.offsetTop-80,behavior:'smooth'});return}
+  if(b=g('#upop [data-fm]')){if(upB)setFx(upB,b.dataset.fm);return}
+  if(!BC.contains(T_))return;
+  if(b=g('.uc')){buzz(8);upB===b?upClose():upOpen(b);return}
+  if(b=g('[data-ster]')){buzz();S.cur.ster=b.dataset.ster;segSet($('sterSeg'),STER.findIndex(x=>x[0]===b.dataset.ster));saveCur();updFlow();return}
+  if(b=g('[data-flow]')){buzz();startFlow(b.dataset.flow);return}
+  if(g('[data-resume]')){buzz();S.flow=S.cur.kind||'med';renderFlow(true);setTab(1);return}
+  if(b=g('[data-rec]')){buzz();const r=REC.find(x=>x.id===b.dataset.rec);$('hq').value='';renderHome();startFlow('med',fromRec(r));return}
+  if(b=g('[data-subgo]')){buzz();const P=newPrep('pdr'),o=P.items[0],k=b.dataset.subgo,s=SUB[k];o.sk=k;o.n=s[0];o.mm=s[1]?D(s[1]):'';o.sok=true;if(!s[1])o.cu='g/L';$('hq').value='';startFlow('pdr',P);return}
+  if(b=g('[data-mine]')){buzz();const p=S.preps.find(x=>x.id===b.dataset.mine);if(p){const c=JSON.parse(JSON.stringify(p));$('hq').value='';renderHome();startFlow(c.kind||'med',c)}return}
+  if(b=g('[data-delp]')){buzz();const p=S.preps.find(x=>x.id===b.dataset.delp);if(p&&confirm(`Supprimer « ${p.name||'Sans nom'} » ?`)){S.preps=S.preps.filter(x=>x!==p);savePreps();renderHome()}return}
+  if(b=g('[data-go]')){setTab(+b.dataset.go);return}
+  /* gels */
+  if(b=g('[data-gel]')){buzz();S.g.t=b.dataset.gel;$('hq').value='';renderHome();startFlow('gel');return}
+  if(b=g('[data-gt]')){buzz();S.g.t=b.dataset.gt;saveG();renderFlow();return}
+  if(b=g('[data-gb]')){if(S.g.a.buf!==b.dataset.gb){buzz();const a=S.g.a;a.buf=b.dataset.gb;saveG();renderFlow()}return}
+  if(b=g('[data-gc]')){buzz(8);const d=b.dataset.gc,i=d.indexOf(':'),k=d.slice(0,i),v=d.slice(i+1);bset(k,v);
+    if(k==='ga.V')S.g.a.Vu='mL';if(k==='gs.th'){const x=SDT.find(z=>z[0]===v);S.g.s.vr=D(x[2]);S.g.s.vs=D(x[3])}saveG();renderFlow();return}
+  if(b=g('[data-gn]')){buzz(8);S.g.s.n=Math.max(1,Math.min(10,(+S.g.s.n||1)+Number(b.dataset.gn)));saveG();renderFlow();return}
+  if(b=g('[data-gs] .ck')){const id=S.g.t+b.closest('[data-gs]').dataset.gs;if(S.g.chk[id]){delete S.g.chk[id];buzz()}else{S.g.chk[id]=1;buzz(OK)}saveG();if(S.tab===2)renderGelLab();else updGel();return}
+  if(b=g('[data-gact]')){const a=b.dataset.gact;if(a==='lab'){buzz();setTab(2)}else if(a==='pdf')printGel();else if(a==='reset'&&confirm('Décocher toutes les étapes ?')){Object.keys(S.g.chk).forEach(k=>{if(k.startsWith(S.g.t))delete S.g.chk[k]});buzz();saveG();renderGelLab()}return}
+  /* substance */
+  if(b=g('[data-pick]')){buzz();const[sc,k]=b.dataset.pick.split(':');const o=tgt(sc);pickSub(sc,k||null,o.sq||'');if(sc==='k')saveK();renderFlow();return}
+  if(b=g('[data-subed]')){buzz(8);const o=tgt(b.dataset.subed);o.sok=false;o.sq='';renderFlow();setTimeout(()=>{const i=$('flow').querySelector('[data-subq]');if(i)i.focus()},60);return}
+  if(b=g('[data-hyd]')){buzz(8);const[sc,k]=b.dataset.hyd.split(':');const o=tgt(sc);o.sk=k;o.n=SUB[k][0];o.mm=D(SUB[k][1]);if(sc==='k')saveK();renderFlow();return}
+  /* milieu */
+  if(b=g('[data-pickrec]')){buzz();const id=b.dataset.pickrec;let P;if(id==='custom'){P=newPrep('med');P.rec='custom';P.items=[blankItem()];P.V=S.cur.V||'';P.Vu=S.cur.Vu||'mL'}else P=fromRec(REC.find(r=>r.id===id));
+    S.cur=P;saveCur();renderFlow();return}
+  if(g('[data-recchg]')){buzz(8);S.cur.rec=null;renderFlow();return}
+  if(b=g('[data-nb]')){buzz(8);const P=S.cur,n=+b.dataset.nb;P.np=P.np>=P.nb?n:Math.min(P.np,n);P.nb=n;saveCur();updFlow();const o=$('npo');if(o)o.textContent=Math.min(P.np,P.nb);return}
+  if(b=g('[data-st]')){const[k,inc]=b.dataset.st.split(':'),P=S.cur;buzz(8);P[k]=Math.max(1,Math.min(k==='np'?P.nb:50,(+P[k]||1)+Number(inc)));const o=$('npo');if(o)o.textContent=Math.min(P.np,P.nb);saveCur();updFlow();return}
+  /* composants */
+  if(b=g('[data-open]')){buzz(8);const i=+b.closest('.ci').dataset.i;collapseAll(i);S.cur.items[i].cl=false;renderList();saveCur();updFlow();return}
+  if(b=g('.cv')){const i=+b.closest('.ci').dataset.i,L=S.cur.items;buzz(OK);L[i].cl=true;
+    if(i===L.length-1){const n=blankItem(),l=L[i];n.t=l.t;n.cu=l.cu;n.ru=l.ru;n.ciu=l.ciu;n.cfu=l.cfu;L.push(n);renderList(L.length-1)}else{const j=L.findIndex((x,k)=>k>i&&!x.cl);renderList(j>=0?j:null)}
+    saveCur();updFlow();return}
+  if(b=g('.tseg button')){const ci=b.closest('.ci'),i=+ci.dataset.i,it=S.cur.items[i];if(it.t!==b.dataset.t){buzz();it.t=b.dataset.t;R0=compute(S.cur);ci.outerHTML=cardHTML(it,i);saveCur();updFlow()}return}
+  if(b=g('.ci .cdel')){const ci=b.closest('.ci'),i=+ci.dataset.i;buzz();const go=()=>{S.cur.items.splice(i,1);renderList();saveCur();updFlow()};
+    if(RM)go();else ci.animate([{opacity:1},{opacity:0,transform:'scale(.96)'}],{duration:180,easing:'ease-in'}).onfinish=go;return}
+  if(g('#cAdd')){buzz();collapseAll();const L=S.cur.items,last=L[L.length-1],n=blankItem();if(last)n.t=last.t,n.cu=last.cu,n.ru=last.ru,n.ciu=last.ciu,n.cfu=last.cfu;L.push(n);renderList(L.length-1);saveCur();updFlow();return}
+  /* actions du résultat */
+  if(b=g('[data-act]')){const a=b.dataset.act,P=S.cur;
+    if(a==='lab'){buzz();setTab(2);return}
+    if(a==='pdf'){printPrep();return}
+    if(a==='save'){buzz(OK);if(!P.name)P.name=autoName(P);const i=S.preps.findIndex(x=>x.id===P.id);P.saved=Date.now();const c=JSON.parse(JSON.stringify(P));if(i>=0)S.preps[i]=c;else S.preps.unshift(c);savePreps();renderHome();toast('Préparation enregistrée : retrouvez-la dans l\'accueil');return}
+    if(a==='addc'){buzz();P.items.forEach(it=>it.cl=true);P.kind='med';P.rec='custom';P.nameSet=1;P.items.push(blankItem());S.flow='med';sto.s('bpr3_flow','med');saveCur();renderFlow();setTimeout(()=>{const d=$('dComp');if(d){d.open=true;renderList(P.items.length-1)}},50);return}}
+  /* au labo */
+  if(b=g('.st .ck')){const id=b.closest('.st').dataset.s,P=S.cur;if(P.chk[id]){delete P.chk[id];buzz()}else{const d=new Date();P.chk[id]={by:P.who[id]||(P.team.length===1?P.team[0]:''),at:`${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`};buzz(OK)}saveCur();renderLab();return}
+  if(b=g('.st .who')){const id=b.closest('.st').dataset.s,P=S.cur,L=['',...P.team],k=(L.indexOf(P.who[id]||'')+1)%L.length;buzz(8);if(L[k])P.who[id]=L[k];else delete P.who[id];saveCur();renderLab();return}
+  if(g('#tAdd')){const n=$('tIn').value.trim();if(!n)return $('tIn').focus();if(!S.cur.team.includes(n)){S.cur.team.push(n);buzz()}saveCur();renderLab();setTimeout(()=>$('tIn')&&$('tIn').focus(),30);return}
+  if(b=g('[data-rm]')){const n=b.dataset.rm,P=S.cur;buzz();P.team=P.team.filter(x=>x!==n);Object.keys(P.who).forEach(k=>{if(P.who[k]===n)delete P.who[k]});saveCur();renderLab();return}
+  if(g('#tAuto')){const P=S.cur,L=buildSteps(compute(P),P).filter(s=>!P.chk[s.id]);L.forEach((s,k)=>P.who[s.id]=P.team[k%P.team.length]);buzz(OK);saveCur();renderLab();toast('Étapes réparties');return}
+  if(g('#lReset')){if(confirm('Décocher toutes les étapes ?')){S.cur.chk={};buzz();saveCur();renderLab()}return}
+  if(g('#lPrint')){printPrep();return}
+  /* IA */
+  if(b=g('[data-ai]')){const[n,u]=AIS[+b.dataset.ai];copyTxt(PROMPT);window.open(u,'_blank','noopener');buzz(OK);toast(`Prompt copié : collez-le dans ${n}`);return}
+  if(g('#aiPaste')){if(navigator.clipboard&&navigator.clipboard.readText)navigator.clipboard.readText().then(t_=>{$('aiIn').value=t_;buzz()}).catch(()=>toast('Collage automatique impossible : appui long dans le champ, puis « Coller »'));else toast('Collage automatique impossible : appui long dans le champ, puis « Coller »');return}
+  if(g('#aiGo')){const r=parseAI($('aiIn').value);if(!r.preps.length){$('aiRes').innerHTML='<div class="grp empty">Aucune préparation reconnue : collez la réponse complète de l\'IA, avec les lignes « PREPARATION: », « COMPOSANT: » et « FIN ».</div>';buzz([30,40,30]);return}
+    r.preps.forEach(p=>{p.kind='med';p.rec='ai';p.saved=Date.now();S.preps.unshift(p)});savePreps();renderHome();buzz(OK);
+    if(r.preps.length===1){startFlow('med',JSON.parse(JSON.stringify(r.preps[0])));toast('Protocole importé');return}
+    $('aiRes').innerHTML=`<p class="gh">${r.preps.length} préparations trouvées : laquelle préparer ?</p><div class="grp">${r.preps.map(p=>row('spark','pink',p.name,`${p.V} ${p.Vu} · ${p.items.length} composant${p.items.length>1?'s':''}`,`data-mine="${p.id}"`)).join('')}</div>`;return}
+  if(g('#findBtn')){buzz();setTab(0);setTimeout(()=>{$('hq').focus()},S.tab===0?0:350);return}});
+
+/* ---------- 15. Onglets ---------- */
+let anims=[];
+function setTab(i,init){const old=S.tab;if(i===old)return;const next=$('view'+i),prev=old>=0?$('view'+old):null,dir=i>old?1:-1;upClose();
+  S.tab=i;BC.dataset.tab=i;navCtl.select(i);nbs.forEach((b,k)=>b.classList.toggle('on',k===i));
+  $('rn').style.transform=$('rtt').style.transform=`translateY(${-i*100/TABS.length}%)`;
+  if(i===0)renderHome();if(i===2)renderLab();
+  if(prev){buzz();scrollTo(0,0);prev.classList.remove('on')}
+  next.classList.add('on');anims.splice(0).forEach(a=>a.cancel());
+  if(!RM&&!init)$$(':scope>*,:scope>div>*',next).slice(0,10).forEach((e,k)=>anims.push(e.animate([{opacity:0,transform:`translateX(${dir*30}px)`},{opacity:1,transform:'none'}],{duration:520,delay:k*40,easing:'cubic-bezier(.22,1,.36,1)',fill:'backwards'})))}
+const sl=$('sl'),navCtl=window.LiquidGlass?LiquidGlass.tabs({wrap:$('navWrap'),inner:$('nav'),indicator:sl,items:nbs,onSelect:i=>setTab(i),glass:false})
+  :{select(i){sl.style.translate=nbs[i].offsetLeft+'px 0';sl.style.width=nbs[i].offsetWidth+'px'}};
+if(!window.LiquidGlass){nbs.forEach((b,i)=>b.addEventListener('click',()=>setTab(i)));addEventListener('resize',()=>navCtl.select(S.tab))}
+/* ---------- 16. Thème, menu, reflet du verre ---------- */
+const period=()=>{const h=new Date().getHours();return h>=7&&h<20?'day':'night'};
+function applyTheme(){root.dataset.theme=S.dark?'dark':'light';document.body.classList.toggle('theme-light',!S.dark);document.body.classList.toggle('theme-dark',S.dark);$('themeBtn').innerHTML=IC[S.dark?'sun':'moon'];$('metaTheme').content=S.dark?'#000000':'#f2f2f7'}
+$('themeBtn').addEventListener('click',()=>{buzz();S.dark=!S.dark;sto.s('bioPrepTheme',S.dark?'dark':'light');sto.s('bioPrepThemePeriod',period());applyTheme()});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{if(sto.g('bioPrepTheme')&&sto.g('bioPrepThemePeriod')===period())return;S.dark=e.matches;applyTheme()});
+$('mb').addEventListener('click',()=>{buzz();let n=0;const go=()=>typeof window.openCapsuleMenu==='function'?window.openCapsuleMenu():++n<40&&setTimeout(go,100);go()});
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+$$('.tools,.mb,.nav-in').forEach(b=>{
+  const aim=e=>{const r=b.getBoundingClientRect();b.style.setProperty('--mx',e.clientX-r.left+'px');b.style.setProperty('--my',e.clientY-r.top+'px')};
+  b.addEventListener('pointerenter',e=>{aim(e);b.classList.add('lit')});b.addEventListener('pointerdown',e=>{aim(e);b.classList.add('lit')});
+  b.addEventListener('pointermove',aim);b.addEventListener('pointerleave',()=>b.classList.remove('lit'));
+  ['pointerup','pointercancel'].forEach(n=>b.addEventListener(n,e=>e.pointerType!=='mouse'&&b.classList.remove('lit')))});
+
+/* ---------- Tests : BioPrep/?tests ou BioPrepTests() en console ---------- */
+window.BioPrepTests=()=>{const R=[],near=(a,b,r=1e-9)=>Math.abs(a-b)<=r*Math.max(1,Math.abs(b)),T_=(n,ok,got='')=>R.push({n,ok:!!ok,got});const f0=S.fmt;S.fmt='std';
+  const mk=(V,Vu,items,x={})=>({...blankPrep(),V,Vu,...x,items:items.map(a=>({...blankItem(),...a}))}),amt=(P,i)=>compute(P).items[i].amt;
+  let P=mk('1','L',[{n:'Tryptone',c:'10'},{n:'Extrait de levure',c:'5'},{n:'NaCl',c:'10'}]);let r=compute(P);
+  T_('LB 1 L : tryptone 10 g, extrait de levure 5 g, NaCl 10 g',near(r.items[0].amt,10)&&near(r.items[1].amt,5)&&near(r.items[2].amt,10),r.ok.map(Q).join(' ; '));
+  P.V='250';P.Vu='mL';r=compute(P);T_('LB adapté à 250 mL → 2,5 g ; 1,25 g ; 2,5 g',near(r.items[0].amt,2.5)&&near(r.items[1].amt,1.25),r.ok.map(Q).join(' ; '));
+  P=mk('750','mL',[{n:'Saccharose',c:'200'},{n:'Solution KH₂PO₄ 10 %',t:'liq',r:'20'},{n:'Hygromycine',t:'sto',ci:'100',ciu:'mg/mL',cf:'240',cfu:'µg/mL',post:true}],{nb:3,np:2,ag:'15'});r=compute(P);
+  T_('TNKYE 750 mL, 3 flacons : saccharose 150 g ; KH₂PO₄ 15 mL ; agar 3,75 g/flacon ; hygromycine 600 µL × 2 ; 30 boîtes',near(r.items[0].amt,150)&&near(r.items[1].amt,15)&&near(r.agb,3.75)&&near(r.items[2].amt,.6)&&r.np===2&&r.plates*r.nb===30,`${Q(r.items[0])} ; ${Q(r.items[1])} ; ${MS(r.agb)} ; ${QX(r.items[2],r)}`);
+  P=mk('230','mL',[{n:'Tris-HCl',t:'sto',ci:'1',ciu:'M',cf:'50',cfu:'mM'},{n:'CaCl₂',t:'sto',ci:'0,5',ciu:'M',cf:'50',cfu:'mM'}]);r=compute(P);
+  T_('STC 230 mL : Tris 1 M → 50 mM = 11,5 mL ; CaCl₂ 0,5 M → 50 mM = 23 mL ; eau ≈ 195,5 mL',near(r.items[0].amt,11.5)&&near(r.items[1].amt,23)&&near(r.water,195.5),`${Q(r.items[0])} ; ${Q(r.items[1])} ; ${VS(r.water)}`);
+  P=mk('100','mL',[{n:'NaCl',c:'0,5',cu:'M',mm:'58,44'}]);T_('NaCl 0,5 M, 100 mL → 2,922 g',near(amt(P,0),2.922),MS(amt(P,0)));
+  P=mk('200','mL',[{n:'KCl',c:'0,66',cu:'M',mm:'74,55'}]);T_('KCl 0,66 M, 200 mL → 9,841 g',near(amt(P,0),9.8406),MS(amt(P,0)));
+  P=mk('10','mL',[{n:'KOH',c:'20',cu:'% (m/V)'}]);T_('KOH 20 % (m/V), 10 mL → 2 g',near(amt(P,0),2),MS(amt(P,0)));
+  P=mk('30','mL',[{n:'MOPS',c:'10',cu:'mM',mm:'209,26'}]);T_('MOPS 10 mM, 30 mL → 62,78 mg',near(amt(P,0),.062778),MS(amt(P,0)));
+  P=mk('500','mL',[{n:'Éthanol 96 %',t:'sto',ci:'96',ciu:'% (V/V)',cf:'70',cfu:'% (V/V)'}]);T_('Éthanol 96 → 70 %, 500 mL → 364,6 mL',near(amt(P,0),364.583,1e-5),VS(amt(P,0)));
+  P=fromRec(REC.find(x=>x.id==='m9'));r=compute(P);T_('M9 1 L : sels 5X 200 mL ; MgSO₄ 2 mL ; glucose 20 % 20 mL ; CaCl₂ 100 µL',near(r.items[0].amt,200)&&near(r.items[1].amt,2)&&near(r.items[2].amt,20)&&near(r.items[3].amt,.1),r.ok.map(Q).join(' ; '));
+  P=fromRec(REC.find(x=>x.id==='tae'));r=compute(P);T_('TAE 50X 1 L : Tris 242 g ; acide acétique 57,1 mL ; EDTA 0,5 M 100 mL',near(r.items[0].amt,242)&&near(r.items[1].amt,57.1)&&near(r.items[2].amt,100),r.ok.map(Q).join(' ; '));
+  P=fromRec(REC.find(x=>x.id==='tris1'));r=compute(P);T_('Tris-HCl 1 M, 500 mL → 60,57 g de Tris base',near(r.items[0].amt,60.57),Q(r.items[0]));
+  P=mk('100','mL',[{n:'X',t:'sto',ci:'1',ciu:'M',cf:'50',cfu:'µg/mL'}]);T_('Unités incompatibles signalées (M → µg/mL)',compute(P).items[0].err==='Unités incompatibles');
+  const txt=`Voici :\n**PREPARATION:** Milieu TNKYE saccharose\nVOLUME: 750 mL\nRECETTE_POUR: 1 L\nFLACONS: 3\nFLACONS_AJOUT: 2\nAGAR: 15 g/L\nPH: 5,5-5,8\nSTERILISATION: autoclave\n- COMPOSANT: Saccharose | 200 g\nCOMPOSANT: Nitrate (NaNO3) | 2 g\nCOMPOSANT: Solution KH2PO4 | 20 mL\nCOMPOSANT: Hygromycine | 100 mg/mL -> 240 µg/mL | après autoclave\nETAPE: Distribuer 250 mL dans 3 bouteilles de 500 mL\nFIN\nPREPARATION: STC\nVOLUME: 230 mL\nCOMPOSANT: Tris HCl | 1 M -> 50 mM\nCOMPOSANT: NaCl | 0,5 M\nFIN`;
+  const pa=parseAI(txt);r=pa.preps[0]&&compute(pa.preps[0]);
+  T_('IA : 2 préparations lues ; TNKYE 750 mL → saccharose 150 g, KH₂PO₄ 15 mL, agar 3,75 g, hygromycine 600 µL × 2',pa.preps.length===2&&r&&near(r.items[0].amt,150)&&near(r.items[1].amt,1.5)&&near(r.items[2].amt,15)&&near(r.agb,3.75)&&near(r.items[3].amt,.6)&&r.items[3].post&&r.np===2&&pa.preps[0].pH==='5,5-5,8'&&pa.preps[0].steps.length===1,r?r.items.map(o=>Q(o)).join(' ; '):'-');
+  const r2=pa.preps[1]&&compute(pa.preps[1]);T_('IA : STC → Tris 1 M → 50 mM = 11,5 mL ; NaCl 0,5 M (M auto 58,44) = 6,722 g',r2&&near(r2.items[0].amt,11.5)&&near(r2.items[1].amt,6.7206),r2?r2.items.map(o=>Q(o)).join(' ; '):'-');
+  T_('Substances : CaCl₂ · 2H₂O → 147,01 ; « chlorure de sodium » → NaCl ; « NaCl 5 M » → NaCl',SUB[subFind('CaCl2 · 2H2O')][1]===147.01&&subFind('chlorure de sodium')==='nacl'&&subFind('NaCl 5 M')==='nacl');
+  T_('Familles : M et g/L incompatibles ; X à part',FAM('mM')!==FAM('g/L')&&FAM('X')==='x'&&FAM('µg/mL')==='mass');
+  T_('Masse à peser : 30 mL à 5 % → 1,5 g ; 100 mL à 0,5 M (58,44) → 2,922 g',near(kMass(5,'% (m/V)',0,30),1.5)&&near(kMass(.5,'M',58.44,100),2.922),MS(kMass(5,'% (m/V)',0,30)));
+  let cv=kConv(.5,'M',58.44);T_('Conversion : NaCl 0,5 M → 29,22 g/L = 2,922 % ; 20 mg/mL de glucose → 111 mM',near(cv.gl,29.22)&&near(kConv(20,'mg/mL',180.16).mol,.111012,1e-5),`${fmt(cv.gl)} g/L ; ${fmt(kConv(20,'mg/mL',180.16).mol*1e3)} mM`);
+  const g0=JSON.stringify(S.g);
+  S.g.a={...GD().a,p:'1',V:'50',cs:'50',cf:'1',vt:'300',st:'sybr'};let ga=gelA(S.g.a);
+  T_('Agarose 1 %, 50 mL, TAE 50X → 1X (+ 300 mL de cuve) : 0,5 g ; 7 mL de TAE 50X + 343 mL d\'eau ; SYBR Safe 5 µL',near(ga.m,.5)&&near(ga.stock,7)&&near(ga.water,343)&&near(ga.stain,5),`${MS(ga.m)} ; ${VS(ga.stock)} ; ${VS(ga.water)} ; ${VS(ga.stain/1000)}`);
+  S.g.a={...S.g.a,lc:'6',lf:'1',ls:'5',ln:'10'};ga=gelA(S.g.a);
+  T_('Tampon de charge 6X → 1X, 5 µL de produit de PCR : 1 µL par échantillon, 6 µL à déposer ; 10 µL pour 10 échantillons',near(ga.ld.vd,1)&&near(ga.ld.vw,6)&&near(ga.ld.vd*ga.ld.ln,10),`${VS(ga.ld.vd/1000)} ; ${VS(ga.ld.vw/1000)}`);
+  S.g.a={...S.g.a,lc:'1',lf:'1'};T_('Tampon de charge : C_f ≥ Cᵢ signalé',!!gelLd(S.g.a).err);
+  S.g.a={...S.g.a,buf:'tbe',p:'2',V:'100',cs:'10',cf:'0,5',vt:'',st:'bet',lc:'',lf:'',ls:'',ln:''};ga=gelA(S.g.a);
+  T_('Agarose 2 %, 100 mL, TBE 10X → 0,5X, BET : 2 g ; 5 mL de TBE 10X ; BET 5 µL',near(ga.m,2)&&near(ga.stock,5)&&near(ga.stain,5),`${MS(ga.m)} ; ${VS(ga.stock)} ; ${VS(ga.stain/1000)}`);
+  S.g.s={...GD().s,p:'10',n:2,vr:'5',vs:'2',ac:'30',ps:'5',t6:'1'};let gs=gelS(S.g.s);
+  T_('SDS-PAGE 10 %, 2 gels (Sambrook, 10 mL) : eau 3,963 mL ; acrylamide 3,333 mL ; Tris 8,8 2,5 mL ; SDS 0,1 mL ; APS 0,1 mL ; TEMED 4 µL',near(gs.R.acr,10/3)&&near(gs.R.tris,2.5)&&near(gs.R.sds,.1)&&near(gs.R.aps,.1)&&near(gs.R.tem,.004)&&near(gs.R.w,3.962667,1e-5),`${VS(gs.R.w)} ; ${VS(gs.R.acr)} ; ${VS(gs.R.tem)}`);
+  T_('Gel de concentration 5 %, 4 mL, Tris 1 M pH 6,8 : acrylamide 0,6667 mL ; Tris 0,5 mL ; TEMED 4 µL ; eau 2,749 mL',near(gs.C.acr,4*5/30)&&near(gs.C.tris,.5)&&near(gs.C.tem,.004)&&near(gs.C.w,2.74933,1e-5),`${VS(gs.C.acr)} ; ${VS(gs.C.tris)} ; ${VS(gs.C.w)}`);
+  S.g.s={...S.g.s,p:'6',n:1,vr:'10'};gs=gelS(S.g.s);T_('SDS-PAGE 6 %, 10 mL : TEMED 8 µL (Sambrook)',near(gs.R.tem,.008),VS(gs.R.tem));
+  S.g.s={...S.g.s,p:'31'};T_('Gel impossible signalé (31 % avec acrylamide 30 %)',!!gelS(S.g.s).err);
+  P=fromRec(REC.find(x=>x.id==='tgs10'));r=compute(P);T_('Tris-glycine-SDS 10X 1 L : Tris 30,3 g ; glycine 144 g ; SDS 10 g',near(r.items[0].amt,30.3)&&near(r.items[1].amt,144)&&near(r.items[2].amt,10),r.ok.map(Q).join(' ; '));
+  P=fromRec(REC.find(x=>x.id==='tris88'));r=compute(P);T_('Tris-HCl 1,5 M pH 8,8, 500 mL → 90,86 g de Tris base',near(r.items[0].amt,90.855),Q(r.items[0]));
+  S.g=JSON.parse(g0);
+  S.fmt=f0;const ok=R.every(r=>r.ok);console[ok?'log':'warn'](`BioPrep : ${R.filter(r=>r.ok).length}/${R.length} tests réussis`);R.forEach(r=>console.log((r.ok?'✓ ':'✗ ')+r.n+(r.got?' → '+r.got:'')));return R};
+
+/* ---------- 17. Démarrage ---------- */
+applyTheme();
+try{S.preps=JSON.parse(sto.g('bpr2_preps'))||[]}catch(e){S.preps=[]}
+try{S.cur=JSON.parse(sto.g('bpr2_cur'))}catch(e){S.cur=null}
+if(!S.cur||!Array.isArray(S.cur.items))S.cur=blankPrep();
+S.cur={...blankPrep(),...S.cur};S.cur.items=S.cur.items.map(it=>({...blankItem(),...it,_ed:0}));
+try{S.k=JSON.parse(sto.g('bpr2_calc'))||{}}catch(e){S.k={}}S.k={c:{...KD.c,...(S.k.c&&typeof S.k.c==='object'&&'u' in S.k.c?S.k.c:{})}};
+BC.dataset.fmt='champ';
+S.flow=sto.g('bpr3_flow');if(!FL[S.flow])S.flow=null;
+renderHome();renderFlow(true);
+setTab(0,true);
+if(/[?&#]tests\b/.test(location.search+location.hash)){const R=BioPrepTests(),box=document.createElement('div');box.className='tests';
+  box.innerHTML=`<b>Tests BioPrep : ${R.filter(x=>x.ok).length}/${R.length}</b><br><br>`+R.map(x=>`<div class="${x.ok?'ok':'ko'}">${x.ok?'✓':'✗'} ${esc(x.n)}${x.got?` → ${esc(x.got)}`:''}</div>`).join('')+'<br><button type="button" class="clr" style="width:100%" onclick="this.parentNode.remove()">Fermer</button>';BC.appendChild(box)}
+document.addEventListener('DOMContentLoaded',()=>{const f=document.querySelector('.modern-transparent-footer');if(f)$('shell').appendChild(f)});
+})();
+</script>
+<script src="/menu-flottant.js"></script>
+</body>
+</html>

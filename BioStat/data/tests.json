@@ -1,0 +1,1852 @@
+{
+ "version": 1,
+ "familles": [
+  {
+   "id": "ref",
+   "titre": "Valeur de référence",
+   "sous": "1 échantillon"
+  },
+  {
+   "id": "deux",
+   "titre": "Deux groupes",
+   "sous": "indépendants ou appariés"
+  },
+  {
+   "id": "trois",
+   "titre": "Trois groupes ou plus",
+   "sous": "ANOVA et alternatives"
+  },
+  {
+   "id": "fact",
+   "titre": "Plusieurs facteurs",
+   "sous": "ANOVA à 2 ou 3 facteurs"
+  },
+  {
+   "id": "quali",
+   "titre": "Variables qualitatives",
+   "sous": "tableaux de contingence"
+  },
+  {
+   "id": "lien",
+   "titre": "Liens et modèles",
+   "sous": "corrélation et régression"
+  },
+  {
+   "id": "survie",
+   "titre": "Survie",
+   "sous": "package survival"
+  },
+  {
+   "id": "cond",
+   "titre": "Conditions",
+   "sous": "normalité et variances"
+  }
+ ],
+ "tests": [
+  {
+   "id": "t-test-1",
+   "famille": "ref",
+   "titre": "Test t pour un échantillon",
+   "type": "paramétrique",
+   "fonction": "t.test",
+   "package": "stats",
+   "vignette": "cloche",
+   "resume": "Compare la moyenne d'un échantillon à une valeur théorique μ₀.",
+   "mots_cles": [
+    "moyenne",
+    "valeur théorique",
+    "un échantillon",
+    "student",
+    "mu"
+   ],
+   "h0": "La moyenne de la population est égale à μ₀ (μ = μ₀).",
+   "h1": "La moyenne de la population est différente de μ₀ (μ ≠ μ₀).",
+   "conditions": [
+    {
+     "texte": "Observations indépendantes (un sujet ne compte qu'une fois). Se vérifie avec le plan d'étude, pas avec R."
+    },
+    {
+     "texte": "Normalité de la variable (ou grand échantillon, règle usuelle n ≥ 30).",
+     "code": "shapiro.test(<X>)\nqqnorm(<X>); qqline(<X>)"
+    }
+   ],
+   "code": "t.test(<X>, mu = <VALEUR>)",
+   "exemple": {
+    "code": "# Glycémie à jeun (g/L) de 12 patients, comparée à 1 g/L\nglycemie <- c(1.05, 0.98, 1.12, 1.20, 0.95, 1.08, 1.15, 1.02, 1.10, 0.99, 1.18, 1.07)\nt.test(glycemie, mu = 1)",
+    "sortie": "\tOne Sample t-test\n\ndata:  glycemie\nt = 3.2094, df = 11, p-value = 0.008314\nalternative hypothesis: true mean is not equal to 1\n95 percent confidence interval:\n 1.023304 1.125029\nsample estimates:\nmean of x \n 1.074167",
+    "notes": [
+     {
+      "cible": "One Sample t-test",
+      "texte": "Nom du test : test t de Student pour un échantillon."
+     },
+     {
+      "cible": "t = 3.2094",
+      "texte": "Statistique t = (moyenne − μ₀) / (s / √n)."
+     },
+     {
+      "cible": "df = 11",
+      "texte": "Degrés de liberté : n − 1 = 12 − 1."
+     },
+     {
+      "cible": "p-value = 0.008314",
+      "texte": "p-value : probabilité d'observer un écart au moins aussi grand si H0 est vraie."
+     },
+     {
+      "cible": "1.023304 1.125029",
+      "texte": "IC à 95 % de la moyenne : il ne contient pas 1."
+     },
+     {
+      "cible": "1.074167",
+      "texte": "Moyenne observée de l'échantillon."
+     }
+    ],
+    "conclusion": "p = 0,0083 < 0,05 : on rejette H0. La glycémie moyenne (1,07 g/L, IC 95 % [1,02 ; 1,13]) est significativement différente de 1 g/L."
+   },
+   "situations": [
+    {
+     "texte": "Au-delà d'un pH de 5,5, un sol contaminé par l'aluminium n'est plus toxique. Le pH moyen de ton sol dépasse-t-il 5,5 ? H1 « le pH est supérieur au seuil » est unilatérale : alternative = \"greater\".",
+     "code": "t.test(<PH>, mu = 5.5, alternative = \"greater\")",
+     "autonome": false
+    },
+    {
+     "texte": "Le taux de croissance de ta souche est-il égal à 3,1 h⁻¹, la norme de l'espèce ? H1 « il est différent » est bilatérale : c'est le réglage par défaut.",
+     "code": "t.test(<TAUX>, mu = 3.1)",
+     "autonome": false
+    }
+   ]
+  },
+  {
+   "id": "wilcox-1",
+   "famille": "ref",
+   "titre": "Test des rangs signés de Wilcoxon (un échantillon)",
+   "type": "non paramétrique",
+   "fonction": "wilcox.test",
+   "package": "stats",
+   "vignette": "rangs",
+   "resume": "Alternative au test t pour un échantillon quand la normalité n'est pas acceptable.",
+   "mots_cles": [
+    "médiane",
+    "valeur théorique",
+    "rangs signés",
+    "un échantillon",
+    "mu"
+   ],
+   "h0": "La distribution est symétrique autour de μ₀ (médiane = μ₀).",
+   "h1": "La distribution n'est pas centrée sur μ₀.",
+   "conditions": [
+    {
+     "texte": "Observations indépendantes (un sujet ne compte qu'une fois). Se vérifie avec le plan d'étude, pas avec R."
+    },
+    {
+     "texte": "Distribution à peu près symétrique autour de sa médiane.",
+     "code": "hist(<X>)\nboxplot(<X>)"
+    },
+    {
+     "texte": "Avec des ex aequo (ou des différences nulles), R 4.6 calcule quand même une p-value exacte ; les versions plus anciennes de R utilisaient une approximation et affichaient l'avertissement « cannot compute exact p-value with ties »."
+    }
+   ],
+   "code": "wilcox.test(<X>, mu = <VALEUR>)",
+   "exemple": {
+    "code": "# Délai de prise en charge (min) de 10 patients, comparé à 15 min\ndelai <- c(12, 16, 9, 22, 31, 11, 14, 45, 13, 19)\nwilcox.test(delai, mu = 15)",
+    "sortie": "\tWilcoxon signed rank exact test\n\ndata:  delai\nV = 34, p-value = 0.541\nalternative hypothesis: true location is not equal to 15",
+    "notes": [
+     {
+      "cible": "Wilcoxon signed rank exact test",
+      "texte": "Test des rangs signés ; « exact » : p-value calculée sans approximation."
+     },
+     {
+      "cible": "V = 34",
+      "texte": "Statistique V : somme des rangs des écarts positifs (valeurs au-dessus de 15)."
+     },
+     {
+      "cible": "p-value = 0.541",
+      "texte": "p-value."
+     },
+     {
+      "cible": "true location is not equal to 15",
+      "texte": "H1 bilatérale : la distribution n'est pas centrée sur 15."
+     }
+    ],
+    "conclusion": "p = 0,54 > 0,05 : on ne rejette pas H0. Rien ne montre que le délai de prise en charge diffère de 15 min (médiane observée : 15 min). Ne pas rejeter H0 ne prouve pas l'égalité."
+   },
+   "remarques": [
+    "Variable discrète (comptage, classe, score) ou non normale : c'est ce test qu'on utilise. H0 : la moitié des valeurs est au-dessus de la valeur théorique, l'autre moitié en dessous."
+   ]
+  },
+  {
+   "id": "prop-test-1",
+   "famille": "ref",
+   "titre": "Test d'une proportion (approximation normale)",
+   "type": "asymptotique",
+   "fonction": "prop.test",
+   "package": "stats",
+   "vignette": "proportion",
+   "resume": "Compare une proportion observée à une proportion théorique p₀.",
+   "mots_cles": [
+    "proportion",
+    "pourcentage",
+    "valeur théorique",
+    "fréquence",
+    "prévalence"
+   ],
+   "h0": "La proportion de la population est égale à p₀.",
+   "h1": "La proportion de la population est différente de p₀.",
+   "conditions": [
+    {
+     "texte": "Observations indépendantes (un sujet ne compte qu'une fois). Se vérifie avec le plan d'étude, pas avec R."
+    },
+    {
+     "texte": "Effectifs suffisants : n·p₀ ≥ 5 et n·(1 − p₀) ≥ 5 (règle usuelle). Sinon, binom.test().",
+     "code": "<EFFECTIF> * <P0> >= 5 & <EFFECTIF> * (1 - <P0>) >= 5"
+    }
+   ],
+   "code": "prop.test(x = <SUCCES>, n = <EFFECTIF>, p = <P0>)",
+   "remarques": [
+    "Par défaut, R applique la correction de continuité de Yates (correct = TRUE).",
+    "Le « test Z » d'une proportion est prop.test(…, correct = FALSE) : R affiche X-squared = z². La fonction BSDA::z.test() compare une moyenne quand l'écart-type de la population est connu, pas une proportion.",
+    "Règle usuelle : au moins 5 succès et 5 échecs."
+   ],
+   "exemple": {
+    "code": "# 42 patients guéris sur 60 : la proportion diffère-t-elle de 50 % ?\nprop.test(x = 42, n = 60, p = 0.5)",
+    "sortie": "\t1-sample proportions test with continuity correction\n\ndata:  42 out of 60, null probability 0.5\nX-squared = 8.8167, df = 1, p-value = 0.002985\nalternative hypothesis: true p is not equal to 0.5\n95 percent confidence interval:\n 0.5662676 0.8079959\nsample estimates:\n  p \n0.7",
+    "notes": [
+     {
+      "cible": "with continuity correction",
+      "texte": "Correction de continuité de Yates, appliquée par défaut."
+     },
+     {
+      "cible": "X-squared = 8.8167",
+      "texte": "Statistique du χ² (équivaut au carré de la statistique z)."
+     },
+     {
+      "cible": "p-value = 0.002985",
+      "texte": "p-value."
+     },
+     {
+      "cible": "0.5662676 0.8079959",
+      "texte": "IC à 95 % de la proportion : il ne contient pas 0,5."
+     },
+     {
+      "cible": "0.7",
+      "texte": "Proportion observée : 42 / 60."
+     }
+    ],
+    "conclusion": "p = 0,003 < 0,05 : on rejette H0. La proportion de guérison (70 %, IC 95 % [57 % ; 81 %]) est significativement différente de 50 %."
+   }
+  },
+  {
+   "id": "binom-test",
+   "famille": "ref",
+   "titre": "Test binomial exact",
+   "type": "exact",
+   "fonction": "binom.test",
+   "package": "stats",
+   "vignette": "proportion",
+   "resume": "Compare une proportion à p₀ sans approximation : utile pour les petits effectifs.",
+   "mots_cles": [
+    "proportion",
+    "exact",
+    "binomial",
+    "petit effectif",
+    "valeur théorique"
+   ],
+   "h0": "La proportion de la population est égale à p₀.",
+   "h1": "La proportion de la population est différente de p₀.",
+   "conditions": [
+    {
+     "texte": "Observations indépendantes (un sujet ne compte qu'une fois). Se vérifie avec le plan d'étude, pas avec R."
+    },
+    {
+     "texte": "Variable binaire (succès / échec), nombre d'essais n fixé."
+    }
+   ],
+   "code": "binom.test(x = <SUCCES>, n = <EFFECTIF>, p = <P0>)",
+   "exemple": {
+    "code": "# 9 effets indésirables chez 20 patients, contre 25 % attendus\nbinom.test(x = 9, n = 20, p = 0.25)",
+    "sortie": "\tExact binomial test\n\ndata:  9 and 20\nnumber of successes = 9, number of trials = 20, p-value = 0.06524\nalternative hypothesis: true probability of success is not equal to 0.25\n95 percent confidence interval:\n 0.2305779 0.6847219\nsample estimates:\nprobability of success \n                  0.45",
+    "notes": [
+     {
+      "cible": "Exact binomial test",
+      "texte": "Test binomial exact : aucune approximation."
+     },
+     {
+      "cible": "number of successes = 9",
+      "texte": "Nombre de « succès » (ici, d'effets indésirables)."
+     },
+     {
+      "cible": "p-value = 0.06524",
+      "texte": "p-value."
+     },
+     {
+      "cible": "0.2305779 0.6847219",
+      "texte": "IC exact à 95 % (Clopper-Pearson) : il contient 0,25."
+     },
+     {
+      "cible": "0.45",
+      "texte": "Proportion observée : 9 / 20."
+     }
+    ],
+    "conclusion": "p = 0,065 > 0,05 : on ne rejette pas H0. Avec 20 patients, la fréquence observée (45 %) n'est pas significativement différente de 25 %. L'IC est large : l'étude manque de puissance."
+   }
+  },
+  {
+   "id": "chisq-gof",
+   "famille": "ref",
+   "titre": "Test du χ² d'ajustement",
+   "type": "asymptotique",
+   "fonction": "chisq.test",
+   "package": "stats",
+   "vignette": "tableau",
+   "resume": "Compare les effectifs observés dans des classes à une répartition théorique (par exemple 50 % / 50 %).",
+   "mots_cles": [
+    "khi-deux",
+    "chi2",
+    "chi-deux",
+    "ajustement",
+    "conformité",
+    "répartition",
+    "fréquences",
+    "qualitative",
+    "effectifs théoriques"
+   ],
+   "h0": "Les effectifs suivent la répartition théorique (les écarts sont dus au hasard).",
+   "h1": "Les effectifs ne suivent pas la répartition théorique.",
+   "conditions": [
+    {
+     "texte": "Observations indépendantes (un sujet ne compte qu'une fois). Se vérifie avec le plan d'étude, pas avec R."
+    },
+    {
+     "texte": "Effectifs théoriques tous ≥ 5 (règle usuelle) : effectif total × proportion théorique de chaque classe.",
+     "code": "chisq.test(<EFFECTIFS>, p = <PROPORTIONS>)$expected"
+    }
+   ],
+   "code": "# Effectifs observés de chaque classe, puis proportions théoriques (somme = 1)\nchisq.test(c(<EFFECTIF1>, <EFFECTIF2>), p = c(<P1>, <P2>))",
+   "remarques": [
+    "Sans l'option p, R teste une répartition égale entre toutes les classes.",
+    "Avec 2 classes, ce test donne le même résultat que prop.test(…, correct = FALSE) : X-squared = z²."
+   ],
+   "exemple": {
+    "code": "# 15 sites de phytoremédiation, 11 dépollués et 4 pollués.\n# La répartition diffère-t-elle de 50 % / 50 % ?\nchisq.test(c(11, 4), p = c(0.5, 0.5))",
+    "sortie": "\tChi-squared test for given probabilities\n\ndata:  c(11, 4)\nX-squared = 3.2667, df = 1, p-value = 0.0707",
+    "notes": [
+     {
+      "cible": "Chi-squared test for given probabilities",
+      "texte": "χ² d'ajustement : les effectifs sont comparés aux proportions données dans p."
+     },
+     {
+      "cible": "X-squared = 3.2667",
+      "texte": "χ² = Σ (O − C)² / C = (11 − 7,5)² / 7,5 + (4 − 7,5)² / 7,5."
+     },
+     {
+      "cible": "df = 1",
+      "texte": "Degrés de liberté : nombre de classes − 1."
+     },
+     {
+      "cible": "p-value = 0.0707",
+      "texte": "p-value."
+     }
+    ],
+    "conclusion": "p = 0,071 > 0,05 (χ² = 3,27 < 3,84, le seuil pour 1 ddl) : on ne rejette pas H0. On ne peut pas conclure, avec un risque acceptable, que la majorité des sites est dépolluée."
+   }
+  },
+  {
+   "id": "t-test-student",
+   "famille": "deux",
+   "titre": "Test t de Student (2 groupes indépendants)",
+   "type": "paramétrique",
+   "fonction": "t.test",
+   "package": "stats",
+   "vignette": "boites",
+   "resume": "Compare les moyennes de 2 groupes indépendants en supposant des variances égales.",
+   "mots_cles": [
+    "deux moyennes",
+    "groupes indépendants",
+    "student",
+    "var.equal",
+    "comparaison"
+   ],
+   "h0": "Les moyennes des 2 populations sont égales (μ₁ = μ₂).",
+   "h1": "Les moyennes des 2 populations sont différentes (μ₁ ≠ μ₂).",
+   "conditions": [
+    {
+     "texte": "Observations indépendantes (un sujet ne compte qu'une fois). Se vérifie avec le plan d'étude, pas avec R."
+    },
+    {
+     "texte": "Normalité de la variable dans chaque groupe (ou grands effectifs, règle usuelle n ≥ 30 par groupe).",
+     "code": "tapply(<DONNEES>$<VAR>, <DONNEES>$<GROUPE>, shapiro.test)\nboxplot(<VAR> ~ <GROUPE>, data = <DONNEES>)"
+    },
+    {
+     "texte": "Variances égales dans les 2 groupes.",
+     "code": "var.test(<VAR> ~ <GROUPE>, data = <DONNEES>)"
+    }
+   ],
+   "code": "t.test(<VAR> ~ <GROUPE>, data = <DONNEES>, var.equal = TRUE)",
+   "exemple": {
+    "code": "# Cholestérol (g/L) après 8 semaines : placebo ou traitement\nessai <- data.frame(\n  chol = c(2.31, 2.05, 2.48, 2.12, 2.60, 2.27, 2.39, 2.18, 2.52, 2.33,\n           2.02, 1.95, 2.21, 1.88, 2.30, 2.10, 1.79, 2.15, 2.05, 1.97),\n  groupe = rep(c(\"placebo\", \"traitement\"), each = 10))\nt.test(chol ~ groupe, data = essai, var.equal = TRUE)",
+    "sortie": "\tTwo Sample t-test\n\ndata:  chol by groupe\nt = 3.806, df = 18, p-value = 0.001294\nalternative hypothesis: true difference in means between group placebo and group traitement is not equal to 0\n95 percent confidence interval:\n 0.1267812 0.4392188\nsample estimates:\n   mean in group placebo mean in group traitement \n                   2.325                    2.042",
+    "notes": [
+     {
+      "cible": "Two Sample t-test",
+      "texte": "Test t de Student classique (variances supposées égales)."
+     },
+     {
+      "cible": "t = 3.806",
+      "texte": "Statistique t."
+     },
+     {
+      "cible": "df = 18",
+      "texte": "Degrés de liberté : n₁ + n₂ − 2 = 10 + 10 − 2."
+     },
+     {
+      "cible": "p-value = 0.001294",
+      "texte": "p-value."
+     },
+     {
+      "cible": "0.1267812 0.4392188",
+      "texte": "IC à 95 % de la différence placebo − traitement : il ne contient pas 0."
+     },
+     {
+      "cible": "sample estimates:",
+      "texte": "Moyenne de chaque groupe."
+     }
+    ],
+    "conclusion": "p = 0,0013 < 0,05 : on rejette H0. Le cholestérol moyen est plus bas sous traitement (2,04 g/L contre 2,33 g/L) ; différence 0,28 g/L, IC 95 % [0,13 ; 0,44]."
+   },
+   "situations": [
+    {
+     "texte": "La surface racinaire du colza change-t-elle avec un engrais azoté ? Deux groupes de plants différents (avec et sans engrais), données normales et variances égales.",
+     "code": "t.test(<SURFACE> ~ <ENGRAIS>, data = <DONNEES>, var.equal = TRUE)",
+     "autonome": false
+    }
+   ],
+   "remarques": [
+    "Sans var.equal = TRUE, t.test() fait le test de Welch (variances inégales)."
+   ]
+  },
+  {
+   "id": "t-test-welch",
+   "famille": "deux",
+   "titre": "Test t de Welch (2 groupes indépendants)",
+   "type": "paramétrique",
+   "fonction": "t.test",
+   "package": "stats",
+   "vignette": "boites",
+   "resume": "Compare les moyennes de 2 groupes indépendants sans supposer des variances égales. C'est le choix par défaut de t.test().",
+   "mots_cles": [
+    "deux moyennes",
+    "groupes indépendants",
+    "welch",
+    "variances inégales",
+    "comparaison"
+   ],
+   "h0": "Les moyennes des 2 populations sont égales (μ₁ = μ₂).",
+   "h1": "Les moyennes des 2 populations sont différentes (μ₁ ≠ μ₂).",
+   "conditions": [
+    {
+     "texte": "Observations indépendantes (un sujet ne compte qu'une fois). Se vérifie avec le plan d'étude, pas avec R."
+    },
+    {
+     "texte": "Normalité de la variable dans chaque groupe (ou grands effectifs, règle usuelle n ≥ 30 par groupe).",
+     "code": "tapply(<DONNEES>$<VAR>, <DONNEES>$<GROUPE>, shapiro.test)\nboxplot(<VAR> ~ <GROUPE>, data = <DONNEES>)"
+    }
+   ],
+   "code": "t.test(<VAR> ~ <GROUPE>, data = <DONNEES>)",
+   "exemple": {
+    "code": "# Cholestérol (g/L) après 8 semaines : placebo ou traitement\nessai <- data.frame(\n  chol = c(2.31, 2.05, 2.48, 2.12, 2.60, 2.27, 2.39, 2.18, 2.52, 2.33,\n           2.02, 1.95, 2.21, 1.88, 2.30, 2.10, 1.79, 2.15, 2.05, 1.97),\n  groupe = rep(c(\"placebo\", \"traitement\"), each = 10))\nt.test(chol ~ groupe, data = essai)",
+    "sortie": "\tWelch Two Sample t-test\n\ndata:  chol by groupe\nt = 3.806, df = 17.65, p-value = 0.001333\nalternative hypothesis: true difference in means between group placebo and group traitement is not equal to 0\n95 percent confidence interval:\n 0.1265588 0.4394412\nsample estimates:\n   mean in group placebo mean in group traitement \n                   2.325                    2.042",
+    "notes": [
+     {
+      "cible": "Welch Two Sample t-test",
+      "texte": "Test de Welch : version par défaut de t.test(), sans hypothèse d'égalité des variances."
+     },
+     {
+      "cible": "t = 3.806",
+      "texte": "Statistique t."
+     },
+     {
+      "cible": "df = 17.65",
+      "texte": "Degrés de liberté corrigés (formule de Welch) : souvent non entiers."
+     },
+     {
+      "cible": "p-value = 0.001333",
+      "texte": "p-value."
+     },
+     {
+      "cible": "0.1265588 0.4394412",
+      "texte": "IC à 95 % de la différence placebo − traitement : il ne contient pas 0."
+     },
+     {
+      "cible": "sample estimates:",
+      "texte": "Moyenne de chaque groupe."
+     }
+    ],
+    "conclusion": "p = 0,0013 < 0,05 : on rejette H0. Le cholestérol moyen est plus bas sous traitement (2,04 g/L contre 2,33 g/L) ; différence 0,28 g/L, IC 95 % [0,13 ; 0,44]."
+   },
+   "remarques": [
+    "t.test() applique la correction de Welch par défaut : c'est la même fonction que pour le test de Student, sans var.equal = TRUE."
+   ]
+  },
+  {
+   "id": "wilcox-mw",
+   "famille": "deux",
+   "titre": "Test de Wilcoxon-Mann-Whitney",
+   "type": "non paramétrique",
+   "fonction": "wilcox.test",
+   "package": "stats",
+   "vignette": "rangs",
+   "resume": "Compare 2 groupes indépendants à partir des rangs, sans hypothèse de normalité.",
+   "mots_cles": [
+    "mann-whitney",
+    "rangs",
+    "groupes indépendants",
+    "médiane",
+    "non paramétrique"
+   ],
+   "h0": "Les 2 groupes ont la même distribution (P(X > Y) = 1/2).",
+   "h1": "Les valeurs d'un groupe tendent à être plus grandes que celles de l'autre.",
+   "conditions": [
+    {
+     "texte": "Observations indépendantes (un sujet ne compte qu'une fois). Se vérifie avec le plan d'étude, pas avec R."
+    },
+    {
+     "texte": "Variable au moins ordinale. On ne parle de « comparaison des médianes » que si les 2 distributions ont la même forme.",
+     "code": "boxplot(<VAR> ~ <GROUPE>, data = <DONNEES>)"
+    }
+   ],
+   "code": "wilcox.test(<VAR> ~ <GROUPE>, data = <DONNEES>)",
+   "remarques": [
+    "Avec des ex aequo (ou des différences nulles), R 4.6 calcule quand même une p-value exacte ; les versions plus anciennes de R utilisaient une approximation et affichaient l'avertissement « cannot compute exact p-value with ties »."
+   ],
+   "exemple": {
+    "code": "# Durée de séjour (jours) selon la technique opératoire\nsejour <- data.frame(\n  duree = c(3, 5, 4, 12, 6, 2, 8, 21, 7, 9,\n            10, 14, 11, 25, 16, 13, 30, 15, 18, 22.5),\n  technique = rep(c(\"A\", \"B\"), each = 10))\nwilcox.test(duree ~ technique, data = sejour)",
+    "sortie": "\tWilcoxon rank sum exact test\n\ndata:  duree by technique\nW = 9, p-value = 0.00105\nalternative hypothesis: true location shift is not equal to 0",
+    "notes": [
+     {
+      "cible": "Wilcoxon rank sum exact test",
+      "texte": "Test de Wilcoxon-Mann-Whitney, p-value exacte."
+     },
+     {
+      "cible": "W = 9",
+      "texte": "Statistique W : nombre de paires (A, B) où la valeur de A dépasse celle de B (sur 10 × 10 = 100)."
+     },
+     {
+      "cible": "p-value = 0.00105",
+      "texte": "p-value."
+     },
+     {
+      "cible": "true location shift is not equal to 0",
+      "texte": "H1 : décalage entre les deux distributions."
+     }
+    ],
+    "conclusion": "p = 0,001 < 0,05 : on rejette H0. Les durées de séjour sont plus courtes avec la technique A (médiane 6,5 jours contre 15,5 jours avec B)."
+   },
+   "situations": [
+    {
+     "texte": "Le nombre de plages de lyse d'un virus diffère-t-il entre une lignée de cellules humaines et une lignée de macaque ? Un dénombrement est une variable discrète : on prend ce test plutôt que le test t.",
+     "code": "wilcox.test(<PLAGES> ~ <LIGNEE>, data = <DONNEES>)",
+     "autonome": false
+    }
+   ]
+  },
+  {
+   "id": "t-test-paired",
+   "famille": "deux",
+   "titre": "Test t apparié",
+   "type": "paramétrique",
+   "fonction": "t.test",
+   "package": "stats",
+   "vignette": "paires",
+   "resume": "Compare 2 mesures faites sur les mêmes sujets (avant / après, deux traitements chez le même patient).",
+   "mots_cles": [
+    "apparié",
+    "avant après",
+    "mesures répétées",
+    "différences",
+    "paired"
+   ],
+   "h0": "La moyenne des différences est nulle (μ_d = 0).",
+   "h1": "La moyenne des différences n'est pas nulle (μ_d ≠ 0).",
+   "conditions": [
+    {
+     "texte": "Les paires sont indépendantes entre elles."
+    },
+    {
+     "texte": "Normalité des différences (ou nombre de paires élevé, règle usuelle n ≥ 30).",
+     "code": "shapiro.test(<APRES> - <AVANT>)"
+    }
+   ],
+   "code": "t.test(<APRES>, <AVANT>, paired = TRUE)",
+   "remarques": [
+    "Les deux vecteurs doivent être dans le même ordre (même patient sur la même ligne).",
+    "La syntaxe formule t.test(y ~ g, paired = TRUE) provoque une erreur dans les versions récentes de R (« cannot use 'paired' in formula method ») : utilise la forme t.test(x, y, paired = TRUE).",
+    "Chaque mesure de la première série correspond à une mesure de la seconde (le même individu avant et après) : option paired = TRUE."
+   ],
+   "exemple": {
+    "code": "# sleep (fourni avec R) : gain de sommeil (h) de 10 patients\n# avec le somnifère 1 puis le somnifère 2\nwith(sleep, t.test(extra[group == 1], extra[group == 2], paired = TRUE))",
+    "sortie": "\tPaired t-test\n\ndata:  extra[group == 1] and extra[group == 2]\nt = -4.0621, df = 9, p-value = 0.002833\nalternative hypothesis: true mean difference is not equal to 0\n95 percent confidence interval:\n -2.4598858 -0.7001142\nsample estimates:\nmean difference \n          -1.58",
+    "notes": [
+     {
+      "cible": "Paired t-test",
+      "texte": "Test t apparié : il travaille sur les différences sujet par sujet."
+     },
+     {
+      "cible": "t = -4.0621",
+      "texte": "Statistique t (négative : somnifère 1 < somnifère 2)."
+     },
+     {
+      "cible": "df = 9",
+      "texte": "Degrés de liberté : nombre de paires − 1 = 10 − 1."
+     },
+     {
+      "cible": "p-value = 0.002833",
+      "texte": "p-value."
+     },
+     {
+      "cible": "-2.4598858 -0.7001142",
+      "texte": "IC à 95 % de la différence moyenne : il ne contient pas 0."
+     },
+     {
+      "cible": "-1.58",
+      "texte": "Différence moyenne (somnifère 1 − somnifère 2), en heures."
+     }
+    ],
+    "conclusion": "p = 0,0028 < 0,05 : on rejette H0. Le somnifère 2 fait gagner en moyenne 1,58 h de sommeil de plus que le somnifère 1 (IC 95 % [0,70 ; 2,46] h)."
+   }
+  },
+  {
+   "id": "wilcox-paired",
+   "famille": "deux",
+   "titre": "Test des rangs signés de Wilcoxon (apparié)",
+   "type": "non paramétrique",
+   "fonction": "wilcox.test",
+   "package": "stats",
+   "vignette": "paires",
+   "resume": "Alternative au test t apparié quand les différences ne sont pas normales.",
+   "mots_cles": [
+    "apparié",
+    "rangs signés",
+    "avant après",
+    "non paramétrique",
+    "paired"
+   ],
+   "h0": "Les différences sont distribuées symétriquement autour de 0.",
+   "h1": "Les différences ne sont pas centrées sur 0.",
+   "conditions": [
+    {
+     "texte": "Les paires sont indépendantes entre elles."
+    },
+    {
+     "texte": "Différences à peu près symétriques.",
+     "code": "hist(<APRES> - <AVANT>)"
+    }
+   ],
+   "code": "wilcox.test(<APRES>, <AVANT>, paired = TRUE)",
+   "remarques": [
+    "Avec des ex aequo (ou des différences nulles), R 4.6 calcule quand même une p-value exacte ; les versions plus anciennes de R utilisaient une approximation et affichaient l'avertissement « cannot compute exact p-value with ties ».",
+    "Version non paramétrique des séries appariées (données non normales ou discrètes) : wilcox.test(…, paired = TRUE)."
+   ],
+   "exemple": {
+    "code": "# Pression artérielle systolique (mmHg) de 10 patients avant et après traitement\navant <- c(152, 148, 160, 155, 170, 145, 158, 162, 150, 166)\napres <- c(140, 146, 151, 149, 157, 147, 150, 148, 146, 155)\nwilcox.test(apres, avant, paired = TRUE)",
+    "sortie": "\tWilcoxon signed rank exact test\n\ndata:  apres and avant\nV = 1.5, p-value = 0.005859\nalternative hypothesis: true location shift is not equal to 0",
+    "notes": [
+     {
+      "cible": "Wilcoxon signed rank exact test",
+      "texte": "Test des rangs signés apparié, p-value exacte."
+     },
+     {
+      "cible": "V = 1.5",
+      "texte": "Somme des rangs des différences positives (après > avant). Le « ,5 » vient de deux différences ex aequo, qui reçoivent un rang moyen."
+     },
+     {
+      "cible": "p-value = 0.005859",
+      "texte": "p-value."
+     }
+    ],
+    "conclusion": "p = 0,006 < 0,05 : on rejette H0. La pression systolique baisse après traitement (9 patients sur 10)."
+   }
+  },
+  {
+   "id": "anova-1",
+   "famille": "trois",
+   "titre": "ANOVA à un facteur",
+   "type": "paramétrique",
+   "fonction": "aov",
+   "package": "stats",
+   "vignette": "groupes",
+   "resume": "Compare les moyennes de 3 groupes indépendants ou plus, puis compare les groupes 2 à 2 (test t par paires, correction de Bonferroni).",
+   "mots_cles": [
+    "anova",
+    "analyse de variance",
+    "plusieurs groupes",
+    "tukey",
+    "post hoc",
+    "fisher",
+    "bonferroni",
+    "test t par paires",
+    "pairwise"
+   ],
+   "h0": "Toutes les moyennes sont égales (μ₁ = μ₂ = … = μₖ).",
+   "h1": "Au moins une moyenne diffère des autres.",
+   "conditions": [
+    {
+     "texte": "Observations indépendantes (un sujet ne compte qu'une fois). Se vérifie avec le plan d'étude, pas avec R."
+    },
+    {
+     "texte": "Normalité des résidus.",
+     "code": "modele <- aov(<VAR> ~ <GROUPE>, data = <DONNEES>)\nshapiro.test(residuals(modele))\nqqnorm(residuals(modele)); qqline(residuals(modele))"
+    },
+    {
+     "texte": "Homogénéité des variances entre les groupes.",
+     "code": "bartlett.test(<VAR> ~ <GROUPE>, data = <DONNEES>)\ncar::leveneTest(<VAR> ~ <GROUPE>, data = <DONNEES>)"
+    }
+   ],
+   "code": "<DONNEES>$<GROUPE> <- factor(<DONNEES>$<GROUPE>)\nmodele <- aov(<VAR> ~ <GROUPE>, data = <DONNEES>)\nsummary(modele)\n# Si p < 0,05 : comparaisons 2 à 2 (post hoc), correction de Bonferroni\npairwise.t.test(<DONNEES>$<VAR>, <DONNEES>$<GROUPE>, p.adjust.method = \"bonferroni\")",
+   "remarques": [
+    "La variable de groupe doit être un facteur : sinon, aov() la traite comme une variable numérique.",
+    "Les comparaisons 2 à 2 ne s'interprètent que si l'ANOVA est significative.",
+    "Variances inégales : ANOVA de Welch, oneway.test(). Autre post hoc courant : TukeyHSD(modele).",
+    "Correction de Bonferroni : on divise le seuil par le nombre de comparaisons (0,05 / 5 = 0,01 pour 5 tests), ce qui revient à multiplier chaque p-value. On réutilise les mêmes données à chaque comparaison : sans correction, le risque de se tromper grandit."
+   ],
+   "exemple": {
+    "code": "# Score de douleur (0-10) selon le traitement, 8 patients par groupe\ndouleur <- data.frame(\n  score = c(6.1, 5.4, 7.0, 6.5, 5.8, 6.9, 6.2, 5.5,\n            4.8, 5.1, 4.2, 5.6, 4.5, 3.9, 5.0, 4.7,\n            4.4, 3.8, 5.2, 4.1, 3.6, 4.9, 4.3, 3.5),\n  traitement = factor(rep(c(\"placebo\", \"paracetamol\", \"ibuprofene\"), each = 8)))\nmodele <- aov(score ~ traitement, data = douleur)\nsummary(modele)\npairwise.t.test(douleur$score, douleur$traitement, p.adjust.method = \"bonferroni\")",
+    "sortie": "            Df Sum Sq Mean Sq F value   Pr(>F)    \ntraitement   2 16.413   8.207   24.39 3.34e-06 ***\nResiduals   21  7.065   0.336                     \n---\nSignif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n\n\tPairwise comparisons using t tests with pooled SD \n\ndata:  douleur$score and douleur$traitement \n\n            ibuprofene paracetamol\nparacetamol 0.29816    -          \nplacebo     3.6e-06    0.00018    \n\nP value adjustment method: bonferroni",
+    "notes": [
+     {
+      "cible": "traitement   2",
+      "texte": "Variabilité entre les groupes : 3 groupes − 1 = 2 ddl."
+     },
+     {
+      "cible": "Residuals   21",
+      "texte": "Variabilité dans les groupes : 24 − 3 = 21 ddl."
+     },
+     {
+      "cible": "24.39",
+      "texte": "F = carré moyen entre groupes / carré moyen résiduel = 8,207 / 0,336."
+     },
+     {
+      "cible": "3.34e-06",
+      "texte": "p-value de l'ANOVA : 3,34 × 10⁻⁶."
+     },
+     {
+      "cible": "0.29816",
+      "texte": "Test t par paires : paracétamol et ibuprofène ne diffèrent pas (p ajustée = 0,30)."
+     },
+     {
+      "cible": "3.6e-06",
+      "texte": "Placebo contre ibuprofène : p ajustée = 3,6 × 10⁻⁶."
+     },
+     {
+      "cible": "P value adjustment method: bonferroni",
+      "texte": "Correction de Bonferroni : chaque p-value est multipliée par le nombre de comparaisons (3)."
+     }
+    ],
+    "conclusion": "p = 3,3 × 10⁻⁶ < 0,05 : au moins un traitement diffère. Comparaisons 2 à 2 (Bonferroni) : le placebo donne plus de douleur que le paracétamol (p = 0,0002) et que l'ibuprofène (p < 0,001) ; paracétamol et ibuprofène ne diffèrent pas significativement (p = 0,30)."
+   }
+  },
+  {
+   "id": "anova-welch",
+   "famille": "trois",
+   "titre": "ANOVA de Welch (variances inégales)",
+   "type": "paramétrique",
+   "fonction": "oneway.test",
+   "package": "stats",
+   "vignette": "groupes",
+   "resume": "Compare les moyennes de 3 groupes indépendants ou plus quand les données sont normales mais que les variances diffèrent.",
+   "mots_cles": [
+    "anova",
+    "welch",
+    "variances inégales",
+    "hétéroscédasticité",
+    "plusieurs groupes",
+    "oneway"
+   ],
+   "h0": "Toutes les moyennes sont égales (μ₁ = μ₂ = … = μₖ).",
+   "h1": "Au moins une moyenne diffère des autres.",
+   "conditions": [
+    {
+     "texte": "Observations indépendantes (un sujet ne compte qu'une fois). Se vérifie avec le plan d'étude, pas avec R."
+    },
+    {
+     "texte": "Normalité dans chaque groupe.",
+     "code": "tapply(<DONNEES>$<VAR>, <DONNEES>$<GROUPE>, shapiro.test)"
+    },
+    {
+     "texte": "Variances inégales (sinon, l'ANOVA classique aov() suffit).",
+     "code": "bartlett.test(<VAR> ~ <GROUPE>, data = <DONNEES>)"
+    }
+   ],
+   "code": "oneway.test(<VAR> ~ <GROUPE>, data = <DONNEES>)\n# Si p < 0,05 : comparaisons 2 à 2 sans supposer des variances égales, correction de Bonferroni\npairwise.t.test(<DONNEES>$<VAR>, <DONNEES>$<GROUPE>, pool.sd = FALSE, p.adjust.method = \"bonferroni\")",
+   "remarques": [
+    "oneway.test() n'applique la correction de Welch que si var.equal = FALSE, ce qui est le réglage par défaut.",
+    "Avec var.equal = TRUE, oneway.test() donne exactement l'ANOVA classique."
+   ],
+   "exemple": {
+    "code": "# Score de douleur (0-10) selon le traitement, 8 patients par groupe\ndouleur <- data.frame(\n  score = c(6.1, 5.4, 7.0, 6.5, 5.8, 6.9, 6.2, 5.5,\n            4.8, 5.1, 4.2, 5.6, 4.5, 3.9, 5.0, 4.7,\n            4.4, 3.8, 5.2, 4.1, 3.6, 4.9, 4.3, 3.5),\n  traitement = factor(rep(c(\"placebo\", \"paracetamol\", \"ibuprofene\"), each = 8)))\noneway.test(score ~ traitement, data = douleur)",
+    "sortie": "\tOne-way analysis of means (not assuming equal variances)\n\ndata:  score and traitement\nF = 21.951, num df = 2.000, denom df = 13.952, p-value = 4.908e-05",
+    "notes": [
+     {
+      "cible": "not assuming equal variances",
+      "texte": "ANOVA de Welch : les variances ne sont pas supposées égales."
+     },
+     {
+      "cible": "F = 21.951",
+      "texte": "Statistique F de Welch."
+     },
+     {
+      "cible": "denom df = 13.952",
+      "texte": "Degrés de liberté corrigés : décimaux, plus petits que les 21 de l'ANOVA classique."
+     },
+     {
+      "cible": "p-value = 4.908e-05",
+      "texte": "p-value : 4,9 × 10⁻⁵."
+     }
+    ],
+    "conclusion": "p = 4,9 × 10⁻⁵ < 0,05 : au moins un traitement diffère, sans supposer des variances égales. Les comparaisons 2 à 2 se font ensuite avec pairwise.t.test(…, pool.sd = FALSE)."
+   }
+  },
+  {
+   "id": "anova-2",
+   "famille": "fact",
+   "titre": "ANOVA à deux facteurs",
+   "type": "paramétrique",
+   "fonction": "aov",
+   "package": "stats",
+   "vignette": "groupes",
+   "resume": "Teste l'effet de deux facteurs croisés sur une variable quantitative, et leur interaction : par exemple le traitement et la dose.",
+   "mots_cles": [
+    "anova à deux facteurs",
+    "deux facteurs",
+    "interaction",
+    "plan factoriel",
+    "two-way",
+    "aov",
+    "facteurs croisés"
+   ],
+   "h0": "Pour chacun des trois effets testés (facteur A, facteur B, interaction A × B) : l'effet est nul.",
+   "h1": "L'effet testé existe : les moyennes diffèrent selon le facteur, ou, pour l'interaction, l'effet d'un facteur dépend du niveau de l'autre.",
+   "conditions": [
+    {
+     "texte": "Observations indépendantes (un sujet ne compte qu'une fois). Se vérifie avec le plan d'étude, pas avec R."
+    },
+    {
+     "texte": "Normalité des résidus du modèle.",
+     "code": "modele <- aov(<VAR> ~ <A> * <B>, data = <DONNEES>)\nshapiro.test(residuals(modele))"
+    },
+    {
+     "texte": "Variances homogènes entre les cases du plan (chaque combinaison des deux facteurs).",
+     "code": "bartlett.test(<VAR> ~ interaction(<A>, <B>), data = <DONNEES>)"
+    },
+    {
+     "texte": "Plan équilibré de préférence : le même nombre d'individus dans chaque case.",
+     "code": "table(<DONNEES>$<A>, <DONNEES>$<B>)"
+    }
+   ],
+   "code": "<DONNEES>$<A> <- factor(<DONNEES>$<A>)\n<DONNEES>$<B> <- factor(<DONNEES>$<B>)\nmodele <- aov(<VAR> ~ <A> * <B>, data = <DONNEES>)\nsummary(modele)\n# moyennes par case, puis graphique d'interaction\ntapply(<DONNEES>$<VAR>, list(<DONNEES>$<A>, <DONNEES>$<B>), mean)\ninteraction.plot(<DONNEES>$<B>, <DONNEES>$<A>, <DONNEES>$<VAR>)",
+   "remarques": [
+    "<A> * <B> est un raccourci pour <A> + <B> + <A>:<B> : les deux effets principaux et leur interaction.",
+    "Lis d'abord la ligne de l'interaction. Si elle est significative, l'effet d'un facteur dépend de l'autre : on décrit les moyennes case par case plutôt que les effets principaux seuls.",
+    "Sur le graphique d'interaction, des lignes à peu près parallèles indiquent l'absence d'interaction ; des lignes qui se croisent ou s'écartent, une interaction.",
+    "Plan déséquilibré : summary(aov()) donne des sommes de carrés séquentielles (type I), qui changent avec l'ordre des facteurs. On utilise alors car::Anova(modele, type = 2).",
+    "Comparaisons 2 à 2 sur un facteur : TukeyHSD(modele, which = \"<B>\")."
+   ],
+   "exemple": {
+    "code": "# ToothGrowth (fourni avec R) : longueur des odontoblastes de 60 cobayes selon\n# le supplément (OJ = jus d'orange, VC = acide ascorbique) et la dose (0,5 ; 1 ; 2 mg/jour)\nToothGrowth$dose <- factor(ToothGrowth$dose)\nmodele <- aov(len ~ supp * dose, data = ToothGrowth)\nsummary(modele)\n# moyennes par case : supplément en lignes, dose en colonnes\ntapply(ToothGrowth$len, list(ToothGrowth$supp, ToothGrowth$dose), mean)",
+    "sortie": "            Df Sum Sq Mean Sq F value   Pr(>F)    \nsupp         1  205.4   205.4  15.572 0.000231 ***\ndose         2 2426.4  1213.2  92.000  < 2e-16 ***\nsupp:dose    2  108.3    54.2   4.107 0.021860 *  \nResiduals   54  712.1    13.2                     \n---\nSignif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n     0.5     1     2\nOJ 13.23 22.70 26.06\nVC  7.98 16.77 26.14",
+    "notes": [
+     {
+      "cible": "supp         1",
+      "texte": "Effet principal du supplément : 2 niveaux − 1 = 1 ddl."
+     },
+     {
+      "cible": "0.000231",
+      "texte": "p-value de l'effet du supplément."
+     },
+     {
+      "cible": "92.000",
+      "texte": "F de l'effet de la dose : très grand, la dose explique l'essentiel de la variabilité."
+     },
+     {
+      "cible": "supp:dose    2",
+      "texte": "Interaction : (2 − 1) × (3 − 1) = 2 ddl."
+     },
+     {
+      "cible": "0.021860",
+      "texte": "p-value de l'interaction : significative au risque 5 %."
+     },
+     {
+      "cible": "Residuals   54",
+      "texte": "Résidus : 60 − 2 × 3 cases = 54 ddl."
+     },
+     {
+      "cible": "26.06",
+      "texte": "À la dose 2, OJ (26,06) et VC (26,14) donnent la même moyenne."
+     }
+    ],
+    "conclusion": "La dose (F(2 ; 54) = 92,0 ; p < 0,001) et le supplément (F(1 ; 54) = 15,6 ; p < 0,001) ont un effet, et leur interaction est significative (F(2 ; 54) = 4,11 ; p = 0,022) : le jus d'orange donne des dents plus longues que la vitamine C aux doses 0,5 et 1 mg/jour, mais pas à 2 mg/jour (26,1 dans les deux cas)."
+   }
+  },
+  {
+   "id": "anova-3",
+   "famille": "fact",
+   "titre": "ANOVA à trois facteurs",
+   "type": "paramétrique",
+   "fonction": "aov",
+   "package": "stats",
+   "vignette": "groupes",
+   "resume": "Teste l'effet de trois facteurs croisés sur une variable quantitative, avec toutes leurs interactions : par exemple trois apports d'engrais.",
+   "mots_cles": [
+    "anova à trois facteurs",
+    "trois facteurs",
+    "interaction",
+    "plan factoriel",
+    "three-way",
+    "aov",
+    "facteurs croisés"
+   ],
+   "h0": "Pour chacun des sept effets testés (A, B, C, les trois interactions doubles et l'interaction triple A × B × C) : l'effet est nul.",
+   "h1": "L'effet testé existe : les moyennes diffèrent selon le facteur, ou l'effet d'un facteur dépend du niveau d'un ou deux autres facteurs.",
+   "conditions": [
+    {
+     "texte": "Observations indépendantes (un sujet ne compte qu'une fois). Se vérifie avec le plan d'étude, pas avec R."
+    },
+    {
+     "texte": "Normalité des résidus du modèle.",
+     "code": "modele <- aov(<VAR> ~ <A> * <B> * <C>, data = <DONNEES>)\nshapiro.test(residuals(modele))"
+    },
+    {
+     "texte": "Variances homogènes entre les cases du plan.",
+     "code": "bartlett.test(<VAR> ~ interaction(<A>, <B>, <C>), data = <DONNEES>)"
+    },
+    {
+     "texte": "Plan équilibré de préférence, avec au moins 2 répétitions par case (sinon l'interaction triple ne peut pas être testée).",
+     "code": "ftable(table(<DONNEES>$<A>, <DONNEES>$<B>, <DONNEES>$<C>))"
+    }
+   ],
+   "code": "modele <- aov(<VAR> ~ <A> * <B> * <C>, data = <DONNEES>)\nsummary(modele)",
+   "remarques": [
+    "<A> * <B> * <C> donne 7 lignes : 3 effets principaux, 3 interactions doubles (<A>:<B>, <A>:<C>, <B>:<C>) et l'interaction triple <A>:<B>:<C>.",
+    "Lis les interactions de la plus complexe à la plus simple : une interaction triple significative veut dire que l'interaction de deux facteurs change selon le troisième.",
+    "Avec beaucoup de lignes testées, quelques p-values < 0,05 peuvent apparaître par hasard : interprète surtout ce qui était prévu par l'étude.",
+    "Plan déséquilibré : utilise car::Anova(modele, type = 2) plutôt que summary(aov())."
+   ],
+   "exemple": {
+    "code": "# npk (fourni avec R) : rendement de pois sur 24 parcelles selon l'apport\n# d'azote (N), de phosphate (P) et de potassium (K) : 0 = absent, 1 = présent\nmodele <- aov(yield ~ N * P * K, data = npk)\nsummary(modele)\ntapply(npk$yield, npk$N, mean)   # rendement moyen sans et avec azote",
+    "sortie": "            Df Sum Sq Mean Sq F value Pr(>F)  \nN            1  189.3  189.28   6.161 0.0245 *\nP            1    8.4    8.40   0.273 0.6082  \nK            1   95.2   95.20   3.099 0.0975 .\nN:P          1   21.3   21.28   0.693 0.4175  \nN:K          1   33.1   33.14   1.078 0.3145  \nP:K          1    0.5    0.48   0.016 0.9019  \nN:P:K        1   37.0   37.00   1.204 0.2887  \nResiduals   16  491.6   30.72                 \n---\nSignif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n       0        1 \n52.06667 57.68333",
+    "notes": [
+     {
+      "cible": "N            1",
+      "texte": "Effet principal de l'azote : 2 niveaux − 1 = 1 ddl."
+     },
+     {
+      "cible": "0.0245",
+      "texte": "p-value de l'effet de l'azote : significative."
+     },
+     {
+      "cible": "0.0975",
+      "texte": "Potassium : p = 0,098, pas significatif au risque 5 %."
+     },
+     {
+      "cible": "N:P:K        1",
+      "texte": "Interaction triple : l'interaction de deux facteurs change-t-elle selon le troisième ?"
+     },
+     {
+      "cible": "0.2887",
+      "texte": "p-value de l'interaction triple : non significative."
+     },
+     {
+      "cible": "Residuals   16",
+      "texte": "Résidus : 24 − 8 cases = 16 ddl."
+     }
+    ],
+    "conclusion": "Seul l'azote a un effet significatif sur le rendement (F(1 ; 16) = 6,16 ; p = 0,025) : le rendement moyen passe de 52,1 à 57,7 avec azote. Ni le phosphate, ni le potassium, ni aucune interaction ne sont significatifs. Les données npk viennent d'un essai en 6 blocs : l'analyse complète ajoute block au modèle."
+   }
+  },
+  {
+   "id": "kruskal",
+   "famille": "trois",
+   "titre": "Test de Kruskal-Wallis",
+   "type": "non paramétrique",
+   "fonction": "kruskal.test",
+   "package": "stats",
+   "vignette": "rangs",
+   "resume": "Alternative non paramétrique à l'ANOVA pour 3 groupes indépendants ou plus.",
+   "mots_cles": [
+    "kruskal",
+    "plusieurs groupes",
+    "rangs",
+    "non paramétrique",
+    "post hoc",
+    "bonferroni",
+    "dunn"
+   ],
+   "h0": "Les groupes ont la même distribution.",
+   "h1": "Au moins un groupe a des valeurs systématiquement différentes.",
+   "conditions": [
+    {
+     "texte": "Observations indépendantes (un sujet ne compte qu'une fois). Se vérifie avec le plan d'étude, pas avec R."
+    },
+    {
+     "texte": "Variable au moins ordinale."
+    }
+   ],
+   "code": "kruskal.test(<VAR> ~ <GROUPE>, data = <DONNEES>)\n# Si p < 0,05 : comparaisons 2 à 2, correction de Bonferroni\npairwise.wilcox.test(<DONNEES>$<VAR>, <DONNEES>$<GROUPE>, p.adjust.method = \"bonferroni\")",
+   "exemple": {
+    "code": "# Score de douleur (0-10) selon le traitement, 8 patients par groupe\ndouleur <- data.frame(\n  score = c(6.1, 5.4, 7.0, 6.5, 5.8, 6.9, 6.2, 5.5,\n            4.8, 5.1, 4.2, 5.6, 4.5, 3.9, 5.0, 4.7,\n            4.4, 3.8, 5.2, 4.1, 3.6, 4.9, 4.3, 3.5),\n  traitement = factor(rep(c(\"placebo\", \"paracetamol\", \"ibuprofene\"), each = 8)))\nkruskal.test(score ~ traitement, data = douleur)\npairwise.wilcox.test(douleur$score, douleur$traitement, p.adjust.method = \"bonferroni\")",
+    "sortie": "\tKruskal-Wallis rank sum test\n\ndata:  score by traitement\nKruskal-Wallis chi-squared = 15.695, df = 2, p-value = 0.0003907\n\n\n\tPairwise comparisons using Wilcoxon rank sum exact test \n\ndata:  douleur$score and douleur$traitement \n\n            ibuprofene paracetamol\nparacetamol 0.39114    -          \nplacebo     0.00047    0.00186    \n\nP value adjustment method: bonferroni",
+    "notes": [
+     {
+      "cible": "Kruskal-Wallis chi-squared = 15.695",
+      "texte": "Statistique H, comparée à une loi du χ²."
+     },
+     {
+      "cible": "df = 2",
+      "texte": "Degrés de liberté : nombre de groupes − 1."
+     },
+     {
+      "cible": "p-value = 0.0003907",
+      "texte": "p-value globale."
+     },
+     {
+      "cible": "0.39114",
+      "texte": "Comparaison 2 à 2 : paracétamol contre ibuprofène, p ajustée = 0,39."
+     },
+     {
+      "cible": "P value adjustment method: bonferroni",
+      "texte": "Correction de Bonferroni pour les comparaisons multiples."
+     }
+    ],
+    "conclusion": "p = 0,0004 < 0,05 : au moins un groupe diffère. Comparaisons 2 à 2 (Bonferroni) : le placebo diffère des deux traitements (p = 0,0005 et 0,002), paracétamol et ibuprofène ne diffèrent pas (p = 0,39)."
+   },
+   "remarques": [
+    "Il travaille sur les rangs des valeurs, comme Mann-Whitney Wilcoxon.",
+    "Post hoc : Wilcoxon (Mann-Whitney) ou test de Dunn par paires, toujours avec une correction de Bonferroni."
+   ]
+  },
+  {
+   "id": "anova-rm",
+   "famille": "trois",
+   "titre": "ANOVA à mesures répétées",
+   "type": "paramétrique",
+   "fonction": "aov",
+   "package": "stats",
+   "vignette": "paires",
+   "resume": "Compare 3 mesures ou plus faites sur les mêmes sujets (par exemple J0, J7, J30).",
+   "mots_cles": [
+    "mesures répétées",
+    "apparié",
+    "plusieurs temps",
+    "anova",
+    "error"
+   ],
+   "h0": "Les moyennes sont égales à tous les temps de mesure.",
+   "h1": "Au moins un temps a une moyenne différente.",
+   "conditions": [
+    {
+     "texte": "Données en format long : une ligne par sujet et par temps ; <ID> et <TEMPS> sont des facteurs.",
+     "code": "str(<DONNEES>)"
+    },
+    {
+     "texte": "Normalité des résidus (plan équilibré, sans donnée manquante).",
+     "code": "m <- lm(<VAR> ~ <TEMPS> + <ID>, data = <DONNEES>)\nshapiro.test(residuals(m))"
+    },
+    {
+     "texte": "Sphéricité (variances des différences entre temps égales) : R de base n'a pas d'outil simple pour la vérifier."
+    }
+   ],
+   "code": "<DONNEES>$<ID> <- factor(<DONNEES>$<ID>)\n<DONNEES>$<TEMPS> <- factor(<DONNEES>$<TEMPS>)\nmodele <- aov(<VAR> ~ <TEMPS> + Error(<ID>/<TEMPS>), data = <DONNEES>)\nsummary(modele)",
+   "exemple": {
+    "code": "# Pression systolique (mmHg) de 6 patients à J0, J7 et J30\nsuivi <- data.frame(\n  id = factor(rep(1:6, times = 3)),\n  temps = factor(rep(c(\"J0\", \"J7\", \"J30\"), each = 6), levels = c(\"J0\", \"J7\", \"J30\")),\n  pas = c(158, 162, 150, 171, 165, 155,\n          150, 157, 146, 160, 158, 151,\n          145, 150, 144, 152, 151, 146))\nmodele <- aov(pas ~ temps + Error(id/temps), data = suivi)\nsummary(modele)",
+    "sortie": "Error: id\n          Df Sum Sq Mean Sq F value Pr(>F)\nResiduals  5  432.9   86.59               \n\nError: id:temps\n          Df Sum Sq Mean Sq F value   Pr(>F)    \ntemps      2  444.8  222.39   41.78 1.39e-05 ***\nResiduals 10   53.2    5.32                     \n---\nSignif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1",
+    "notes": [
+     {
+      "cible": "Error: id",
+      "texte": "Strate « sujets » : variabilité entre les patients, retirée du test."
+     },
+     {
+      "cible": "Error: id:temps",
+      "texte": "Strate « intra-sujet » : c'est ici qu'on teste l'effet du temps."
+     },
+     {
+      "cible": "41.78",
+      "texte": "F = 222,39 / 5,32."
+     },
+     {
+      "cible": "1.39e-05",
+      "texte": "p-value de l'effet du temps."
+     }
+    ],
+    "conclusion": "p = 1,4 × 10⁻⁵ < 0,05 : la pression systolique moyenne varie entre J0, J7 et J30 (sous réserve de la sphéricité)."
+   },
+   "remarques": [
+    "Plusieurs séries dépendantes demandent souvent des modèles mixtes ou des analyses multivariées : pour un vrai travail, fais-toi aider d'un statisticien."
+   ]
+  },
+  {
+   "id": "friedman",
+   "famille": "trois",
+   "titre": "Test de Friedman",
+   "type": "non paramétrique",
+   "fonction": "friedman.test",
+   "package": "stats",
+   "vignette": "rangs",
+   "resume": "Alternative non paramétrique à l'ANOVA à mesures répétées.",
+   "mots_cles": [
+    "friedman",
+    "mesures répétées",
+    "rangs",
+    "apparié",
+    "non paramétrique"
+   ],
+   "h0": "Les distributions sont identiques à tous les temps de mesure.",
+   "h1": "Au moins un temps diffère des autres.",
+   "conditions": [
+    {
+     "texte": "Plan complet : chaque sujet est mesuré à chaque temps, une seule fois.",
+     "code": "table(<DONNEES>$<ID>, <DONNEES>$<TEMPS>)"
+    }
+   ],
+   "code": "friedman.test(<VAR> ~ <TEMPS> | <ID>, data = <DONNEES>)",
+   "exemple": {
+    "code": "# Pression systolique (mmHg) de 6 patients à J0, J7 et J30\nsuivi <- data.frame(\n  id = factor(rep(1:6, times = 3)),\n  temps = factor(rep(c(\"J0\", \"J7\", \"J30\"), each = 6), levels = c(\"J0\", \"J7\", \"J30\")),\n  pas = c(158, 162, 150, 171, 165, 155,\n          150, 157, 146, 160, 158, 151,\n          145, 150, 144, 152, 151, 146))\nfriedman.test(pas ~ temps | id, data = suivi)",
+    "sortie": "\tFriedman rank sum test\n\ndata:  pas and temps and id\nFriedman chi-squared = 12, df = 2, p-value = 0.002479",
+    "notes": [
+     {
+      "cible": "Friedman chi-squared = 12",
+      "texte": "Statistique de Friedman, calculée sur les rangs à l'intérieur de chaque patient."
+     },
+     {
+      "cible": "df = 2",
+      "texte": "Degrés de liberté : nombre de temps − 1."
+     },
+     {
+      "cible": "p-value = 0.002479",
+      "texte": "p-value."
+     }
+    ],
+    "conclusion": "p = 0,0025 < 0,05 : la pression systolique n'a pas la même distribution aux trois temps. Ici, chaque patient baisse de J0 à J7 puis de J7 à J30."
+   }
+  },
+  {
+   "id": "chisq",
+   "famille": "quali",
+   "titre": "Test du χ² d'indépendance",
+   "type": "asymptotique",
+   "fonction": "chisq.test",
+   "package": "stats",
+   "vignette": "tableau",
+   "resume": "Teste le lien entre 2 variables qualitatives (ou compare des proportions entre groupes).",
+   "mots_cles": [
+    "khi-deux",
+    "chi2",
+    "chi-deux",
+    "tableau de contingence",
+    "qualitatives",
+    "proportions",
+    "indépendance"
+   ],
+   "h0": "Les 2 variables sont indépendantes.",
+   "h1": "Les 2 variables sont liées.",
+   "conditions": [
+    {
+     "texte": "Observations indépendantes (un sujet ne compte qu'une fois). Se vérifie avec le plan d'étude, pas avec R."
+    },
+    {
+     "texte": "Effectifs théoriques tous ≥ 5 (règle usuelle). Sinon, fisher.test().",
+     "code": "chisq.test(<TABLE>)$expected"
+    }
+   ],
+   "code": "<TABLE> <- table(<DONNEES>$<VAR1>, <DONNEES>$<VAR2>)\nchisq.test(<TABLE>)",
+   "remarques": [
+    "Sur un tableau 2 × 2, R applique par défaut la correction de continuité de Yates (correct = TRUE)."
+   ],
+   "exemple": {
+    "code": "# Tabagisme et maladie chez 100 patients\ntab <- matrix(c(30, 15, 20, 35), nrow = 2,\n              dimnames = list(Tabac = c(\"Fumeur\", \"Non fumeur\"),\n                              Maladie = c(\"Oui\", \"Non\")))\nchisq.test(tab)",
+    "sortie": "\tPearson's Chi-squared test with Yates' continuity correction\n\ndata:  tab\nX-squared = 7.9192, df = 1, p-value = 0.004891",
+    "notes": [
+     {
+      "cible": "with Yates' continuity correction",
+      "texte": "Correction de Yates, appliquée par défaut aux tableaux 2 × 2."
+     },
+     {
+      "cible": "X-squared = 7.9192",
+      "texte": "Statistique du χ²."
+     },
+     {
+      "cible": "df = 1",
+      "texte": "Degrés de liberté : (lignes − 1) × (colonnes − 1) = 1."
+     },
+     {
+      "cible": "p-value = 0.004891",
+      "texte": "p-value."
+     }
+    ],
+    "conclusion": "p = 0,0049 < 0,05 : on rejette H0. Tabagisme et maladie sont liés (60 % de malades chez les fumeurs contre 30 % chez les non-fumeurs). Effectifs théoriques : 22,5 et 27,5, tous ≥ 5."
+   },
+   "situations": [
+    {
+     "texte": "Les débouchés (agroalimentaire, environnement, santé) sont-ils les mêmes après une Licence et après un Master ? Effectif théorique d'une case = total de sa ligne × total de sa colonne / effectif total.",
+     "code": "deb <- matrix(c(15, 5, 54, 15, 13, 12), nrow = 2,\n              dimnames = list(Diplome = c(\"Licence\", \"Master\"),\n                              Debouche = c(\"Agroalimentaire\", \"Environnement\", \"Sante\")))\ntest <- chisq.test(deb)\ntest            # X-squared = 6.3812, df = 2, p-value = 0.04115\ntest$expected   # effectifs théoriques, tous ≥ 5",
+     "autonome": true
+    }
+   ]
+  },
+  {
+   "id": "fisher",
+   "famille": "quali",
+   "titre": "Test exact de Fisher",
+   "type": "exact",
+   "fonction": "fisher.test",
+   "package": "stats",
+   "vignette": "tableau",
+   "resume": "Teste le lien entre 2 variables qualitatives quand les effectifs théoriques sont trop petits pour le χ².",
+   "mots_cles": [
+    "fisher",
+    "exact",
+    "petits effectifs",
+    "tableau de contingence",
+    "qualitatives",
+    "odds ratio"
+   ],
+   "h0": "Les 2 variables sont indépendantes (sur un 2 × 2 : odds ratio = 1).",
+   "h1": "Les 2 variables sont liées (odds ratio ≠ 1).",
+   "conditions": [
+    {
+     "texte": "Observations indépendantes (un sujet ne compte qu'une fois). Se vérifie avec le plan d'étude, pas avec R."
+    }
+   ],
+   "code": "<TABLE> <- table(<DONNEES>$<VAR1>, <DONNEES>$<VAR2>)\nfisher.test(<TABLE>)",
+   "remarques": [
+    "Sur un 2 × 2, l'odds ratio affiché est l'estimation du maximum de vraisemblance conditionnelle : il peut différer légèrement de (a·d)/(b·c)."
+   ],
+   "exemple": {
+    "code": "# Guérison selon le traitement, petits effectifs\ntab <- matrix(c(8, 2, 3, 9), nrow = 2,\n              dimnames = list(Traitement = c(\"Nouveau\", \"Standard\"),\n                              Guerison = c(\"Oui\", \"Non\")))\nfisher.test(tab)",
+    "sortie": "\tFisher's Exact Test for Count Data\n\ndata:  tab\np-value = 0.02997\nalternative hypothesis: true odds ratio is not equal to 1\n95 percent confidence interval:\n   1.18968 157.52660\nsample estimates:\nodds ratio \n  10.40372",
+    "notes": [
+     {
+      "cible": "Fisher's Exact Test for Count Data",
+      "texte": "Test exact de Fisher."
+     },
+     {
+      "cible": "p-value = 0.02997",
+      "texte": "p-value exacte."
+     },
+     {
+      "cible": "1.18968 157.52660",
+      "texte": "IC à 95 % de l'odds ratio : il ne contient pas 1, mais il est très large (petits effectifs)."
+     },
+     {
+      "cible": "10.40372",
+      "texte": "Odds ratio estimé (maximum de vraisemblance conditionnelle), différent de (8 × 9) / (2 × 3) = 12."
+     }
+    ],
+    "conclusion": "p = 0,030 < 0,05 : on rejette H0. La guérison est liée au traitement (8 guérisons sur 11 avec le nouveau contre 2 sur 11 avec le standard), mais l'IC très large montre une estimation peu précise."
+   }
+  },
+  {
+   "id": "mcnemar",
+   "famille": "quali",
+   "titre": "Test de McNemar",
+   "type": "asymptotique",
+   "fonction": "mcnemar.test",
+   "package": "stats",
+   "vignette": "tableau",
+   "resume": "Compare 2 proportions mesurées sur les mêmes sujets (avant / après, deux examens chez le même patient).",
+   "mots_cles": [
+    "mcnemar",
+    "apparié",
+    "qualitatives",
+    "avant après",
+    "paires discordantes"
+   ],
+   "h0": "Les 2 proportions sont égales (paires discordantes équilibrées).",
+   "h1": "Les 2 proportions sont différentes.",
+   "conditions": [
+    {
+     "texte": "Données appariées binaires : un sujet = une paire.",
+     "code": "<TABLE> <- table(<AVANT>, <APRES>)\n<TABLE>"
+    },
+    {
+     "texte": "Au moins 10 paires discordantes (b + c ≥ 10). Sinon, test binomial exact sur les paires discordantes.",
+     "code": "binom.test(<B>, <B> + <C>)"
+    }
+   ],
+   "code": "mcnemar.test(table(<AVANT>, <APRES>))",
+   "exemple": {
+    "code": "# Même 100 patients, deux examens : A et B\ndiag <- matrix(c(40, 5, 15, 40), nrow = 2,\n               dimnames = list(Examen_A = c(\"Positif\", \"Negatif\"),\n                               Examen_B = c(\"Positif\", \"Negatif\")))\nmcnemar.test(diag)",
+    "sortie": "\tMcNemar's Chi-squared test with continuity correction\n\ndata:  diag\nMcNemar's chi-squared = 4.05, df = 1, p-value = 0.04417",
+    "notes": [
+     {
+      "cible": "with continuity correction",
+      "texte": "Correction de continuité, appliquée par défaut."
+     },
+     {
+      "cible": "McNemar's chi-squared = 4.05",
+      "texte": "Statistique : (|15 − 5| − 1)² / (15 + 5), calculée sur les seules paires discordantes."
+     },
+     {
+      "cible": "df = 1",
+      "texte": "Degré de liberté."
+     },
+     {
+      "cible": "p-value = 0.04417",
+      "texte": "p-value."
+     }
+    ],
+    "conclusion": "p = 0,044 < 0,05 : on rejette H0. Les deux examens n'ont pas la même fréquence de résultats positifs : A est positif chez 55 patients, B chez 45."
+   },
+   "remarques": [
+    "Sans correction, la statistique vaut (b − c)² / (b + c) : mcnemar.test(<TABLE>, correct = FALSE)."
+   ],
+   "situations": [
+    {
+     "texte": "Des composteurs productifs à l'installation le sont-ils encore 3 mois plus tard ? Seules les paires discordantes comptent (72 et 12). K = (72 − 12)² / (72 + 12) = 42,86.",
+     "code": "comp <- matrix(c(66, 12, 72, 21), nrow = 2,\n               dimnames = list(Installation = c(\"Oui\", \"Non\"),\n                               Apres_3_mois = c(\"Oui\", \"Non\")))\nmcnemar.test(comp, correct = FALSE)   # McNemar's chi-squared = 42.857",
+     "autonome": true
+    }
+   ]
+  },
+  {
+   "id": "cor-pearson",
+   "famille": "lien",
+   "titre": "Corrélation de Pearson",
+   "type": "paramétrique",
+   "fonction": "cor.test",
+   "package": "stats",
+   "vignette": "points",
+   "resume": "Mesure et teste la force d'un lien linéaire entre 2 variables quantitatives.",
+   "mots_cles": [
+    "corrélation",
+    "pearson",
+    "lien linéaire",
+    "quantitatives",
+    "coefficient r"
+   ],
+   "h0": "Le coefficient de corrélation de la population est nul (ρ = 0).",
+   "h1": "Le coefficient de corrélation n'est pas nul (ρ ≠ 0).",
+   "conditions": [
+    {
+     "texte": "Observations indépendantes (un sujet ne compte qu'une fois). Se vérifie avec le plan d'étude, pas avec R."
+    },
+    {
+     "texte": "Relation linéaire (à voir sur le nuage de points).",
+     "code": "plot(<DONNEES>$<X>, <DONNEES>$<Y>)"
+    },
+    {
+     "texte": "Normalité des 2 variables.",
+     "code": "shapiro.test(<DONNEES>$<X>)\nshapiro.test(<DONNEES>$<Y>)"
+    },
+    {
+     "texte": "Pas de valeur aberrante (elle peut à elle seule créer ou masquer une corrélation)."
+    }
+   ],
+   "code": "cor.test(<DONNEES>$<X>, <DONNEES>$<Y>)",
+   "remarques": [
+    "Corrélation ne veut pas dire causalité. On meurt plus souvent à l'hôpital, mais parce qu'on y va quand on est malade. Seule une expérience où la cause supposée est contrôlée, avec un échantillonnage aléatoire, peut montrer un lien de cause à effet.",
+    "Rapporte toujours le coefficient r (sens et force du lien) et la p-value (lien significatif ou non). Repère usuel : |r| < 0,5 lien faible, |r| ≥ 0,5 lien fort."
+   ],
+   "exemple": {
+    "code": "# Âge (ans) et pression systolique (mmHg) de 12 patients\ncardio <- data.frame(\n  age = c(34, 41, 45, 50, 52, 56, 60, 63, 67, 70, 74, 78),\n  pas = c(118, 125, 121, 132, 130, 138, 135, 145, 142, 150, 148, 160))\ncor.test(cardio$age, cardio$pas)",
+    "sortie": "\tPearson's product-moment correlation\n\ndata:  cardio$age and cardio$pas\nt = 11.323, df = 10, p-value = 5.032e-07\nalternative hypothesis: true correlation is not equal to 0\n95 percent confidence interval:\n 0.8703114 0.9898870\nsample estimates:\n     cor \n0.963147",
+    "notes": [
+     {
+      "cible": "t = 11.323",
+      "texte": "Statistique t = r √(n − 2) / √(1 − r²)."
+     },
+     {
+      "cible": "df = 10",
+      "texte": "Degrés de liberté : n − 2."
+     },
+     {
+      "cible": "p-value = 5.032e-07",
+      "texte": "p-value : 5,0 × 10⁻⁷."
+     },
+     {
+      "cible": "0.8703114 0.9898870",
+      "texte": "IC à 95 % du coefficient de corrélation."
+     },
+     {
+      "cible": "0.963147",
+      "texte": "Coefficient de corrélation r."
+     }
+    ],
+    "conclusion": "p = 5 × 10⁻⁷ < 0,05 : on rejette H0. Âge et pression systolique sont fortement et positivement corrélés (r = 0,96, IC 95 % [0,87 ; 0,99])."
+   }
+  },
+  {
+   "id": "cor-spearman",
+   "famille": "lien",
+   "titre": "Corrélation de Spearman",
+   "type": "non paramétrique",
+   "fonction": "cor.test",
+   "package": "stats",
+   "vignette": "rangs",
+   "resume": "Mesure un lien monotone (pas forcément linéaire) à partir des rangs.",
+   "mots_cles": [
+    "corrélation",
+    "spearman",
+    "rangs",
+    "monotone",
+    "rho"
+   ],
+   "h0": "Pas de lien monotone (ρ de Spearman = 0).",
+   "h1": "Il existe un lien monotone (ρ ≠ 0).",
+   "conditions": [
+    {
+     "texte": "Observations indépendantes (un sujet ne compte qu'une fois). Se vérifie avec le plan d'étude, pas avec R."
+    },
+    {
+     "texte": "Relation monotone (toujours croissante ou toujours décroissante).",
+     "code": "plot(<DONNEES>$<X>, <DONNEES>$<Y>)"
+    }
+   ],
+   "code": "cor.test(<DONNEES>$<X>, <DONNEES>$<Y>, method = \"spearman\")",
+   "remarques": [
+    "Avec des ex aequo, R signale qu'il ne peut pas calculer la p-value exacte ; exact = FALSE supprime ce message.",
+    "Convient aux relations non linéaires et aux variables ordinales (qui se rangent du plus petit au plus grand) : cor.test(…, method = \"spearman\")."
+   ],
+   "exemple": {
+    "code": "# Score d'anxiété et durée de sommeil (h) de 9 étudiants\nanxiete <- c(12, 18, 25, 9, 30, 22, 15, 28, 20)\nsommeil <- c(7.5, 6.8, 5.9, 8.1, 6.2, 6.0, 7.0, 5.1, 6.9)\ncor.test(anxiete, sommeil, method = \"spearman\")",
+    "sortie": "\tSpearman's rank correlation rho\n\ndata:  anxiete and sommeil\nS = 226, p-value = 0.003075\nalternative hypothesis: true rho is not equal to 0\nsample estimates:\n       rho \n-0.8833333",
+    "notes": [
+     {
+      "cible": "Spearman's rank correlation rho",
+      "texte": "Corrélation de Spearman : calculée sur les rangs."
+     },
+     {
+      "cible": "S = 226",
+      "texte": "Statistique S : somme des carrés des écarts de rangs."
+     },
+     {
+      "cible": "p-value = 0.003075",
+      "texte": "p-value."
+     },
+     {
+      "cible": "-0.8833333",
+      "texte": "ρ = −0,88 : lien décroissant fort."
+     }
+    ],
+    "conclusion": "p = 0,003 < 0,05 : on rejette H0. Plus le score d'anxiété est élevé, plus le sommeil est court (ρ = −0,88)."
+   }
+  },
+  {
+   "id": "lm-reg",
+   "famille": "lien",
+   "titre": "Régression linéaire",
+   "type": "paramétrique",
+   "fonction": "lm",
+   "package": "stats",
+   "vignette": "droite",
+   "resume": "Modélise Y en fonction de X (pente, ordonnée à l'origine, R²).",
+   "mots_cles": [
+    "régression",
+    "lm",
+    "pente",
+    "modèle linéaire",
+    "prédire",
+    "r2"
+   ],
+   "h0": "La pente est nulle (X n'explique pas Y).",
+   "h1": "La pente n'est pas nulle.",
+   "conditions": [
+    {
+     "texte": "Observations indépendantes (un sujet ne compte qu'une fois). Se vérifie avec le plan d'étude, pas avec R."
+    },
+    {
+     "texte": "Linéarité, normalité et variance constante des résidus.",
+     "code": "modele <- lm(<Y> ~ <X>, data = <DONNEES>)\nshapiro.test(residuals(modele))   # normalité des résidus\nplot(fitted(modele), residuals(modele))   # homoscédasticité : nuage sans forme"
+    }
+   ],
+   "code": "modele <- lm(<Y> ~ <X>, data = <DONNEES>)\nsummary(modele)     # pente, ordonnée à l'origine, R²\nconfint(modele)\ncar::Anova(modele)  # test de la pente (package car)",
+   "exemple": {
+    "code": "# Pression systolique (mmHg) en fonction de l'âge (ans)\ncardio <- data.frame(\n  age = c(34, 41, 45, 50, 52, 56, 60, 63, 67, 70, 74, 78),\n  pas = c(118, 125, 121, 132, 130, 138, 135, 145, 142, 150, 148, 160))\nmodele <- lm(pas ~ age, data = cardio)\nsummary(modele)\nconfint(modele)",
+    "sortie": "Call:\nlm(formula = pas ~ age, data = cardio)\n\nResiduals:\n   Min     1Q Median     3Q    Max \n-4.869 -3.518  1.774  2.425  4.745 \n\nCoefficients:\n            Estimate Std. Error t value Pr(>|t|)    \n(Intercept) 85.79829    4.63680   18.50 4.58e-09 ***\nage          0.89046    0.07864   11.32 5.03e-07 ***\n---\nSignif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n\nResidual standard error: 3.556 on 10 degrees of freedom\nMultiple R-squared:  0.9277,\tAdjusted R-squared:  0.9204 \nF-statistic: 128.2 on 1 and 10 DF,  p-value: 5.032e-07\n\n                 2.5 %    97.5 %\n(Intercept) 75.4668527 96.129724\nage          0.7152464  1.065683",
+    "notes": [
+     {
+      "cible": "85.79829",
+      "texte": "Ordonnée à l'origine : valeur prédite à 0 an (sans sens clinique ici)."
+     },
+     {
+      "cible": "0.89046",
+      "texte": "Pente : +0,89 mmHg par année d'âge."
+     },
+     {
+      "cible": "5.03e-07",
+      "texte": "p-value du test « pente = 0 »."
+     },
+     {
+      "cible": "Multiple R-squared:  0.9277",
+      "texte": "R² : l'âge explique 92,8 % de la variabilité de la pression."
+     },
+     {
+      "cible": "0.7152464  1.065683",
+      "texte": "IC à 95 % de la pente."
+     }
+    ],
+    "conclusion": "p = 5 × 10⁻⁷ < 0,05 : la pente est significativement non nulle. La pression systolique augmente de 0,89 mmHg par an (IC 95 % [0,72 ; 1,07])."
+   },
+   "remarques": [
+    "Deux rôles : une variable contrôlée (x, fixée par l'expérience) et une variable réponse (y). H0 : la pente est nulle, donc x n'influence pas y.",
+    "R² : part de la variabilité de la variable réponse expliquée par la variable contrôlée. On rapporte aussi la pente et l'ordonnée à l'origine.",
+    "car::Anova() demande le package car : install.packages(\"car\") une seule fois."
+   ]
+  },
+  {
+   "id": "glm-logit",
+   "famille": "lien",
+   "titre": "Régression logistique",
+   "type": "paramétrique",
+   "fonction": "glm",
+   "package": "stats",
+   "vignette": "sigmoide",
+   "resume": "Prédit un résultat binaire (malade / non malade) et donne des odds ratios ajustés.",
+   "mots_cles": [
+    "logistique",
+    "glm",
+    "binomial",
+    "odds ratio",
+    "binaire",
+    "prédire",
+    "ajusté"
+   ],
+   "h0": "Le coefficient de la variable est nul (odds ratio = 1).",
+   "h1": "Le coefficient n'est pas nul (odds ratio ≠ 1).",
+   "conditions": [
+    {
+     "texte": "Observations indépendantes (un sujet ne compte qu'une fois). Se vérifie avec le plan d'étude, pas avec R."
+    },
+    {
+     "texte": "Variable à expliquer binaire : 0/1 ou facteur à 2 niveaux (le 2ᵉ niveau est l'événement modélisé).",
+     "code": "table(<DONNEES>$<Y>)"
+    },
+    {
+     "texte": "Assez d'événements par variable explicative (règle usuelle souvent citée : environ 10)."
+    }
+   ],
+   "code": "modele <- glm(<Y> ~ <X1> + <X2>, family = binomial, data = <DONNEES>)\nsummary(modele)\nexp(coef(modele))      # odds ratios\nexp(confint(modele))   # IC 95 % des odds ratios",
+   "exemple": {
+    "code": "# infert (fourni avec R) : étude cas-témoins sur l'infertilité\n# case = 1 si la femme est infertile ; nombre d'avortements spontanés et provoqués\nmodele <- glm(case ~ spontaneous + induced, family = binomial, data = infert)\nsummary(modele)\nexp(coef(modele))      # odds ratios\nexp(confint(modele))   # IC 95 % des odds ratios",
+    "sortie": "Call:\nglm(formula = case ~ spontaneous + induced, family = binomial, \n    data = infert)\n\nCoefficients:\n            Estimate Std. Error z value Pr(>|z|)    \n(Intercept)  -1.7079     0.2677  -6.380 1.78e-10 ***\nspontaneous   1.1972     0.2116   5.657 1.54e-08 ***\ninduced       0.4181     0.2056   2.033    0.042 *  \n---\nSignif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n\n(Dispersion parameter for binomial family taken to be 1)\n\n    Null deviance: 316.17  on 247  degrees of freedom\nResidual deviance: 279.61  on 245  degrees of freedom\nAIC: 285.61\n\nNumber of Fisher Scoring iterations: 4\n\n(Intercept) spontaneous     induced \n  0.1812532   3.3108503   1.5191172 \nWaiting for profiling to be done...\n                2.5 %    97.5 %\n(Intercept) 0.1046179 0.2998809\nspontaneous 2.2121059 5.0864647\ninduced     1.0159893 2.2824458",
+    "notes": [
+     {
+      "cible": "1.1972",
+      "texte": "Coefficient (log de l'odds ratio) des avortements spontanés."
+     },
+     {
+      "cible": "1.54e-08",
+      "texte": "p-value du test de Wald pour « spontaneous »."
+     },
+     {
+      "cible": "0.042",
+      "texte": "p-value pour « induced » : 0,042."
+     },
+     {
+      "cible": "3.3108503",
+      "texte": "Odds ratio ajusté : exp(1,1972) = 3,31 par avortement spontané supplémentaire."
+     },
+     {
+      "cible": "2.2121059 5.0864647",
+      "texte": "IC à 95 % de cet odds ratio (vraisemblance profilée)."
+     }
+    ],
+    "conclusion": "À nombre d'avortements provoqués égal, chaque avortement spontané multiplie l'odds d'infertilité par 3,31 (IC 95 % [2,21 ; 5,09], p < 0,001) ; chaque avortement provoqué par 1,52 (IC 95 % [1,02 ; 2,28], p = 0,042)."
+   }
+  },
+  {
+   "id": "km",
+   "famille": "survie",
+   "titre": "Courbe de survie de Kaplan-Meier",
+   "type": "non paramétrique",
+   "fonction": "survfit",
+   "package": "survival",
+   "vignette": "survie",
+   "resume": "Estime et trace la probabilité de survie au cours du temps.",
+   "mots_cles": [
+    "survie",
+    "kaplan-meier",
+    "survfit",
+    "surv",
+    "censure",
+    "médiane de survie"
+   ],
+   "h0": "Méthode descriptive : pas d'hypothèse testée.",
+   "h1": "Méthode descriptive : pas d'hypothèse testée.",
+   "conditions": [
+    {
+     "texte": "Censure non informative : les perdus de vue ont le même risque que les autres."
+    },
+    {
+     "texte": "<EVENEMENT> vaut 1 (ou TRUE) si l'événement est survenu, 0 si le sujet est censuré.",
+     "code": "table(<DONNEES>$<EVENEMENT>)"
+    }
+   ],
+   "code": "fit <- survival::survfit(survival::Surv(<TEMPS>, <EVENEMENT>) ~ 1, data = <DONNEES>)\nsummary(fit)\nplot(fit)",
+   "aide": "survfit.formula"
+  },
+  {
+   "id": "logrank",
+   "famille": "survie",
+   "titre": "Test du log-rank",
+   "type": "non paramétrique",
+   "fonction": "survdiff",
+   "package": "survival",
+   "vignette": "survie",
+   "resume": "Compare les courbes de survie de 2 groupes ou plus.",
+   "mots_cles": [
+    "survie",
+    "log-rank",
+    "logrank",
+    "survdiff",
+    "comparer des courbes"
+   ],
+   "h0": "Les courbes de survie des groupes sont identiques.",
+   "h1": "Au moins une courbe diffère.",
+   "conditions": [
+    {
+     "texte": "Censure non informative."
+    },
+    {
+     "texte": "Le test est le plus puissant quand les risques sont proportionnels (courbes qui ne se croisent pas).",
+     "code": "plot(survival::survfit(survival::Surv(<TEMPS>, <EVENEMENT>) ~ <GROUPE>, data = <DONNEES>))"
+    }
+   ],
+   "code": "survival::survdiff(survival::Surv(<TEMPS>, <EVENEMENT>) ~ <GROUPE>, data = <DONNEES>)"
+  },
+  {
+   "id": "cox",
+   "famille": "survie",
+   "titre": "Modèle de Cox",
+   "type": "semi-paramétrique",
+   "fonction": "coxph",
+   "package": "survival",
+   "vignette": "survie",
+   "resume": "Mesure l'effet de plusieurs facteurs sur la survie (hazard ratios ajustés).",
+   "mots_cles": [
+    "cox",
+    "coxph",
+    "hazard ratio",
+    "survie",
+    "risques proportionnels",
+    "ajusté"
+   ],
+   "h0": "Le coefficient de la variable est nul (hazard ratio = 1).",
+   "h1": "Le coefficient n'est pas nul (hazard ratio ≠ 1).",
+   "conditions": [
+    {
+     "texte": "Censure non informative."
+    },
+    {
+     "texte": "Risques proportionnels : une p-value faible de cox.zph() suggère que l'hypothèse n'est pas respectée.",
+     "code": "modele <- survival::coxph(survival::Surv(<TEMPS>, <EVENEMENT>) ~ <X1> + <X2>, data = <DONNEES>)\nsurvival::cox.zph(modele)"
+    }
+   ],
+   "code": "modele <- survival::coxph(survival::Surv(<TEMPS>, <EVENEMENT>) ~ <X1> + <X2>, data = <DONNEES>)\nsummary(modele)   # exp(coef) = hazard ratio"
+  },
+  {
+   "id": "shapiro",
+   "famille": "cond",
+   "titre": "Test de Shapiro-Wilk",
+   "type": "condition",
+   "fonction": "shapiro.test",
+   "package": "stats",
+   "vignette": "cloche",
+   "resume": "Teste la normalité d'une variable (de 3 à 5000 valeurs).",
+   "mots_cles": [
+    "normalité",
+    "shapiro",
+    "loi normale",
+    "condition",
+    "gaussienne"
+   ],
+   "h0": "La variable suit une loi normale.",
+   "h1": "La variable ne suit pas une loi normale.",
+   "conditions": [
+    {
+     "texte": "Entre 3 et 5000 valeurs (limite de shapiro.test())."
+    }
+   ],
+   "code": "shapiro.test(<X>)",
+   "remarques": [
+    "Avec un petit échantillon, le test manque de puissance ; avec un grand, il rejette pour des écarts minimes. Regarde aussi le graphique quantile-quantile.",
+    "Lecture : H0 = les données suivent la loi normale. Une p-value < 0,05 veut dire que la normalité n'est pas respectée."
+   ],
+   "exemple": {
+    "code": "# Glycémie à jeun (g/L) de 12 patients\nglycemie <- c(1.05, 0.98, 1.12, 1.20, 0.95, 1.08, 1.15, 1.02, 1.10, 0.99, 1.18, 1.07)\nshapiro.test(glycemie)",
+    "sortie": "\tShapiro-Wilk normality test\n\ndata:  glycemie\nW = 0.97164, p-value = 0.9272",
+    "notes": [
+     {
+      "cible": "W = 0.97164",
+      "texte": "Statistique W : proche de 1 quand les données ressemblent à une loi normale."
+     },
+     {
+      "cible": "p-value = 0.9272",
+      "texte": "p-value."
+     }
+    ],
+    "conclusion": "p = 0,93 > 0,05 : on ne rejette pas la normalité. Cela ne prouve pas que les données sont normales : avec 12 valeurs, le test a peu de puissance."
+   }
+  },
+  {
+   "id": "qqnorm",
+   "famille": "cond",
+   "titre": "Graphique quantile-quantile",
+   "type": "condition",
+   "fonction": "qqnorm",
+   "package": "stats",
+   "vignette": "qq",
+   "resume": "Vérifie visuellement la normalité : les points doivent suivre la droite.",
+   "mots_cles": [
+    "qqplot",
+    "qqnorm",
+    "normalité",
+    "graphique",
+    "quantiles"
+   ],
+   "h0": "Méthode graphique : pas d'hypothèse testée.",
+   "h1": "Méthode graphique : pas d'hypothèse testée.",
+   "conditions": [],
+   "code": "qqnorm(<X>)\nqqline(<X>)",
+   "remarques": [
+    "Points alignés sur la droite : distribution proche de la loi normale.",
+    "Points qui remontent au-dessus de la droite à droite : asymétrie à droite (longue queue vers les grandes valeurs). Points sous la droite à gauche : asymétrie à gauche."
+   ]
+  },
+  {
+   "id": "var-test",
+   "famille": "cond",
+   "titre": "Test F d'égalité de 2 variances",
+   "type": "condition",
+   "fonction": "var.test",
+   "package": "stats",
+   "vignette": "boites",
+   "resume": "Compare les variances de 2 groupes (avant un test t de Student).",
+   "mots_cles": [
+    "variance",
+    "fisher",
+    "test f",
+    "homoscédasticité",
+    "condition"
+   ],
+   "h0": "Les 2 variances sont égales (rapport = 1).",
+   "h1": "Les 2 variances sont différentes.",
+   "conditions": [
+    {
+     "texte": "Observations indépendantes (un sujet ne compte qu'une fois). Se vérifie avec le plan d'étude, pas avec R."
+    },
+    {
+     "texte": "Normalité de la variable dans chaque groupe (ou grands effectifs, règle usuelle n ≥ 30 par groupe).",
+     "code": "tapply(<DONNEES>$<VAR>, <DONNEES>$<GROUPE>, shapiro.test)\nboxplot(<VAR> ~ <GROUPE>, data = <DONNEES>)"
+    }
+   ],
+   "code": "var.test(<VAR> ~ <GROUPE>, data = <DONNEES>)",
+   "remarques": [
+    "Très sensible à la non-normalité."
+   ],
+   "exemple": {
+    "code": "# Cholestérol (g/L) après 8 semaines : placebo ou traitement\nessai <- data.frame(\n  chol = c(2.31, 2.05, 2.48, 2.12, 2.60, 2.27, 2.39, 2.18, 2.52, 2.33,\n           2.02, 1.95, 2.21, 1.88, 2.30, 2.10, 1.79, 2.15, 2.05, 1.97),\n  groupe = rep(c(\"placebo\", \"traitement\"), each = 10))\nvar.test(chol ~ groupe, data = essai)",
+    "sortie": "\tF test to compare two variances\n\ndata:  chol by groupe\nF = 1.3279, num df = 9, denom df = 9, p-value = 0.6795\nalternative hypothesis: true ratio of variances is not equal to 1\n95 percent confidence interval:\n 0.3298294 5.3460818\nsample estimates:\nratio of variances \n          1.327891",
+    "notes": [
+     {
+      "cible": "F = 1.3279",
+      "texte": "Rapport des variances : placebo / traitement."
+     },
+     {
+      "cible": "num df = 9, denom df = 9",
+      "texte": "Degrés de liberté : n₁ − 1 et n₂ − 1."
+     },
+     {
+      "cible": "p-value = 0.6795",
+      "texte": "p-value."
+     },
+     {
+      "cible": "0.3298294 5.3460818",
+      "texte": "IC à 95 % du rapport des variances : il contient 1."
+     }
+    ],
+    "conclusion": "p = 0,68 > 0,05 : rien ne montre que les variances diffèrent. Le test t de Student (var.equal = TRUE) est envisageable ; le test de Welch reste valable dans tous les cas."
+   }
+  },
+  {
+   "id": "bartlett",
+   "famille": "cond",
+   "titre": "Test de Bartlett",
+   "type": "condition",
+   "fonction": "bartlett.test",
+   "package": "stats",
+   "vignette": "groupes",
+   "resume": "Compare les variances de 2 groupes ou plus, si les données sont normales.",
+   "mots_cles": [
+    "variance",
+    "bartlett",
+    "homoscédasticité",
+    "anova",
+    "condition"
+   ],
+   "h0": "Toutes les variances sont égales.",
+   "h1": "Au moins une variance diffère.",
+   "conditions": [
+    {
+     "texte": "Observations indépendantes (un sujet ne compte qu'une fois). Se vérifie avec le plan d'étude, pas avec R."
+    },
+    {
+     "texte": "Normalité de la variable dans chaque groupe (ou grands effectifs, règle usuelle n ≥ 30 par groupe).",
+     "code": "tapply(<DONNEES>$<VAR>, <DONNEES>$<GROUPE>, shapiro.test)\nboxplot(<VAR> ~ <GROUPE>, data = <DONNEES>)"
+    }
+   ],
+   "code": "bartlett.test(<VAR> ~ <GROUPE>, data = <DONNEES>)",
+   "exemple": {
+    "code": "# Score de douleur (0-10) selon le traitement\ndouleur <- data.frame(\n  score = c(6.1, 5.4, 7.0, 6.5, 5.8, 6.9, 6.2, 5.5,\n            4.8, 5.1, 4.2, 5.6, 4.5, 3.9, 5.0, 4.7,\n            4.4, 3.8, 5.2, 4.1, 3.6, 4.9, 4.3, 3.5),\n  traitement = factor(rep(c(\"placebo\", \"paracetamol\", \"ibuprofene\"), each = 8)))\nbartlett.test(score ~ traitement, data = douleur)",
+    "sortie": "\tBartlett test of homogeneity of variances\n\ndata:  score by traitement\nBartlett's K-squared = 0.12278, df = 2, p-value = 0.9405",
+    "notes": [
+     {
+      "cible": "Bartlett's K-squared = 0.12278",
+      "texte": "Statistique de Bartlett."
+     },
+     {
+      "cible": "df = 2",
+      "texte": "Degrés de liberté : nombre de groupes − 1."
+     },
+     {
+      "cible": "p-value = 0.9405",
+      "texte": "p-value."
+     }
+    ],
+    "conclusion": "p = 0,94 > 0,05 : rien ne montre que les variances diffèrent entre les 3 groupes. La condition d'homogénéité de l'ANOVA est acceptable."
+   },
+   "remarques": [
+    "À faire en deuxième, seulement si la normalité est respectée. Une p-value < 0,05 veut dire que les variances diffèrent (homoscédasticité non respectée)."
+   ]
+  },
+  {
+   "id": "levene",
+   "famille": "cond",
+   "titre": "Test de Levene",
+   "type": "condition",
+   "fonction": "leveneTest",
+   "package": "car",
+   "vignette": "groupes",
+   "resume": "Compare les variances de 2 groupes ou plus ; moins sensible à la non-normalité que Bartlett.",
+   "mots_cles": [
+    "variance",
+    "levene",
+    "homoscédasticité",
+    "anova",
+    "condition",
+    "car"
+   ],
+   "h0": "Toutes les variances sont égales.",
+   "h1": "Au moins une variance diffère.",
+   "conditions": [
+    {
+     "texte": "Observations indépendantes (un sujet ne compte qu'une fois). Se vérifie avec le plan d'étude, pas avec R."
+    },
+    {
+     "texte": "Package car installé (install.packages(\"car\")) ; <GROUPE> doit être un facteur."
+    }
+   ],
+   "code": "car::leveneTest(<VAR> ~ <GROUPE>, data = <DONNEES>)",
+   "remarques": [
+    "Par défaut, car::leveneTest() centre sur la médiane (center = median)."
+   ]
+  }
+ ]
+}

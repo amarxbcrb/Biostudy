@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="fr" data-verre="own" data-haptic="own" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-visual">
+<meta name="theme-color" content="#f2f2f7" id="metaTheme">
+<title>BioConvert | Conversion d'unités de labo : masse, volume, concentration, moles</title>
+<meta name="description" content="BioConvert : convertir masses, volumes, concentrations (g/L, mg/mL, %, ppm, M, mM, µM) et moles ↔ grammes avec la masse molaire. Saisie décimale ou scientifique par champ.">
+<link rel="canonical" href="https://www.biostudy.xyz/BioConvert/">
+<link rel="icon" type="image/png" href="/Pictures/favicon.png">
+<link rel="apple-touch-icon" href="/Pictures/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="BioStudy">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script>
+/* thème avant le premier rendu : choix mémorisé pour la période (jour / nuit) en cours, sinon celui du système */
+(()=>{const g=k=>{try{return localStorage.getItem(k)}catch(e){return null}},h=new Date().getHours(),th=g('bioConvertTheme');
+document.documentElement.dataset.theme=th&&g('bioConvertThemePeriod')===(h>=7&&h<20?'day':'night')?th:matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'})();
+</script>
+<style>
+/* TABLE DES MATIÈRES
+    1. Jetons : palette Réglages iOS (clair #f2f2f7 / groupes blancs ; sombre noir / groupes #1c1c1e)
+    2. Verre (barres, menus, historique) : un seul style, reflet qui suit la souris
+    3. En-tête
+    4. Page : saisie puis résultat
+    5. Barre d'onglets (façon BioCampus) et résultat flottant
+    6. Historique (verre), choix d'unité composée (molettes façon horloge)
+    7. Pied de page (footer-global.js) : dans le flux, sous le contenu
+    8. Adaptations
+    9. BioDilu : options, étapes à la demande, schéma animé
+   10. Formule et aide : repliées, déployées avec animation
+   11. Liquid glass sur toute l'interface (même verre que la barre de navigation)
+   12. Sombre AMOLED : noir pur, cartes en verre translucide
+   13. Fenêtre d'unité : grille régulière de capsules
+   14. Mode clair : palette affinée (contrastes, accents, verre plus net)
+   15. Mode clair : fond neutre (plus de bleu)
+   16. Apparition de la capsule résultat
+   17. Capsule résultat : entrée façon Apple (ressort, flou → net, reflet qui balaie)
+   18. Mode clair : liquid glass bien visible
+   19. Mode clair façon iOS 27 : fond uni, verre plat et lisible, sans effet 3D
+   20. Mode sombre AMOLED : même verre plat (iOS 27), sans effet 3D
+   21. Capsule résultat : la capsule elle-même se déploie (forme + taille), puis le texte arrive
+   22. « Grandeur recherchée » : même verre et même lentille que la barre de navigation
+   Résultat flottant au-dessus du clavier : sections 5 (.mini) — classe html.kb posée par le JS (section 13).
+*/
+/* ===== 1. Jetons : palette Réglages iOS (clair #f2f2f7 / groupes blancs ; sombre noir / groupes #1c1c1e) ===== */
+#bc{--serif:"Iowan Old Style","Palatino Linotype",Georgia,serif;--ease:cubic-bezier(.22,1,.36,1);--spring:cubic-bezier(.34,1.45,.64,1);
+--top:70px;--gx:14px;--navh:60px;--blur:22px;
+--grp:#fff;--fill:rgba(118,118,128,.12);--thumb:#fff;--tx:#000;--tx2:#6c6c70;--tx3:#8a8a8e;--sep:rgba(60,60,67,.18);
+--acc:var(--c-blue);--acc-tx:color-mix(in srgb,var(--acc) 78%,#000);--brand:#0064d2;
+--c-blue:#007aff;--c-indigo:#5856d6;--c-purple:#af52de;--c-pink:#ff2d55;--c-orange:#ff9500;--c-green:#34c759;--c-teal:#30b0c7;--c-cyan:#32ade6;--c-mint:#00c7be;--c-brown:#a2845e;
+--ok:#1f8a3b;--err:#d70015;--warn:#ff9500;
+--lg-rgb:255,255,255;--lg-a:.68;--lg-hi:#fff;--lg-sh:rgba(0,0,0,.12);--hair:rgba(0,0,0,.09);
+--fb:rgba(60,60,67,.3);--lens:rgba(120,120,128,.16);--lens-line:rgba(255,255,255,.9);--veil:rgba(0,0,0,.22);--blob:.3;
+color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",sans-serif;font-size:16px;line-height:1.4}
+[data-theme=dark] #bc{--grp:#1c1c1e;--fill:#2c2c2e;--thumb:#636366;--tx:#fff;--tx2:#a1a1a6;--tx3:#8e8e93;--sep:rgba(84,84,88,.6);
+--acc-tx:color-mix(in srgb,var(--acc) 72%,#fff);--brand:#4da3ff;
+--c-blue:#0a84ff;--c-indigo:#5e5ce6;--c-purple:#bf5af2;--c-pink:#ff375f;--c-orange:#ff9f0a;--c-green:#30d158;--c-teal:#40cbe0;--c-cyan:#64d2ff;--c-mint:#63e6e2;--c-brown:#ac8e68;
+--ok:#30d158;--err:#ff453a;
+--lg-rgb:28,28,30;--lg-a:.66;--lg-hi:rgba(255,255,255,.34);--lg-sh:rgba(0,0,0,.5);--hair:rgba(255,255,255,.08);
+--fb:rgba(235,235,245,.26);--lens:rgba(255,255,255,.17);--lens-line:rgba(255,255,255,.26);--veil:rgba(0,0,0,.5);--blob:0}
+/* accent par onglet : C1V1 bleu, au 1/n sarcelle, série indigo, UFC orange, gamme rose */
+#bc{--acc:var(--c-orange)}#bc[data-tab="1"]{--acc:var(--c-cyan)}#bc[data-tab="2"]{--acc:var(--c-blue)}#bc[data-tab="3"]{--acc:var(--c-purple)}#bc[data-tab="4"]{--acc:var(--c-pink)}
+#bc .nb:nth-of-type(1){--nc:var(--c-orange)}#bc .nb:nth-of-type(2){--nc:var(--c-cyan)}#bc .nb:nth-of-type(3){--nc:var(--c-blue)}#bc .nb:nth-of-type(4){--nc:var(--c-purple)}#bc .nb:nth-of-type(5){--nc:var(--c-pink)}
+@media(min-width:600px){#bc{--gx:24px;--top:80px}}
+@media(min-width:900px){#bc{--gx:36px;--top:92px}}
+html{background:#f2f2f7;color-scheme:light;-webkit-text-size-adjust:100%;overflow-x:clip;overscroll-behavior:none;transition:background .4s}
+html[data-theme=dark]{background:#000;color-scheme:dark}
+body{margin:0;min-height:100dvh;overflow-x:clip;overscroll-behavior:none;-webkit-font-smoothing:antialiased}
+#bc::before{content:"";position:fixed;inset:-50%;z-index:-1;pointer-events:none;opacity:var(--blob);filter:blur(60px);animation:flow 20s ease-in-out infinite alternate;
+background:radial-gradient(circle at 20% 30%,rgba(10,132,255,.5),transparent 40%),radial-gradient(circle at 80% 70%,rgba(94,92,230,.25),transparent 40%),radial-gradient(circle at 50% 10%,rgba(142,142,147,.15),transparent 40%)}
+@keyframes flow{to{transform:translate(-4%,3%) rotate(8deg)}}
+:where(#bc) *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:where(#bc) :is(button,input,select){font:inherit;color:inherit}
+:where(#bc) button{border:0;background:none;cursor:pointer;touch-action:manipulation}
+#bc :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+#bc :is(input,select):focus-visible{outline:none}
+#bc [hidden]{display:none!important}
+.ic{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+/* ===== 2. Verre (barres, menus, historique) : un seul style, reflet qui suit la souris ===== */
+.glass{position:relative;background:rgba(var(--lg-rgb),var(--lg-a));-webkit-backdrop-filter:blur(var(--blur)) saturate(190%);backdrop-filter:blur(var(--blur)) saturate(190%);
+box-shadow:inset 0 1px 0 var(--lg-hi),0 0 0 .5px var(--hair),0 12px 30px var(--lg-sh)}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;
+background:radial-gradient(circle 90px at var(--mx,50%) var(--my,50%),rgba(255,255,255,.28),transparent 70%)}
+.glass.lit::after{opacity:1}
+@media(prefers-reduced-transparency:reduce){.glass{background:var(--grp);-webkit-backdrop-filter:none;backdrop-filter:none}}
+
+/* ===== 3. En-tête ===== */
+header{position:fixed;top:0;left:0;right:0;z-index:20;padding-top:env(safe-area-inset-top);pointer-events:none}
+.hin{max-width:1080px;margin:auto;padding:12px var(--gx);display:flex;justify-content:space-between;align-items:center;gap:8px;animation:drop .7s var(--ease)}
+@keyframes drop{from{opacity:0;transform:translateY(-100%)}}
+.logo-c{flex:1;min-width:0;pointer-events:auto}
+.logo{font-size:clamp(1.45rem,6.4vw,1.9rem);font-weight:800;letter-spacing:-.6px;line-height:1;white-space:nowrap}
+.logo i{font-style:normal;color:var(--brand)}
+.sub{font-size:.75rem;font-weight:600;color:var(--tx2);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hact{pointer-events:auto;display:flex;align-items:center;gap:8px;position:relative}
+.tools{height:48px;padding:0 4px;border-radius:999px;display:flex;align-items:center;gap:2px}
+.tb,.mb{display:grid;place-items:center;border-radius:50%;font-size:20px;transition:transform .35s var(--spring),background .3s}
+.tb{width:40px;height:40px;position:relative;z-index:1}
+.mb{width:48px;height:48px}
+.tb:active{transform:scale(.86);background:var(--fill)}
+.mb:active{transform:scale(.88)}
+@media(hover:hover){.tb:hover{background:var(--fill)}.mb:hover{transform:scale(1.06)}}
+.badge{position:absolute;top:7px;right:7px;width:9px;height:9px;border-radius:50%;background:var(--warn);transform:scale(0);transition:transform .35s var(--spring)}
+.badge.on{transform:none;animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,159,10,.8)}70%,to{box-shadow:0 0 0 8px transparent}}
+.pop{position:absolute;top:calc(100% + 10px);right:56px;padding:6px;border-radius:26px;display:none;flex-direction:column;transform-origin:top right}
+.pop.on{display:flex;animation:pop .45s var(--spring)}
+.lmenu{min-width:176px}
+@keyframes pop{from{opacity:0;transform:scale(.86) translateY(-8px)}}
+.lmenu button{position:relative;z-index:1;min-height:44px;padding:11px 16px;border-radius:999px;text-align:left;font-size:15px;font-weight:600}
+.lmenu button:hover,.lmenu button.on{background:var(--fill);color:var(--acc-tx)}
+
+/* ===== 4. Page : saisie puis résultat ===== */
+.shell{min-height:100dvh;max-width:1080px;margin:auto;display:flex;flex-direction:column;
+padding:calc(var(--top) + env(safe-area-inset-top)) var(--gx) calc(var(--navh) + 96px + env(safe-area-inset-bottom))}
+.stage{flex:1 0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:26px;align-content:center;animation:rise .7s var(--ease) backwards}
+@keyframes rise{from{opacity:0;transform:translateY(24px)}}
+@media(min-width:900px){.stage{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:32px}}
+.inputs{display:flex;flex-direction:column;min-width:0}
+.thead{display:flex;align-items:center;gap:10px;margin:0 4px 14px}
+.roll{height:38px;overflow:hidden}
+.roll>div{transition:transform .8s var(--spring)}
+.roll span{height:38px;display:grid;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rnb{width:30px;flex-shrink:0;font-size:27px;color:var(--acc-tx)}
+.rnb span{place-items:center}
+.rttl{flex:1;min-width:0;font-size:clamp(22px,5vw,27px);font-weight:800;letter-spacing:-.6px}
+.view{display:none}
+.view.on{display:block}
+/* en-têtes de groupe façon Réglages */
+.gh{margin:20px 16px 7px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--tx2)}
+/* segments : la pastille se place en CSS (--i : index, --n : nombre) */
+.seg{position:relative;display:flex;padding:3px;border-radius:999px;background:var(--fill);--i:0;--n:2}
+.seg .th{position:absolute;top:3px;bottom:3px;left:3px;width:calc((100% - 6px)/var(--n));border-radius:999px;background:var(--thumb);box-shadow:0 2px 6px rgba(0,0,0,.18);
+transform:translateX(calc(var(--i)*100%));transition:transform .5s var(--spring)}
+.seg button{flex:1;min-width:0;height:34px;position:relative;z-index:1;border-radius:999px;font-size:14px;font-weight:600;color:var(--tx2);white-space:nowrap;transition:color .3s,transform .35s var(--spring)}
+.seg button:active{transform:scale(.94)}
+.seg button.on{color:var(--tx)}
+/* « Calculer » : symbole + nom court ; la grandeur choisie disparaît des valeurs connues */
+.cal button{height:52px;padding:0 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.cal b,.sym,.fl{font-family:var(--serif);font-style:italic;color:var(--acc-tx)}
+.cal b{font-size:20px;line-height:1}
+.cal small{max-width:100%;font-size:11px;overflow:hidden;text-overflow:ellipsis}
+:is(.cal b,.sym,.fl) sub{font-size:.6em}
+/* valeurs connues : un groupe, une ligne par grandeur ; seule l'unité est en capsule */
+.grp{background:var(--grp);border-radius:22px;overflow:hidden}
+.vr{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;min-height:58px;padding:8px 12px 8px 16px;transition:background .25s}
+.vr:not([hidden])~.vr::before{content:"";position:absolute;top:0;left:16px;right:0;height:.5px;background:var(--sep)}
+.vr:focus-within{background:color-mix(in srgb,var(--grp) 94%,var(--acc))}
+.lb{flex:1 1 96px;min-width:0;display:flex;align-items:baseline;gap:10px;font-size:15px;font-weight:600;line-height:1.25}
+.lb .ls{display:none}
+@media(max-width:599px){.lb .ln{display:none}.lb .ls{display:inline}}
+/* scientifique sur mobile : tout tient sur la ligne (champs plus compacts) */
+@media(max-width:599px){.vr:has(>.ctl.sci) .lb{flex-basis:56px}.ctl.sci{gap:5px}.ctl.sci .val{flex-basis:78px;width:78px;padding:0 10px;font-size:17px}
+.ctl.sci .exp{flex-basis:42px;width:42px}.ctl.sci .sel{flex-basis:92px;width:92px;padding:0 22px 0 11px;font-size:14px;background-position:right 8px center}}
+.sym{flex-shrink:0;min-width:28px;height:28px;padding:0 7px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;align-self:center;background:var(--sc);color:#fff;font-size:16px;font-weight:700;line-height:1;white-space:nowrap}
+.lb{align-items:center}
+.ctl{flex:1 0 auto;display:flex;align-items:center;justify-content:flex-end;gap:8px}
+/* champs modifiables : capsule bordée teintée (les unités restent des capsules grises à chevron) */
+.val,.exp{border:1.5px solid var(--fb);background:transparent;border-radius:999px;font-weight:600;cursor:text;
+transition:border-color .2s,box-shadow .2s,background .2s}
+.val{flex:0 0 112px;width:112px;min-width:0;height:42px;padding:0 14px;font-size:19px;text-align:right}
+.ctl.sci .val{flex-basis:92px;width:92px}
+.exp{flex:0 0 52px;width:52px;height:38px;font-size:16px;text-align:center}
+.val:focus,.exp:focus{border-color:var(--acc);background:var(--grp);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 22%,transparent)}
+.val::placeholder,.exp::placeholder{color:var(--tx3);font-weight:500}
+.ctl:not(.sci) :is(.x10,.exp){display:none}
+.x10{font-size:13px;font-weight:700;color:var(--tx2)}
+.ctl:not(.sci) :is(.x10,.exp){display:none}
+.sel{flex:0 0 108px;width:108px;height:38px;padding:0 28px 0 14px;border:0;border-radius:999px;appearance:none;-webkit-appearance:none;cursor:pointer;
+background:var(--fill) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a8f9b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e") no-repeat right 10px center/12px;
+font-size:15px;font-weight:600;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:transform .3s var(--spring)}
+.sel:active{transform:scale(.97)}
+.sel:focus-visible{box-shadow:0 0 0 2px var(--acc)}
+.sel option{background:var(--grp);color:var(--tx)}
+.sel.one{background-image:none;padding-right:14px;pointer-events:none}
+.sel.ghost{visibility:hidden}#ru .ghost{display:none}
+.fl{margin:12px 0 0;padding:12px 20px;border-radius:999px;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;
+background:color-mix(in srgb,var(--acc) 12%,transparent);border:1px solid color-mix(in srgb,var(--acc) 28%,transparent);font-size:22px;font-weight:600;font-style:normal}
+.fl small{font:700 11px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;letter-spacing:.5px;text-transform:uppercase;color:var(--acc-tx);opacity:.8}
+.fl span{font-style:italic;white-space:nowrap}
+.fl.hit{animation:lawpop .45s var(--spring)}
+@keyframes lawpop{40%{transform:scale(1.04)}}
+/* résultat : valeur + unité (capsule), équation, actions */
+.results{display:flex;flex-direction:column;min-width:0}
+.results>.gh{margin-top:0}
+.rg{background:var(--grp);border-radius:22px;overflow:hidden;text-align:center}
+.rv{min-height:92px;padding:22px 16px 8px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px}
+.num{font-size:clamp(32px,10vw,44px);font-weight:800;letter-spacing:-1px;line-height:1.1;white-space:nowrap;font-variant-numeric:tabular-nums}
+#ru .sel{flex:none;width:auto;height:42px;padding:0 34px 0 16px;background-position:right 12px center;font-size:20px;font-weight:700;color:var(--acc-tx)}
+.eq{padding:0 16px 16px;font-size:14px;font-weight:500;color:var(--tx2);line-height:1.45;overflow-wrap:anywhere}
+.acts{display:flex;border-top:.5px solid var(--sep)}
+.ab{flex:1;height:50px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:600;color:var(--acc-tx);transition:opacity .2s,color .2s}
+.ab+.ab{border-left:.5px solid var(--sep)}
+.ab .ic{font-size:17px}
+.ab:active{opacity:.5}
+.ab:disabled{opacity:.35;pointer-events:none}
+.ab.ok{color:var(--ok)}
+.bump{animation:bump .55s var(--spring)}
+@keyframes bump{40%{transform:scale(1.07)}}
+.tip{margin:10px 16px 0;display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--tx2);line-height:1.45}
+.tip:empty{display:none}
+.tip .ic{margin-top:2px;font-size:15px}
+.tip.err{color:var(--err);font-weight:600}
+.tip.warn{color:var(--warn);font-weight:600}
+.tip span{white-space:pre-line}
+
+/* ===== 5. Barre d'onglets (façon BioCampus) et résultat flottant ===== */
+.nav{position:fixed;z-index:30;bottom:max(12px,env(safe-area-inset-bottom));left:12px;right:12px;max-width:440px;height:var(--navh);margin-inline:auto;border-radius:999px;
+animation:navin .8s var(--ease) backwards .2s}
+@keyframes navin{from{opacity:0;translate:0 40px;scale:.94}}
+@keyframes navin-d{from{opacity:0;translate:0 -30px;scale:.94}}
+.nav-in{height:100%;padding:5px;border-radius:999px;display:flex;touch-action:pan-y;-webkit-user-select:none;user-select:none;cursor:grab}
+.nav-in.dragging{cursor:grabbing}
+.sl{position:absolute;top:5px;bottom:5px;left:0;width:80px;z-index:1;border-radius:999px;pointer-events:none;translate:5px 0;
+background:var(--lens);border:1px solid var(--lens-line);box-shadow:inset 0 1px 1px rgba(255,255,255,.5),0 4px 14px rgba(0,0,0,.14);
+transition:translate .6s var(--spring),width .3s var(--ease),scale .3s var(--spring)}
+.sl.interacting{scale:1.06 1.12}
+.dragging .sl{transition:scale .25s var(--spring)}
+.nb{flex:1;position:relative;z-index:2;border-radius:999px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+font-size:.66rem;font-weight:500;color:var(--tx2);white-space:nowrap;transition:color .3s,transform .45s var(--spring)}
+.nb:active{transform:scale(.92)}
+.nb .ic{font-size:20px}
+.nb.on{color:var(--acc-tx);font-weight:600}
+.nb .ic{color:var(--nc);opacity:.75;transition:opacity .3s}.nb.on .ic{opacity:1}
+.nb.on .ic{animation:ipop .35s var(--ease)}
+@keyframes ipop{from{transform:scale(.85)}}
+.mini{position:fixed;z-index:29;left:12px;right:12px;max-width:440px;margin-inline:auto;bottom:calc(max(12px,env(safe-area-inset-bottom)) + var(--navh) + 10px);
+min-height:46px;padding:8px 18px;border-radius:999px;display:flex;align-items:baseline;justify-content:center;gap:8px;font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;
+opacity:0;translate:0 16px;pointer-events:none;transition:opacity .3s,translate .45s var(--spring)}
+.mini.on{opacity:1;translate:0;pointer-events:auto}
+/* clavier ouvert (classe html.kb, posée par le JS section 13) : capsule juste au-dessus du clavier (top calculé en JS),
+   barre d'onglets masquée, marge en bas pour pouvoir faire défiler le champ au-dessus de la capsule */
+html.kb .mini{bottom:auto;translate:0;transition:opacity .2s;z-index:50}
+html.kb .nav{visibility:hidden}
+html.kb body{padding-bottom:45vh}
+.mini span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini .ml{font:italic 700 17px var(--serif);color:var(--acc-tx)}
+.mini .mu{font-size:16px;color:var(--acc-tx)}
+
+/* ===== 6. Historique (verre), choix d'unité composée (molettes façon horloge) ===== */
+.ov{position:fixed;inset:0;z-index:40;display:flex;justify-content:flex-end;visibility:hidden;transition:background .4s,visibility 0s .6s}
+.ov.on{background:var(--veil);visibility:visible;transition:background .4s}
+.sheet{--lg-a:.7;--blur:30px;width:88%;max-width:420px;height:100%;border-radius:32px 0 0 32px;display:flex;flex-direction:column;
+padding:max(20px,env(safe-area-inset-top)) 18px max(20px,env(safe-area-inset-bottom));transform:translateX(104%);transition:transform .6s var(--ease)}
+.ov.on .sheet{transform:none}
+.oh{display:flex;justify-content:space-between;align-items:center;padding:0 4px 12px;border-bottom:.5px solid var(--sep)}
+.ot{font-size:20px;font-weight:800}
+.x,.hdel{width:40px;height:40px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;font-size:17px;transition:transform .45s var(--spring),color .2s}
+.x{background:var(--fill)}
+.x:active{transform:scale(.85) rotate(90deg)}
+.hl{flex:1;overflow-y:auto;overscroll-behavior:contain;padding-bottom:14px}
+.hi{display:flex;align-items:center;gap:8px;padding:12px 0 12px 4px;border-bottom:.5px solid var(--sep);animation:slide .5s var(--ease) backwards}
+@keyframes slide{from{opacity:0;transform:translateY(-8px)}}
+.hi>div{flex:1;min-width:0}
+.ht{font-size:12px;font-weight:700;color:var(--acc-tx)}
+.hd{margin-top:3px;font-size:14px;font-weight:500;line-height:1.45;overflow-wrap:anywhere}
+.hd b{color:var(--acc-tx)}
+.hdel{color:var(--tx2)}
+.hdel:hover{color:var(--err)}
+.hempty{padding:30px 0;text-align:center;font-size:14px;color:var(--tx2)}
+.clr{min-height:48px;margin-top:8px;border-radius:999px;border:1.5px solid var(--err)!important;color:var(--err);font-size:14px;font-weight:700;transition:transform .35s var(--spring)}
+.clr:active{transform:scale(.95)}
+.upop{--lg-a:.86;position:fixed;z-index:60;width:min(300px,calc(100vw - 16px));padding:12px;border-radius:22px;max-height:calc(100dvh - 16px);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.up-n{display:flex;flex-wrap:wrap;gap:6px;padding-bottom:12px;margin-bottom:8px;border-bottom:.5px solid var(--sep)}
+.up-n button{min-height:34px;padding:0 12px;border-radius:999px;background:var(--fill);font-size:14px;font-weight:600}
+.up-n button.on{background:var(--acc);color:#fff}
+.up-h{display:grid;grid-template-columns:1fr 1fr;padding:4px 0 6px;text-align:center;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tx2)}
+.up-c{position:relative;height:200px;display:grid;grid-template-columns:1fr 1fr;
+-webkit-mask-image:linear-gradient(transparent,#000 28%,#000 72%,transparent);mask-image:linear-gradient(transparent,#000 28%,#000 72%,transparent)}
+.up-lens{position:absolute;left:0;right:0;top:80px;height:40px;border-radius:12px;background:var(--fill);pointer-events:none}
+.up-wh{position:relative;padding:80px 0;overflow-y:auto;scroll-snap-type:y mandatory;overscroll-behavior:contain;scrollbar-width:none}
+.up-wh::-webkit-scrollbar{display:none}
+.up-it{height:40px;line-height:40px;text-align:center;scroll-snap-align:center;font-size:19px;font-weight:500;color:var(--tx2);cursor:pointer;transition:color .15s}
+.up-it.on{color:var(--tx);font-weight:700}
+
+/* ===== 7. Pied de page (footer-global.js) : dans le flux, sous le contenu ===== */
+#bc .shell>footer{position:relative!important;z-index:1!important;margin-top:24px!important;padding:24px 0 0!important}
+[data-theme=light] #bc .shell>footer a{background:var(--grp)!important;color:#000!important;border:1px solid rgba(0,0,0,.1)!important}
+[data-theme=light] #bc .shell>footer svg{filter:brightness(0)!important}
+[data-theme=light] #bc .shell>footer :is(span,p){color:#000!important}
+
+/* ===== 8. Adaptations ===== */
+@media(max-width:599px){.sub{display:none}
+#bc .shell>footer{width:100vw!important;max-width:100vw!important;margin-left:calc(50% - 50vw)!important;padding-inline:6px!important}
+#bc .shell>footer div{flex-wrap:nowrap!important;gap:4px!important;justify-content:center!important}
+#bc .shell>footer a{padding-inline:8px!important;font-size:11px!important;white-space:nowrap!important;flex-shrink:1!important}}
+@media(max-width:389px){.tools{height:44px}.tb{width:34px;height:34px;font-size:18px}.mb{width:44px;height:44px}.nb{font-size:.62rem}.sel{flex-basis:104px;width:104px}}
+@media(max-height:480px) and (orientation:landscape) and (min-aspect-ratio:3/2) and (max-width:1023px){#bc{--navh:52px;--top:62px}.stage{grid-template-columns:1fr 1fr}.nb{flex-direction:row;gap:6px}}
+/* PC ≥ 1024 × 600 : barre en haut, saisie à gauche, résultat à droite */
+@media(min-width:1024px) and (min-height:600px){
+#bc{--top:84px;--gx:32px}
+.hin{max-width:none;padding:16px 32px}
+.logo{font-size:1.8rem}.sub{font-size:.85rem}
+.tools{height:52px}.tb{width:44px;height:44px}.mb{width:52px;height:52px}.pop{right:62px}
+.nav{top:calc(env(safe-area-inset-top) + 14px);bottom:auto;left:0;right:0;width:min(700px,calc(100vw - 640px));max-width:none;height:56px;animation-name:navin-d}
+.nb{flex-direction:row;gap:8px;font-size:.78rem}
+.mini{display:none}
+.shell{max-width:none;margin:0;padding:calc(var(--top) + env(safe-area-inset-top)) var(--gx) 24px}
+.stage{width:100%;max-width:1400px;margin:0 auto;padding-top:24px;grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);align-content:start;gap:40px}
+.inputs{display:grid;grid-template-columns:minmax(0,1fr) 250px;align-items:center;column-gap:18px}
+.thead{margin-bottom:0}
+.view{grid-column:1/-1}
+.vr{min-height:62px}
+.val{flex-basis:150px;width:150px}.ctl.sci .val{flex-basis:120px;width:120px}.sel{flex-basis:118px;width:118px}
+.results{padding-top:52px}
+.rv{min-height:170px}
+.num{font-size:clamp(44px,4.4vw,72px)}
+#ru .sel{height:48px;font-size:24px}
+#bc .shell>footer{margin-top:32px!important}}
+@media(min-width:1024px) and (min-height:600px) and (max-width:1279px){.sub{display:none}.nb{flex-direction:column;gap:2px;font-size:11.5px}.nb .ic{font-size:18px}}
+@media(prefers-reduced-motion:reduce){#bc *,#bc ::before,#bc ::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* écriture des nombres choisie par champ, dans la fenêtre de l'unité */
+.upf{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:12px;margin-bottom:10px;border-bottom:.5px solid var(--sep);font-size:12px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.4px}
+.upf:last-child{padding-bottom:0;margin-bottom:0;border-bottom:0}
+.upf .seg{flex:0 0 172px}.upf .seg button{height:32px;font-size:13.5px;text-transform:none;letter-spacing:0}
+.ucap.u0{min-width:0}
+#upop .up-n:last-child{border-bottom:0;padding-bottom:0;margin-bottom:0}
+
+#bMore,#more{display:none!important}
+.vr.off{display:none!important}
+
+/* ===== 9. BioDilu : options, étapes à la demande, schéma animé ===== */
+.inputs>.seg#fmtSeg{margin-bottom:4px}
+.pr .ctl{flex:0 1 auto}
+.prs{flex:0 0 auto;display:flex;align-items:center;gap:6px}
+.prs button{width:42px;height:42px;border-radius:50%;background:var(--fill);display:grid;place-items:center;font-size:19px;transition:transform .3s var(--spring)}
+.prs button:active{transform:scale(.88)}
+.prs output{min-width:34px;text-align:center;font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+.pl{flex:1 1 180px;min-width:0;height:42px;padding:0 14px;border:1.5px solid var(--fb);border-radius:999px;background:transparent;font-size:16px;font-weight:600;transition:border-color .2s,box-shadow .2s}
+.pl:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 22%,transparent)}
+.pseg{flex:1 1 220px}
+.psel{flex:0 1 auto;width:auto;max-width:210px}
+.acts .ab .ic{transition:transform .35s var(--ease)}
+.more{display:flex;flex-direction:column;animation:moreIn .45s var(--ease)}
+@keyframes moreIn{from{opacity:0;transform:translateY(-8px)}}
+.more .gh{margin-top:18px}
+.mst{padding:12px 16px;font-size:14.5px;line-height:1.65;font-variant-numeric:tabular-nums;white-space:pre-wrap;overflow-wrap:anywhere}
+.mst b{color:var(--acc-tx)}
+.mtb{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+.mtb th{text-align:left;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--tx2);padding:10px 8px 6px}
+.mtb td{padding:9px 8px;border-top:.5px solid var(--sep)}
+.mtb :is(td,th):first-child{padding-left:16px}.mtb :is(td,th):last-child{padding-right:16px}
+.mtb b{color:var(--acc-tx)}
+.mtw{overflow-x:auto}
+.sch{display:flex;align-items:flex-end;gap:2px;overflow-x:auto;padding:18px 12px 14px;scrollbar-width:thin}
+.tu{flex:0 0 62px;display:flex;flex-direction:column;align-items:center;gap:5px;animation:tin .5s var(--ease) backwards;animation-delay:calc(var(--k,0)*110ms)}
+.tu i{width:30px;height:84px;border:2px solid var(--fb);border-top:0;border-radius:0 0 999px 999px;position:relative;overflow:hidden}
+.tu i::before{content:"";position:absolute;inset:auto 0 0 0;height:var(--h,70%);border-radius:0 0 999px 999px;
+background:color-mix(in srgb,var(--c-orange) calc(var(--o,1)*100%),color-mix(in srgb,var(--c-cyan) 22%,transparent));animation:fill 1s var(--ease) backwards;animation-delay:calc(var(--k,0)*110ms + 220ms)}
+.tu.fk i{width:40px;height:70px;border-top:2px solid var(--fb);border-radius:10px 10px 14px 14px}
+.tu.fk i::before{border-radius:0 0 12px 12px}
+.tu b{font-size:13px;font-weight:700;white-space:nowrap}
+.tu span{font-size:11.5px;font-weight:700;color:var(--acc-tx);white-space:nowrap}
+.tu em{font-size:11px;font-style:normal;color:var(--tx2);white-space:nowrap;font-variant-numeric:tabular-nums}
+.ar{flex:0 0 auto;align-self:center;margin-bottom:30px;display:flex;flex-direction:column;align-items:center;color:var(--tx3);font-size:11px;font-weight:600;white-space:nowrap;padding:0 2px;animation:tin .5s var(--ease) backwards;animation-delay:calc(var(--k,0)*110ms + 60ms)}
+.ar .ic{font-size:18px;color:var(--acc-tx);animation:nudge 1.6s ease-in-out infinite;animation-delay:calc(var(--k,0)*110ms)}
+@keyframes tin{from{opacity:0;transform:translateY(10px) scale(.96)}}
+@keyframes fill{from{height:0}}
+@keyframes nudge{50%{transform:translateX(5px)}}
+.tp{position:relative;display:flex;gap:12px;align-items:flex-start;padding:12px 16px;font-size:14.5px;line-height:1.45;animation:tin .45s var(--ease) backwards;animation-delay:calc(var(--k,0)*50ms)}
+.tp+.tp::before{content:"";position:absolute;top:0;left:50px;right:0;height:.5px;background:var(--sep)}
+.tp>.ic{font-size:20px;margin-top:1px;color:var(--acc-tx)}
+.tp b{font-weight:700}
+.tp.warn{background:color-mix(in srgb,var(--warn) 11%,transparent)}.tp.warn>.ic{color:var(--warn)}
+.tp.bad{background:color-mix(in srgb,var(--err) 9%,transparent)}.tp.bad>.ic{color:var(--err)}
+.pr .lb{flex-wrap:wrap;row-gap:0}.pr .lb small{flex-basis:100%;font-size:12.5px;font-weight:400;color:var(--tx2)}
+.tu i.dish{width:66px;height:66px;border:2px solid var(--fb);border-radius:50%;background:color-mix(in srgb,var(--c-orange) 10%,transparent)}
+.tu i.dish::before{display:none}
+.dish u{position:absolute;width:7px;height:7px;border-radius:50%;background:var(--c-orange);animation:pop .4s var(--spring) backwards;animation-delay:calc(var(--k,2)*110ms + var(--j)*45ms + 350ms)}
+@keyframes pop{from{transform:scale(0)}}
+@media(min-width:1024px) and (min-height:600px){.stage{align-items:start}.inputs{align-self:start}}
+.cta{width:100%;margin-top:12px;display:flex;align-items:center;gap:12px;min-height:64px;padding:10px 14px 10px 12px;border-radius:22px;background:var(--grp);text-align:left;transition:transform .35s var(--spring),opacity .2s}
+.cta:active{transform:scale(.98)}.cta:disabled{opacity:.4;pointer-events:none}
+.cti{width:40px;height:40px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;background:var(--acc);color:#fff;font-size:20px}
+[data-theme=dark] .cti{color:#000}
+.ctt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}.ctt b{font-size:16px;font-weight:700}.ctt small{font-size:13px;color:var(--tx2)}
+.ctv{color:var(--tx3);font-size:18px;transition:transform .4s var(--ease)}.cta.on .ctv{transform:rotate(90deg)}
+.more .grp+.grp{margin-top:10px}
+.mpar .lb small{display:block}
+.mpar .lb{flex:1 1 100%}.mpar .vr>.ctl,.mpar .vr>.psel,.mpar .vr>.prs{margin-left:auto}
+@media(max-width:599px){.pr .lb{flex:1 1 100%}.pr>.ctl,.pr>.psel,.pr>.prs{margin-left:auto}.pr>.pl{flex-basis:100%}}
+.cap{padding:0 16px 12px;font-size:13px;color:var(--tx2);line-height:1.45}
+.cap:empty{display:none}
+#mSchW+#mHow .hs:first-child{border-top:.5px solid var(--sep)}
+.hs{position:relative;display:flex;align-items:center;gap:14px;padding:12px 16px;animation:tin .5s var(--ease) backwards;animation-delay:calc(var(--k,0)*160ms)}
+.hs+.hs::before{content:"";position:absolute;top:0;left:16px;right:0;height:.5px;background:var(--sep)}
+.hv{flex:0 0 92px;height:58px;display:flex;align-items:flex-end;justify-content:center;gap:5px}
+.hs p{flex:1;min-width:0;font-size:14.5px;line-height:1.45}
+.hs p b{font-weight:700}
+.hn{display:inline-grid;place-items:center;width:22px;height:22px;margin-right:8px;border-radius:50%;background:var(--acc);color:#fff;font-size:12px;font-weight:800;vertical-align:1px}
+[data-theme=dark] .hn{color:#000}
+.zt{display:block;width:16px;height:44px;border:2px solid var(--fb);border-top:0;border-radius:0 0 999px 999px;position:relative;overflow:hidden;flex-shrink:0}
+.zt::before{content:"";position:absolute;inset:auto 0 0 0;height:var(--h,70%);background:color-mix(in srgb,var(--c-orange) calc(var(--o,1)*100%),color-mix(in srgb,var(--c-cyan) 24%,transparent));animation:fill .9s var(--ease) backwards;animation-delay:calc(var(--k,0)*160ms + 250ms)}
+.zt.zb{width:24px;height:36px;border-top:2px solid var(--fb);border-radius:6px 6px 9px 9px}
+.zt.big{width:22px;height:54px}
+.zt.spin{animation:wob 1.4s ease-in-out infinite;transform-origin:50% 90%}
+@keyframes wob{25%{rotate:-14deg}75%{rotate:14deg}}
+.za{align-self:center;display:grid;color:var(--acc-tx);font-size:16px}.za .ic{animation:nudge 1.6s ease-in-out infinite}
+.zd{display:block;width:46px;height:46px;border:2px solid var(--fb);border-radius:50%;position:relative;background:color-mix(in srgb,var(--c-orange) 10%,transparent);align-self:center}
+.zd u{position:absolute;width:5px;height:5px;border-radius:50%;background:var(--c-orange);animation:pop .4s var(--spring) backwards;animation-delay:calc(var(--k,0)*160ms + var(--j)*50ms + 300ms)}
+.zc{align-self:center;font-size:26px;color:var(--acc-tx)}
+.tu small{font-size:10.5px;color:var(--tx3);white-space:nowrap}
+@media(min-width:1024px) and (min-height:600px){
+.stage{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:32px}
+.results{padding-top:0}.rv{min-height:120px}
+.more{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:16px;align-items:start;margin-top:-14px}
+.more.np{grid-template-columns:repeat(2,minmax(0,1fr))}.more.np.nn{grid-template-columns:minmax(0,1fr)}.more.nn:not(.np){grid-template-columns:repeat(2,minmax(0,1fr))}
+#mHowW{order:4;grid-column:1/-1}#mNotesW{order:3}
+#mHow{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}#mSchW+#mHow .hs:first-child{border-top:0}#mSchW:not([hidden])+#mHow{border-top:.5px solid var(--sep)}
+.hs{flex-direction:column;align-items:flex-start;gap:10px;padding:16px}.hs+.hs::before{top:14px;bottom:14px;left:0;right:auto;width:.5px;height:auto}.hv{flex:0 0 auto;width:100%;justify-content:flex-start}
+}
+@media(min-width:1500px) and (min-height:600px){.stage{max-width:1560px;grid-template-columns:minmax(0,.95fr) minmax(0,1.3fr)}}
+.tests{position:fixed;inset:12px;z-index:90;overflow:auto;padding:18px;border-radius:24px;background:var(--grp);box-shadow:0 20px 60px rgba(0,0,0,.4);font-size:13.5px;line-height:1.6}
+.tests .ok{color:var(--ok)}.tests .ko{color:var(--err)}
+/* ############################################################################
+   SURCHARGES — l'ordre compte : chaque bloc ci-dessous peut redéfinir les précédents
+   (formule/aide, verre, thèmes clair/sombre, animations de la capsule résultat).
+   Ne pas les réordonner sans vérifier les deux thèmes.
+   ############################################################################ */
+/* ===== 10. Formule et aide : repliées, déployées avec animation ===== */
+.fold{margin:12px 0 0;border-radius:22px;overflow:hidden;background:var(--grp)}
+.fl.fold{display:block;padding:0;background:var(--grp);border:0;font-size:15px}
+.fh{width:100%;min-height:48px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;font-size:15px;font-weight:600;color:var(--acc-tx);transition:opacity .2s}
+.fh:active{opacity:.55}
+.fh .ic{font-size:18px;transition:transform .45s var(--spring)}
+.fold.open .fh .ic{transform:rotate(90deg)}
+.fx{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .5s var(--ease),opacity .35s}
+.fold.open .fx{grid-template-rows:1fr;opacity:1}
+.fx>div{overflow:hidden;min-height:0}
+.fx>div>*{display:block;padding:2px 18px 16px}
+.fl .fx span{font-family:inherit;font-style:normal;font-weight:600;white-space:pre-line;color:var(--tx);line-height:1.45}
+.how{font-size:14.5px;line-height:1.45}
+.how ol{list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:10px}
+.how li{counter-increment:s;display:flex;gap:10px;align-items:flex-start}
+.how li::before{content:counter(s);flex:0 0 22px;height:22px;border-radius:50%;background:var(--acc);color:#fff;font-size:12px;font-weight:800;display:grid;place-items:center;margin-top:1px}
+[data-theme=dark] .how li::before{color:#000}
+.how .ex{margin-top:2px;height:42px;border-radius:999px;background:var(--acc);color:#fff;font-size:14.5px;font-weight:600}
+[data-theme=dark] .how .ex{color:#000}
+.how .ex:active{transform:scale(.97)}
+.hb.how{padding:4px 18px 18px;display:flex;flex-direction:column;gap:18px}
+.how ol{margin:0}
+
+/* correctifs : bouton exemple, titre de formule */
+.how .ex{width:100%;align-self:stretch;padding:0 20px;display:flex;align-items:center;justify-content:center}
+.fl.fold,.fl.fold .fh span{font-family:inherit;font-style:normal;white-space:normal}
+/* ===== 11. Liquid glass sur toute l'interface (même verre que la barre de navigation) ===== */
+[data-theme=dark] #bc{--blob:.4}
+#bc :is(.grp,.rg,.cta,.fold){position:relative;background:rgba(var(--lg-rgb),var(--lg-a));-webkit-backdrop-filter:blur(var(--blur)) saturate(190%);backdrop-filter:blur(var(--blur)) saturate(190%);
+box-shadow:inset 0 1px 0 var(--lg-hi),0 0 0 .5px var(--hair),0 10px 28px var(--lg-sh)}
+#bc :is(.grp,.rg,.cta,.fold)::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;
+background:radial-gradient(circle 110px at var(--mx,50%) var(--my,50%),rgba(255,255,255,.26),transparent 70%)}
+#bc :is(.grp,.rg,.cta,.fold).lit::after{opacity:1}
+@media(prefers-reduced-transparency:reduce){#bc :is(.grp,.rg,.cta,.fold){background:var(--grp);-webkit-backdrop-filter:none;backdrop-filter:none}}
+
+/* champ « 5 » : jamais collé au libellé (retour à la ligne si manque de place) */
+#bc .vr .lb{min-width:max-content}
+@media(max-width:599px){#bc .vr:has(>.ctl.sci) .lb{flex:1 1 auto}}
+/* ===== 12. Sombre AMOLED : noir pur, cartes en verre translucide ===== */
+[data-theme=dark] #bc{--blob:0;--grp:#0c0c0e;--lg-rgb:14,14,16;--lg-a:.72;--sep:rgba(84,84,88,.45)}
+[data-theme=dark] #bc :is(.grp,.rg,.cta,.fold){background:rgba(255,255,255,.065)}
+
+/* ===== 13. Fenêtre d'unité : grille régulière de capsules ===== */
+#bc .upop{width:min(316px,calc(100vw - 16px));padding:14px;border-radius:26px}
+#bc .upf{padding-bottom:14px;margin-bottom:14px}
+#bc .up-n{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding-bottom:14px;margin-bottom:10px}
+#bc .up-n button{min-height:40px;height:40px;padding:0 4px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:14.5px;font-weight:600;white-space:nowrap;
+transition:transform .3s var(--spring),background .2s,color .2s}
+#bc .up-n button:active{transform:scale(.92)}
+#bc .up-n button.on{background:var(--acc);color:#fff;box-shadow:0 2px 8px color-mix(in srgb,var(--acc) 40%,transparent)}
+[data-theme=dark] #bc .up-n button.on{color:#000}
+#bc .up-n button[data-u*=" "]{grid-column:span 2}
+
+/* ===== 14. Mode clair : palette affinée (contrastes, accents, verre plus net) ===== */
+html[data-theme=light]{background:#f1f4fa}
+[data-theme=light] #bc{--tx:#0c0d12;--tx2:#585b68;--tx3:#8b8f9c;--sep:rgba(40,50,80,.14);--fill:rgba(90,100,130,.11);--fb:rgba(60,70,100,.26);--hair:rgba(30,45,90,.08);
+--acc-tx:color-mix(in srgb,var(--acc) 66%,#0a1020);--brand:#0a62d6;
+--c-blue:#0a7cff;--c-indigo:#5b5bd6;--c-purple:#9b51e0;--c-pink:#f0305a;--c-orange:#f58a00;--c-green:#2fb457;--c-teal:#1fa5b8;--c-cyan:#1e9fdc;--c-mint:#0fbfb2;
+--ok:#1b8a3a;--err:#d1122b;
+--lg-rgb:255,255,255;--lg-a:.76;--lg-hi:rgba(255,255,255,.95);--lg-sh:rgba(40,60,120,.09);--blob:.22}
+[data-theme=light] #bc::before{background:radial-gradient(circle at 18% 22%,rgba(10,124,255,.45),transparent 42%),radial-gradient(circle at 82% 68%,rgba(155,81,224,.30),transparent 42%),radial-gradient(circle at 55% 8%,rgba(30,159,220,.28),transparent 40%)}
+[data-theme=light] #bc :is(.grp,.rg,.cta,.fold){box-shadow:inset 0 1px 0 var(--lg-hi),0 0 0 .5px var(--hair),0 10px 30px var(--lg-sh)}
+[data-theme=light] #bc .val,[data-theme=light] #bc .exp{background:rgba(255,255,255,.55)}
+[data-theme=light] #bc .val:focus,[data-theme=light] #bc .exp:focus{background:#fff}
+[data-theme=light] #bc .sel{background-color:rgba(90,100,130,.12)}
+[data-theme=light] #bc .sym{box-shadow:0 2px 6px color-mix(in srgb,var(--sc) 38%,transparent)}
+[data-theme=light] #bc .fl.fold,[data-theme=light] #bc .how-w{background:rgba(255,255,255,.76)}
+[data-theme=light] #bc .num{color:#0c0d12}
+
+/* ===== 15. Mode clair : fond neutre (plus de bleu) ===== */
+html[data-theme=light]{background:#f4f4f6}
+[data-theme=light] #bc{--blob:0;--sep:rgba(60,60,67,.16);--fill:rgba(118,118,128,.12);--fb:rgba(60,60,67,.26);--hair:rgba(0,0,0,.07);--lg-sh:rgba(0,0,0,.07);
+--acc-tx:color-mix(in srgb,var(--acc) 68%,#111);--tx:#0e0e10;--tx2:#5e5e66}
+[data-theme=light] #bc .sel{background-color:rgba(118,118,128,.12)}
+[data-theme=light] #bc .fl.fold,[data-theme=light] #bc .how-w{background:rgba(255,255,255,.8)}
+[data-theme=light] #bc :is(.grp,.rg,.cta,.fold){background:rgba(255,255,255,.82)}
+/* ===== 16. Apparition de la capsule résultat ===== */
+.rg.appear{animation:resIn .75s var(--spring),resRing .9s ease-out}
+.rg.appear .num{animation:numIn .7s var(--spring) .08s backwards}
+.rg.appear #ru{animation:numIn .7s var(--spring) .18s backwards}
+@keyframes resIn{from{opacity:.35;transform:translateY(18px) scale(.93)}}
+@keyframes resRing{0%{outline:2px solid color-mix(in srgb,var(--acc) 55%,transparent);outline-offset:0}100%{outline:2px solid transparent;outline-offset:12px}}
+@keyframes numIn{from{opacity:0;transform:translateY(10px) scale(.88)}}
+
+/* ===== 17. Capsule résultat : entrée façon Apple (ressort, flou → net, reflet qui balaie) ===== */
+.rg.appear{animation:appleIn 1s cubic-bezier(.2,.9,.25,1.14) both;transform-origin:50% 60%}
+.rg.appear>*{animation:appleBlur .75s cubic-bezier(.22,1,.36,1) both}
+.rg.appear .num{animation:numIn .9s cubic-bezier(.2,.9,.25,1.14) .1s backwards}
+.rg.appear #ru{animation:numIn .9s cubic-bezier(.2,.9,.25,1.14) .2s backwards}
+[data-theme=dark] @keyframes appleIn{0%{opacity:0;transform:translateY(30px) scale(.88)}45%{opacity:1}100%{opacity:1;transform:none}}
+@keyframes appleBlur{0%{filter:blur(10px);opacity:0}100%{filter:blur(0);opacity:1}}
+
+#bc .rg::after{display:none}
+/* ===== 18. Mode clair : liquid glass bien visible ===== */
+[data-theme=light] #bc{--blob:1;--lg-a:.6}
+[data-theme=light] #bc::before{background:radial-gradient(circle at 15% 20%,rgba(255,159,10,.30),transparent 40%),radial-gradient(circle at 85% 38%,rgba(175,82,222,.20),transparent 42%),radial-gradient(circle at 30% 85%,rgba(52,199,89,.20),transparent 42%),radial-gradient(circle at 80% 92%,rgba(255,45,85,.14),transparent 40%)}
+[data-theme=light] #bc :is(.grp,.rg,.cta,.fold),[data-theme=light] #bc .fl.fold,[data-theme=light] #bc .how-w{
+background:linear-gradient(180deg,rgba(255,255,255,.62),rgba(255,255,255,.38));-webkit-backdrop-filter:blur(28px) saturate(210%);backdrop-filter:blur(28px) saturate(210%);
+box-shadow:inset 0 1.5px 0 rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,.7),inset 0 -1px 0 rgba(255,255,255,.4),0 0 0 .5px rgba(0,0,0,.09),0 14px 34px rgba(0,0,0,.11)}
+
+/* ===== 19. Mode clair façon iOS 27 : fond uni, verre plat et lisible, sans effet 3D ===== */
+html[data-theme=light]{background:#f2f2f7}
+[data-theme=light] #bc{--blob:0;--lg-a:.74}
+[data-theme=light] #bc::before{display:none}
+[data-theme=light] #bc :is(.grp,.rg,.cta,.fold),[data-theme=light] #bc .fl.fold,[data-theme=light] #bc .how-w{
+background:rgba(255,255,255,.86);-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);
+box-shadow:0 0 0 .5px rgba(0,0,0,.06),0 2px 14px rgba(0,0,0,.05)}
+[data-theme=light] #bc .sym{box-shadow:none}
+
+/* ===== 20. Mode sombre AMOLED : même verre plat (iOS 27), sans effet 3D ===== */
+[data-theme=dark] #bc :is(.grp,.rg,.cta,.fold),[data-theme=dark] #bc .fl.fold,[data-theme=dark] #bc .how-w{
+background:rgba(255,255,255,.07);-webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);
+box-shadow:0 0 0 .5px rgba(255,255,255,.1)}
+[data-theme=dark] #bc .sym{box-shadow:none}
+/* ===== 21. Capsule résultat : la capsule elle-même se déploie (forme + taille), puis le texte arrive ===== */
+.rg.appear{animation:capIn .95s cubic-bezier(.2,.9,.25,1.08) backwards;transform-origin:50% 55%}
+.rg.appear>*{animation:appleBlur .6s .3s cubic-bezier(.22,1,.36,1) backwards}
+.rg.appear .num{animation:numIn .8s cubic-bezier(.2,.9,.25,1.14) .35s backwards}
+.rg.appear #ru{animation:numIn .8s cubic-bezier(.2,.9,.25,1.14) .45s backwards}
+@keyframes capIn{0%{opacity:0;transform:translateY(24px) scale(.8);clip-path:inset(34% 18% round 46px)}
+ 45%{opacity:1}100%{opacity:1;transform:none;clip-path:inset(0 round 22px)}}
+
+/* capsule résultat : seul le contenant s'anime, le texte reste fixe */
+.rg.appear>*,.rg.appear .num,.rg.appear #ru{animation:none!important}
+
+/* capsule résultat : même animation que les cartes du haut (glissement + ressort) */
+.rg.appear{animation:none!important;clip-path:none}
+
+/* barre de navigation, barre du haut, menus : liquid glass d'origine */
+[data-theme=light] #bc{--lg-rgb:255,255,255;--lg-a:.68;--lg-hi:#fff;--lg-sh:rgba(0,0,0,.12);--hair:rgba(0,0,0,.09)}
+[data-theme=dark] #bc{--lg-rgb:28,28,30;--lg-a:.66;--lg-hi:rgba(255,255,255,.34);--lg-sh:rgba(0,0,0,.5);--hair:rgba(255,255,255,.08)}
+
+/* ===== 22. « Grandeur recherchée » : même verre et même lentille que la barre de navigation ===== */
+#bc .seg.cal{padding:5px;border-radius:999px;background:rgba(var(--lg-rgb),var(--lg-a));-webkit-backdrop-filter:blur(var(--blur)) saturate(190%);backdrop-filter:blur(var(--blur)) saturate(190%);
+box-shadow:inset 0 1px 0 var(--lg-hi),0 0 0 .5px var(--hair),0 12px 30px var(--lg-sh)}
+#bc .cal .th{top:5px;bottom:5px;left:5px;width:calc((100% - 10px)/var(--n));border-radius:999px;z-index:1;
+background:var(--lens);border:1px solid var(--lens-line);box-shadow:inset 0 1px 1px rgba(255,255,255,.5),0 4px 14px rgba(0,0,0,.14);
+transition:transform .6s var(--spring),scale .3s var(--spring)}
+#bc .cal:active .th{scale:1.06 1.1}
+#bc .cal button{z-index:2;border-radius:999px;height:52px}
+#bc .cal button.on small{color:var(--acc-tx);font-weight:600}
+</style>
+</head>
+<body>
+<div id="bc" data-fmt="std">
+
+<header><div class="hin">
+  <div class="logo-c"><div class="logo">Bio<i>Convert</i></div><div class="sub" data-key="subtitle"></div></div>
+  <div class="hact">
+    <div class="tools glass">
+      <button class="tb" id="histBtn" data-tk="t_hist" data-ic="hist"><i id="badge" class="badge"></i></button>
+      <button class="tb" id="themeBtn" data-tk="t_theme"></button>
+    </div>
+    <button class="mb glass" id="mb" type="button" data-menu data-tk="t_menu" data-ic="menu"></button>
+  </div>
+</div></header>
+
+<div class="shell" id="shell">
+  <main class="stage" id="card">
+    <section class="inputs">
+      <div class="thead" aria-hidden="true"><div class="roll rnb"><div id="rn"></div></div><div class="roll rttl"><div id="rtt"></div></div></div>
+      <div id="views" style="display:contents"></div>
+    </section>
+    <section class="results" id="resBox">
+      <p class="gh" id="rt"></p>
+      <div class="rg">
+        <div class="rv" id="rv" aria-live="polite"><div id="num" class="num">-</div><div id="ru"></div></div>
+        <div class="acts"><button class="ab" id="bCopy"></button><button class="ab" id="bSave"></button></div>
+      </div>
+      <div id="tip" class="tip"></div>
+      <button class="cta" id="bMore" type="button" aria-expanded="false" aria-controls="more" disabled><span class="cti" data-ic="flask"></span><span class="ctt"><b data-key="cta_t"></b><small data-key="cta_s"></small></span><span class="ctv" data-ic="chev"></span></button>
+    </section>
+    <div class="more" id="more" hidden>
+        <div class="msec" id="mParW"><p class="gh" data-key="h_par"></p><div id="mPar"></div></div>
+        <div class="msec"><p class="gh" data-key="h_steps"></p><div class="grp" id="mSteps"></div></div>
+        <div class="msec full" id="mHowW"><p class="gh" data-key="h_how"></p><div class="grp"><div id="mSchW"><div class="sch" id="mSch"></div><p class="cap" id="mCap"></p></div><div id="mHow"></div></div></div>
+        <div class="msec" id="mNotesW"><p class="gh" data-key="h_notes"></p><div class="grp" id="mNotes"></div></div>
+      </div>
+  </main>
+  <script src="/footer-global.js"></script>
+</div>
+
+<nav class="nav" id="navWrap" aria-label="Navigation"><div class="nav-in glass" id="nav"><span class="sl" id="sl"></span></div></nav>
+<button class="mini glass" id="mini" type="button"><span class="ml" id="ml"></span><span id="miniN"></span><span class="mu" id="miniU"></span></button>
+
+<div class="ov" id="ov" role="dialog" aria-modal="true" aria-labelledby="hT"><div class="sheet glass">
+  <div class="oh"><span class="ot" id="hT" data-key="hist_title"></span><button class="x" id="hClose" data-ic="close" data-tk="t_close"></button></div>
+  <div class="hl" id="hl"></div><button class="clr" id="hClr" data-key="hist_clear"></button>
+</div></div>
+<div class="upop glass" id="upop" hidden></div>
+</div>
+
+<script src="/liquid-glass.js"></script>
+<script>
+(()=>{'use strict';
+/* ---------- 1. Outils ---------- */
+const $=id=>document.getElementById(id),BC=$('bc'),root=document.documentElement;
+const $$=(s,c=BC)=>[...c.querySelectorAll(s)];
+const sto={g(k){try{return localStorage.getItem(k)}catch(e){return null}},s(k,v){try{localStorage.setItem(k,v)}catch(e){}},d(k){try{localStorage.removeItem(k)}catch(e){}}};
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const VV=window.visualViewport;   // zone réellement visible (change quand le clavier s'ouvre)
+const IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1;
+/* retour haptique : vibration courte (Android), sinon interrupteur natif caché (iPhone, iOS 18+) */
+function buzz(p=14){try{if(navigator.vibrate){navigator.vibrate(p);return}if(!IOS)return;
+  const l=document.createElement('label'),i=document.createElement('input');i.type='checkbox';i.setAttribute('switch','');
+  l.dataset.hap='';l.style.display='none';l.appendChild(i);document.head.appendChild(l);l.click();l.remove()}catch(e){}}
+const OK=[12,60,18];
+
+/* ---------- 2. Icônes : Lucide (ISC) ---------- */
+const IC=Object.fromEntries(Object.entries({
+  calc:'<rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/>',
+  beaker:'<path d="M4.5 3h15"/><path d="M6 3v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V3"/><path d="M6 14h12"/>',
+  tubes:'<path d="M9 2v17.5A2.5 2.5 0 0 1 6.5 22A2.5 2.5 0 0 1 4 19.5V2"/><path d="M20 2v17.5a2.5 2.5 0 0 1-2.5 2.5a2.5 2.5 0 0 1-2.5-2.5V2"/><path d="M3 2h7"/><path d="M14 2h7"/><path d="M9 16H4"/><path d="M20 16h-5"/>',
+  bars:'<path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/>',
+  list:'<path d="m6 9 6 6 6-6"/>',
+  tip:'<path d="M12 22 8 7h8z"/><path d="M7 2h10v5H7z"/>',
+  mix:'<path d="M21 12a9 9 0 1 1-6.22-8.56"/><path d="M21 3v5h-5"/><circle cx="12" cy="12" r="2.5"/>',
+  tube:'<path d="M14.5 2v17.5c0 1.4-1.1 2.5-2.5 2.5c-1.4 0-2.5-1.1-2.5-2.5V2"/><path d="M8.5 2h7"/><path d="M14.5 16h-5"/>',
+  tag:'<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5"/>',
+  order:'<path d="M10 12h11"/><path d="M10 18h11"/><path d="M10 6h11"/><path d="M4 10h2"/><path d="M4 6h1v4"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/>',
+  arrow:'<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+  flask:'<path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/><path d="M6.453 15h11.094"/><path d="M8.5 2h7"/>',
+  chev:'<path d="m9 18 6-6-6-6"/>',
+  plus:'<path d="M5 12h14"/><path d="M12 5v14"/>',minus:'<path d="M5 12h14"/>',
+  scale:'<path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>',
+  dish:'<circle cx="12" cy="12" r="9"/><circle cx="9" cy="9.5" r="1.3"/><circle cx="14.8" cy="9" r="1"/><circle cx="13.2" cy="14.6" r="1.5"/><circle cx="8.6" cy="15" r=".9"/>',
+  cuv:'<path d="M8 2h8"/><path d="M9 2v18a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2V2"/><path d="M9 12h6"/><path d="M2 8h4"/><path d="M18 8h4"/>',
+  pip:'<path d="m12 9-8.4 8.4A2 2 0 0 0 3 18.8v1.4a2 2 0 0 1-.6 1.4 2 2 0 0 1 1.4-.6h1.4a2 2 0 0 0 1.4-.6L15 12"/><path d="m18 9 .4.4a1 1 0 1 1-3 3l-3.8-3.8a1 1 0 1 1 3-3l.4.4 3.4-3.4a1 1 0 1 1 3 3z"/>',
+  grow:'<path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/>',
+  hist:'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+  lang:'<path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+  moon:'<path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/>',
+  dl:'<path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/>',
+  menu:'<path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/>',
+  copy:'<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
+  save:'<path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  close:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+  warn:'<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>'
+}).map(([k,d])=>[k,`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`]));
+
+
+/* ---------- 3. Textes ---------- */
+const T={fr:{subtitle:"Conversion d'unités de labo",fmt_std:"Décimale",fmt_sci:"Scientifique",calc:"Grandeur recherchée",known:"Données",law:"Relation",h_par:"Options",h_steps:"Détail du calcul",h_how:"Pas à pas",h_notes:"Bon à savoir",
+cta_t:"Détail",cta_t2:"Masquer",cta_s:"",
+u_mass:"Masse",u_vol:"Volume",a_exp:"Exposant (puissance de 10)",a_unit:"Unité",
+btn_copy:"Copier",btn_copied:"Copié",btn_save:"Enregistrer",btn_saved:"Enregistré",
+hist_title:"Historique",hist_empty:"Aucune conversion enregistrée.",hist_clear:"Effacer l'historique",
+t_hist:"Historique",t_theme:"Changer le thème",t_menu:"Menu",t_close:"Fermer",t_del:"Supprimer",
+wait:"En attente de saisie",tip_wait:"Saisissez les données : la conversion s'affiche dès que tout est rempli.",
+bad:"Format non valide",tip_bad:"Nombre non reconnu. Écrivez par exemple 10 ; 1,5 ; 2e-3 ; 2×10^-3 ou 1/1000 (exposant : nombre entier).",
+neg:"Valeur négative",tip_neg:"Une grandeur ne peut pas être négative. Saisissez une valeur positive, sans signe −.",
+zero:"Calcul impossible",tip_zero:"Une valeur nulle se retrouve au dénominateur. Remplacez le 0 par une valeur non nulle.",
+ovf:"Résultat hors limites",tip_ovf:"Le résultat est trop grand ou trop petit pour être calculé. Vérifiez les valeurs et leurs unités.",
+fam:"Masse molaire non calculable",tip_fam:"Pour calculer M, une concentration doit être molaire (M, mM…) et l'autre massique (g/L, mg/mL, %…).",
+foot_dev:"Design & Développement",
+nav:["Masse","Volume","Concentration","Quantité"],
+tabs:["Convertir une masse","Convertir un volume","Convertir une concentration","Quantité de matière et masse"],
+v_a:"Valeur à convertir",s_a:"Valeur",v_b:"Valeur convertie",s_b:"Résultat",
+v_ca:"Concentration de départ",s_ca:"Départ",v_cb:"Concentration convertie",s_cb:"Résultat",v_M:"Masse molaire",s_M:"M",
+v_n:"Quantité de matière",s_n:"Quantité",v_m:"Masse",s_m:"Masse"}};
+T.en=T.fr;
+const S={lang:'fr',dark:root.dataset.theme==='dark',fmt:'std',tab:-1,tgt:{},ok:false,last:null,hist:[],par:{},more:false,ctx:null,rdim:''};
+const t=k=>T.fr[k]!=null?T.fr[k]:k,tv=(k,v)=>t(k).replace('{v}',v);
+
+/* ---------- 4. Unités : base g, L, mol/L ou g/L, mol ---------- */
+const MASS={kg:1e3,g:1,mg:1e-3,'µg':1e-6,ng:1e-9,pg:1e-12},VOLc={L:1,dL:.1,mL:1e-3,'µL':1e-6,nL:1e-9};
+const D={mass:{u:{t:1e6,kg:1e3,g:1,mg:1e-3,'µg':1e-6,ng:1e-9,pg:1e-12,fg:1e-15}},
+  vol:{u:{kL:1e3,L:1,dL:.1,cL:.01,mL:1e-3,'µL':1e-6,nL:1e-9,pL:1e-12,fL:1e-15}},
+  conc:{u:{M:1,mM:1e-3,'µM':1e-6,nM:1e-9,pM:1e-12,fM:1e-15,'% (m/V)':10,ppm:1e-3,ppb:1e-6},r:[MASS,VOLc,1],lab:['u_mass','u_vol']},
+  mm:{u:{'g/mol':1,kDa:1e3}},mol:{u:{mol:1,mmol:1e-3,'µmol':1e-6,nmol:1e-9,pmol:1e-12,fmol:1e-15}}};
+function fu(dim,u){const d=D[dim];if(u in d.u)return d.u[u];const k=u.indexOf('/');
+  if(d.r&&k>0){const n=d.r[0][u.slice(0,k)],q=d.r[1][u.slice(k+1)];if(n&&q)return n/q*d.r[2]}return NaN}
+const FAM=u=>/^(M|mM|µM|nM|pM|fM)$/.test(u)?'mol':'mass';
+
+/* ---------- 5. Convertisseurs ---------- */
+const V=(k,s,dim,u,n,ph,sh)=>({k,s,dim,u,n,ph,sh:sh||s});
+const DC={mass:'orange',vol:'cyan',conc:'blue',mm:'indigo',mol:'purple'};
+const sb=(a,b)=>`${a}<sub>${b}</sub>`;
+/* facteur entre les deux unités : « multiplier par 1 000 » */
+function facTip(dim,ua,ub){const f=fu(dim,ua)/fu(dim,ub);if(!(f>0))return'';if(Math.abs(f-1)<1e-12)return'Unités équivalentes : la valeur ne change pas.';
+  return f>1?`Multiplier par ${fmt(f)}`:`Diviser par ${fmt(1/f)}`}
+const conv=(id,ic,dim,ua,ub,ph)=>({id,ic,tgt:'b',conv:1,
+  vars:[V('a',sb('x','1'),dim,ua,'a',ph,sb('x','1')),V('b',sb('x','2'),dim,ub,'b','',sb('x','2'))],
+  f:{b:`${sb('x','2')} = ${sb('x','1')} · facteur`,a:`${sb('x','1')} = ${sb('x','2')} / facteur`},
+  solve:{b:x=>x.a,a:x=>x.b},note:(x,c)=>facTip(dim,c.U.a,c.U.b),
+  more(c){return{steps:`${fmt(c.x.a/fu(dim,c.U.a))} ${c.U.a} = <b>${fmt(c.x.b/fu(dim,c.U.b))} ${c.U.b}</b>\n${facTip(dim,c.U.a,c.U.b)}`}}});
+const TABS=[conv('mass','scale','mass','g','mg','1'),conv('vol','beaker','vol','L','mL','1'),
+{id:'conc',ic:'tubes',tgt:'b',conv:1,
+ vars:[V('a','C₁','conc','g/L','ca','50',sb('C','1')),V('M','M','mm','g/mol','M','58,44'),V('b','C₂','conc','mM','cb','',sb('C','2'))],
+ f:{b:`C (g/L) = C (mol/L) · M`,a:`C (g/L) = C (mol/L) · M`,M:`M = C (g/L) / C (mol/L)`},
+ skip:U=>FAM(U.a)===FAM(U.b)?['M']:[],
+ solve:{b:(x,c)=>{const A=FAM(c.U.a),B=FAM(c.U.b);return A===B?x.a:A==='mol'?x.a*x.M:x.a/x.M},
+   a:(x,c)=>{const A=FAM(c.U.a),B=FAM(c.U.b);return A===B?x.b:A==='mol'?x.b/x.M:x.b*x.M},
+   M:(x,c)=>FAM(c.U.a)==='mol'?x.b/x.a:x.a/x.b},
+ note:(x,c)=>FAM(c.U.a)===FAM(c.U.b)?facTip('conc',c.U.a,c.U.b):'Conversion mol/L ↔ g/L avec la masse molaire : γ = C · M.',
+ more(c){const x=c.x,U=c.U;return{steps:`${fmt(x.a/fu('conc',U.a))} ${U.a} = <b>${fmt(x.b/fu('conc',U.b))} ${U.b}</b>${FAM(U.a)!==FAM(U.b)?`\navec M = ${fmt(x.M)} g/mol`:''}`}}},
+{id:'qty',ic:'calc',tgt:'m',
+ vars:[V('n','n','mol','mmol','n','1'),V('M','M','mm','g/mol','M','58,44'),V('m','m','mass','g','m','')],
+ f:{m:'m = n · M',n:'n = m / M',M:'M = m / n'},
+ solve:{m:x=>x.n*x.M,n:x=>x.m/x.M,M:x=>x.m/x.n},
+ more(c){const x=c.x;return{steps:`m = n · M = ${fmt(x.n)} mol · ${fmt(x.M)} g/mol = <b>${fmt(x.m)} g</b>`}}}];
+TABS.forEach(tb=>S.tgt[tb.id]=tb.tgt);
+/* icône concentration : goutte */
+IC.drop='<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.7 6.5 10a7 7 0 1 0 11 0z"/><path d="M9 15a3 3 0 0 0 3 3"/></svg>';
+TABS[2].ic='drop';
+/* relations écrites en toutes lettres */
+const conv_f={b:'Valeur convertie = valeur de départ × facteur',a:'Valeur de départ = valeur convertie ÷ facteur'};
+Object.assign(TABS[0].f,conv_f);Object.assign(TABS[1].f,conv_f);
+Object.assign(TABS[2].f,{b:'g/L = mol/L × masse molaire (M)\nmol/L = g/L ÷ masse molaire (M)',a:'g/L = mol/L × masse molaire (M)\nmol/L = g/L ÷ masse molaire (M)',M:'Masse molaire = concentration en g/L ÷ concentration en mol/L'});
+Object.assign(TABS[3].f,{m:'Masse = quantité de matière × masse molaire',n:'Quantité de matière = masse ÷ masse molaire',M:'Masse molaire = masse ÷ quantité de matière'});
+T.fr.law='Formule';
+T.fr.tip_wait='Remplissez les champs ci-dessus : le résultat s’affiche automatiquement.';
+
+const cur=()=>TABS[S.tab];
+
+/* ---------- 6. Nombres : lecture souple, affichage à 4 chiffres significatifs ---------- */
+const sup=s=>String(s).replace(/./g,c=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[c]||({'-':'⁻','+':'⁺'}[c]||c));
+const clean=n=>Number.isFinite(n)&&n!==0?Number(n.toPrecision(12)):n;
+const dec=s=>S.lang==='fr'?s.replace('.',','):s;
+const grp=s=>{const p=s.split('.');p[0]=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f');return p.join('.')};
+function sciStr(c){const[m,e]=c.toExponential(11).split('e'),k=+e,mt=dec(String(Number(m)));return k?`${mt} × 10${sup(k)}`:mt}
+function fmt(n){if(!Number.isFinite(n))return'-';if(n===0)return'0';const c=Number(n.toPrecision(4)),a=Math.abs(c);
+  return S.rsci||a<1e-4||a>=1e6?sciStr(c):dec(grp(String(c)))}
+/* valeur saisie telle quelle dans l'équation (pleine précision) */
+const echo=v=>{if(v===0)return'0';const c=clean(v),a=Math.abs(c);return !S.rsci&&a>=1e-6&&a<1e21?dec(String(c)):sciStr(c)};
+/* saisie : virgule ou point, 2e-3, 2×10^-3, 2x10-3 */
+function num(raw){let c=String(raw||'').replace(/\s+/g,'').replace(/,/g,'.').replace(/[−–]/g,'-').replace(/[⁻⁰¹²³⁴⁵⁶⁷⁸⁹]/g,ch=>'-0123456789'['⁻⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(ch)]).replace(/[×x*·]10\^?/i,'e');
+  const p=c.match(/^10(?:\^([+-]?\d+)|(-\d+))$/);if(p)c='1e'+(p[1]||p[2]);
+  const q=c.match(/^(\d+(?:\.\d+)?)[\/:](\d+(?:\.\d+)?(?:e[+-]?\d+)?)$/i);if(q){const v=+q[1]/+q[2];return Number.isFinite(v)?{v}:{bad:1}}
+  if(!c)return{empty:1};
+  if(!/^[+-]?(\d+(\.\d*)?|\.\d+)(e[+-]?\d+)?$/i.test(c))return{bad:1};
+  const v=Number(c);return Number.isFinite(v)?{v}:{bad:1}}
+/* lecture d'une ligne : décimale, ou mantisse × 10^exposant en mode scientifique */
+const FXK='bcv_fx',FXD='std';let FX={};try{FX=JSON.parse(sto.g(FXK))||{}}catch(e){}
+const isSci=(id,k)=>(FX[id+'-'+k]||FXD)==='sci';
+function applyFx(){$$('.ctl').forEach(c=>{const v=c.querySelector('.val');if(v&&v.id)c.classList.toggle('sci',(FX[v.id]||FXD)==='sci')});$$('.ucap').forEach(ulab)}
+function readVal(id,k){const raw=$(`${id}-${k}`).value,r=num(raw);if(!('v' in r)||!isSci(id,k))return r;
+  if(/[e×x*^\/:⁰¹²³⁴⁵⁶⁷⁸⁹⁻]|^\s*10\s*[−–-]\s*\d/i.test(raw))return r;   // puissance déjà écrite dans le champ (8x10^-2, 1e6, 1/1000) : l'exposant à côté est ignoré
+  const e=$(`${id}-${k}-e`).value.trim().replace(/[−–]/g,'-');if(!e)return r;
+  return /^[+-]?\d+$/.test(e)?{v:r.v*10**+e}:{bad:1}}
+/* écriture d'une valeur au format courant (sig chiffres significatifs) */
+function writeVal(id,k,v,sig){const A=$(`${id}-${k}`),E=$(`${id}-${k}-e`);
+  if(v==null||v===0){A.value=v===0?'0':'';E.value='';return}
+  if(isSci(id,k)){const[m,e]=v.toExponential(sig-1).split('e');A.value=dec(String(Number(m)));E.value=String(+e)}
+  else{A.value=dec(String(Number(v.toPrecision(sig))));E.value=''}}
+
+
+/* ---------- 7. Construction : barre d'onglets, titres, vues, options ---------- */
+const unitCtl=(id,dim,u)=>{const k=Object.keys(D[dim].u);return`<button type="button" id="${id}" class="sel ucap${D[dim].r||k.length>1?'':k[0]?' u1':' u0'}" data-dim="${dim}" value="${u}" data-al="a_unit">${u}</button>`};
+const field=(id,cls,al,mode,ph='')=>`<input id="${id}" class="${cls}" type="text" inputmode="${mode}" autocomplete="off" spellcheck="false" data-al="${al}" data-ph="${ph}">`;
+function parRow(tb,p){const id=`${tb.id}-p-${p.k}`,path=`${tb.id}.${p.k}`,lb=`<div class="lb"><span data-key="${p.lab}"></span>${p.sub?`<small data-key="${p.sub}"></small>`:''}</div>`;
+  switch(p.t){
+  case'sel':return`<div class="vr pr">${lb}<select id="${id}" class="sel psel" data-par="${path}" data-al="${p.lab}">${Object.entries(p.opts).map(([v,k])=>`<option value="${v}" data-key="${k}"></option>`).join('')}</select></div>`;
+  case'int':return`<div class="vr pr">${lb}<div class="prs"><button type="button" data-pint="${path}:-1" aria-label="Moins">${IC.minus}</button><output id="${id}"></output><button type="button" data-pint="${path}:1" aria-label="Plus">${IC.plus}</button></div></div>`;
+  case'num':return`<div class="vr pr" id="${tb.id}-r-${p.k}">${lb}<div class="ctl">${field(`${tb.id}-${p.k}`,'val',p.lab,'decimal',p.ph)}<span class="x10">×10</span>${field(`${tb.id}-${p.k}-e`,'exp','a_exp','text','0')}${unitCtl(`${tb.id}-${p.k}-u`,p.dim,p.u)}</div></div>`;
+  case'list':return`<div class="vr pr">${lb}<input id="${id}" class="pl" type="text" inputmode="text" autocomplete="off" spellcheck="false" data-par="${path}" data-al="${p.lab}" data-ph="${p.ph||''}"></div>`;
+  case'seg':return`<div class="vr pr">${lb}<div class="seg pseg" id="${id}" style="--n:${Object.keys(p.opts).length}" data-par="${path}"><i class="th"></i>${Object.entries(p.opts).map(([v,k])=>`<button type="button" data-pv="${v}" data-key="${k}"></button>`).join('')}</div></div>`}}
+$('views').innerHTML=TABS.map((tb,i)=>`<section class="view" id="view${i}">
+<p class="gh" data-key="calc"></p>
+<div class="seg cal" id="${tb.id}-cal" role="group" style="--n:${tb.vars.length}"><i class="th"></i>${tb.vars.map(v=>`<button type="button" data-k="${v.k}"><b style="color:var(--c-${DC[v.dim]})">${v.sh}</b><small data-key="s_${v.n}"></small></button>`).join('')}</div>
+<p class="fl"><small data-key="law"></small><span id="${tb.id}-fml"></span></p>
+<p class="gh" data-key="known"></p>
+<div class="grp">${tb.vars.map(v=>`<div class="vr" id="${tb.id}-r-${v.k}"><div class="lb"><span class="sym" style="--sc:var(--c-${DC[v.dim]})">${v.sh}</span><span class="ln" data-key="v_${v.n}"></span><span class="ls" data-key="s_${v.n}"></span></div>
+<div class="ctl">${field(`${tb.id}-${v.k}`,'val','v_'+v.n,'decimal',v.ph)}<span class="x10">×10</span>${field(`${tb.id}-${v.k}-e`,'exp','a_exp','text','0')}${unitCtl(`${tb.id}-${v.k}-u`,v.dim,v.u)}</div></div>`).join('')}${(tb.params||[]).filter(p=>p.main).map(p=>parRow(tb,p)).join('')}</div>
+</section>`).join('');
+/* options qui ne servent qu'à la préparation : sous le résultat, dans « Préparer au labo » */
+TABS.forEach(tb=>{if(tb.conv){const c=$(tb.id+'-cal');c.hidden=true;c.previousElementSibling.hidden=true}});
+$('mPar').innerHTML=TABS.map((tb,i)=>{const ps=(tb.params||[]).filter(p=>!p.main);return ps.length?`<div class="grp mpar" data-i="${i}" hidden>${ps.map(p=>parRow(tb,p)).join('')}</div>`:''}).join('');
+$('nav').insertAdjacentHTML('beforeend',TABS.map((tb,i)=>`<button class="nb" data-tab="${i}">${IC[tb.ic]}<span></span></button>`).join(''));
+$('rn').innerHTML=TABS.map(tb=>`<span>${IC[tb.ic]}</span>`).join('');
+$$('[data-ic]').forEach(e=>{e.insertAdjacentHTML('afterbegin',IC[e.dataset.ic]);e.removeAttribute('data-ic')});
+const nbs=$$('.nb');
+
+/* ---------- 8. Grandeur à calculer : choisie dans « Calculer », masquée des valeurs connues ----------
+   son unité passe dans le résultat ; l'ancienne inconnue redevient une ligne saisissable, avec sa valeur calculée */
+const segSet=(seg,i)=>{seg.style.setProperty('--i',i);seg.querySelectorAll('button').forEach((b,j)=>{b.classList.toggle('on',j===i);b.setAttribute('aria-pressed',j===i)})};
+const home=u=>$(u.id.replace(/^(\w+)-(\w+)-u$/,'$1-r-$2')).lastElementChild;
+function dockUnit(){const tb=cur(),u=$(`${tb.id}-${S.tgt[tb.id]}-u`),ru=$('ru'),o=ru.firstElementChild;
+  if(o===u)return;if(o)home(o).appendChild(o);ru.appendChild(u)}
+function setTarget(tb,k,user){
+  S.tgt[tb.id]=k;segSet($(tb.id+'-cal'),tb.vars.findIndex(v=>v.k===k));
+  tb.vars.forEach(v=>{const r=$(`${tb.id}-r-${v.k}`),hide=v.k===k;
+    if(user&&r.hidden&&!hide&&!RM)r.animate([{opacity:0,transform:'translateY(-6px)'},{opacity:1,transform:'none'}],{duration:350,easing:'cubic-bezier(.22,1,.36,1)'});
+    r.hidden=hide});
+  const fl=$(tb.id+'-fml');fl.innerHTML=tb.f[k];
+  if(user&&!RM){const p=fl.closest('.fl');p.classList.remove('hit');void fl.offsetWidth;p.classList.add('hit')}
+  if(user){buzz();dockUnit();recalc();save()}}
+
+
+/* ---------- 9. Calcul et affichage : le résultat seul, les étapes à la demande ---------- */
+let shown=null,raf=0;
+const fr=v=>S.rdim==='dil'?dlabel(v):fmt(v);
+function fit(){const n=$('num'),a=$('rv').clientWidth-32;n.style.fontSize='';const w=n.scrollWidth;
+  if(w>a)n.style.fontSize=Math.max(16,parseFloat(getComputedStyle(n).fontSize)*a/w*.98)+'px'}
+/* la valeur glisse vers la nouvelle (interpolation logarithmique) */
+function setNum(v){cancelAnimationFrame(raf);const n=$('num');
+  if(v==null||RM||S.rdim==='stp'||!(shown>0&&v>0)||shown===v||Math.abs(Math.log10(v/shown))>40){shown=v;n.textContent=v==null?'-':fr(v);return fit()}
+  const a=Math.log(shown),b=Math.log(v),t0=performance.now();
+  (function f(now){const p=Math.min(1,(now-t0)/380);shown=p<1?Math.exp(a+(b-a)*(1-(1-p)**3)):v;n.textContent=p<1?fmt(shown):fr(v);fit();if(p<1)raf=requestAnimationFrame(f)})(t0)}
+const setBtn=(b,icon,key,ok)=>{b.classList.toggle('ok',!!ok);b.innerHTML=`${IC[icon]}<span>${t(key)}</span>`};
+const resetBtns=()=>{setBtn($('bCopy'),'copy','btn_copy');setBtn($('bSave'),'save','btn_save');moreBtn()};
+function moreBtn(){const b=$('bMore');b.classList.toggle('on',S.more);b.setAttribute('aria-expanded',S.more);b.querySelector('.ctt b').textContent=t(S.more?'cta_t2':'cta_t')}
+let mCache={};
+function renderMore(){const c=S.ctx,box=$('more'),on=!!c&&S.ok&&S.more;box.hidden=!on;if(!on){mCache={};return}
+  const m=cur().more(c),set=(id,h)=>{if(mCache[id]!==h){$(id).innerHTML=h;mCache[id]=h}};
+  let hasPar=false;$$('.mpar').forEach(g=>{const me=+g.dataset.i===S.tab;g.hidden=!me;if(me)hasPar=true});
+  $('mParW').hidden=!hasPar;box.classList.toggle('np',!hasPar);box.classList.toggle('nn',!(m.notes&&m.notes.length));
+  set('mSteps',`<div class="mst">${m.steps}</div>${m.table||''}`);
+  $('mSchW').hidden=!m.sch;if(m.sch){set('mSch',m.sch);$('mCap').textContent=m.cap||''}
+  set('mHow',(m.how||[]).map(([v,h],n)=>`<div class="hs" style="--k:${n}"><div class="hv">${v}</div><p><b class="hn">${n+1}</b>${h}</p></div>`).join(''));
+  $('mNotesW').hidden=!(m.notes&&m.notes.length);set('mNotes',(m.notes||[]).map(([i,h,cl],n)=>`<div class="tp ${cl}" style="--k:${n}">${IC[i]||IC.info}<div>${h}</div></div>`).join(''))}
+function show(v,o){const ok=v!=null,was=S.ok;S.ok=ok;
+  if(ok&&!was&&!RM&&!S.inTab)resAnim(0,0);S.last=ok?o.rec:null;S.ctx=ok?o.ctx:null;
+  setNum(v);
+  const tp=$('tip');tp.classList.toggle('err',!!o.err);tp.classList.toggle('warn',!!o.warn);tp.innerHTML=o.tip?`${IC[o.err||o.warn?'warn':'info']}<span>${esc(o.tip)}</span>`:'';
+  $('bCopy').disabled=$('bSave').disabled=$('bMore').disabled=!ok;resetBtns();
+  $('miniN').textContent=ok?fr(v):'';$('miniU').textContent=ok?o.u:'';miniUpd();renderMore()}
+/* options d'un onglet (valeurs par défaut, puis choix mémorisés ; champs numériques en unités de base) */
+function readPar(tb){const P={...(tb.def||{}),...(S.par[tb.id]||{})};
+  (tb.params||[]).filter(p=>p.t==='num').forEach(p=>{const r=readVal(tb.id,p.k);P[p.k]='v' in r&&r.v>0?r.v*fu(p.dim,$(`${tb.id}-${p.k}-u`).value):null});return P}
+function recalc(){S.rsci=isSci(cur().id,S.tgt[cur().id]);
+  const tb=cur(),id=tb.id,k=S.tgt[id],kv=tb.vars.find(v=>v.k===k),un=$(`${id}-${k}-u`).value,x={},parts=[],U={};
+  tb.vars.forEach(v=>U[v.k]=$(`${id}-${v.k}-u`).value);
+  const sk=tb.skip?tb.skip(U):[];tb.vars.forEach(v=>$(`${id}-r-${v.k}`).classList.toggle('off',sk.includes(v.k)&&v.k!==k));
+  $('rt').textContent=t('v_'+kv.n);$('ml').innerHTML=kv.sh+' =';S.rdim=kv.dim;
+  const c={k,U,P:readPar(tb)};
+  let err='',empty=false,res,val;
+  for(const v of tb.vars){if(v.k===k||sk.includes(v.k))continue;
+    const r=readVal(id,v.k);
+    if(r.empty){empty=true;continue}
+    if(r.bad){err='bad';break}
+    if(r.v<0){err='neg';break}
+    const u=U[v.k];x[v.k]=r.v*fu(v.dim,u);
+    if(!Number.isFinite(x[v.k])){err='ovf';break}
+    parts.push(`${v.s} = ${echo(r.v)}${u?' '+u:''}`)}
+  if(!err&&empty){writeVal(id,k,null);return show(null,{tip:t('tip_wait')})}
+  if(!err&&tb.prep)tb.prep(c);
+  if(!err){{res=tb.solve[k](x,c);val=res/fu(kv.dim,un);
+      err=(tb.check&&tb.check({...x,[k]:res},c))||(tb.skip&&k==='M'&&tb.skip(U).length?'fam':'')||(!Number.isFinite(res)?(Object.values(x).includes(0)?'zero':'ovf'):res<0?'neg':!Number.isFinite(val)?'ovf':'')}}
+  if(err){writeVal(id,k,null);return show(null,{tip:t(err)+' : '+t('tip_'+err).replace(/^./,m=>m.toLowerCase()),err:1})}
+  x[k]=res;writeVal(id,k,val,kv.dim==='stp'?2:4);c.x=x;
+  const from=parts.join(' • '),to=`${kv.s} = ${fr(val)}${un?' '+un:''}`,eq=`${from} → ${to}`;
+  const nt=tb.note?tb.note(x,c):'',warn=nt[0]==='!';
+  show(val,{eq,u:un,tip:warn?nt.slice(1):nt,warn,rec:{from,to,eq},ctx:c})}
+
+/* ---------- 10. Onglets : sortie 200 ms, entrée en cascade, zoom ressort du résultat ---------- */
+let anims=[],tabTok=0;
+function resAnim(dir,delay){if(RM)return;const g=document.querySelector('.rg');if(g)play(g,[{opacity:0,transform:'translateY(18px)',clipPath:'inset(0 40% round 44px)'},{opacity:1,transform:'none',clipPath:'inset(0 0% round 22px)'}],{duration:800,delay,easing:'cubic-bezier(.16,1,.3,1)',fill:'backwards'})}
+function play(el,kf,o,done){const a=el.animate(kf,o);anims.push(a);a.onfinish=()=>{anims=anims.filter(x=>x!==a);a.cancel();done&&done()}}
+function setTab(i,dir){
+  const old=S.tab;if(i===old)return;
+  const next=$('view'+i),prev=old>=0?$('view'+old):null,my=++tabTok;
+  dir=dir||(i>old?1:-1);S.tab=i;BC.dataset.tab=i;sto.s('bcv_tab',i);
+  navCtl.select(i);nbs.forEach((b,k)=>b.classList.toggle('on',k===i));
+  $('rn').style.transform=$('rtt').style.transform=`translateY(${-i*100/TABS.length}%)`;
+  if(prev){buzz();scrollTo(0,0)}
+  anims.splice(0).forEach(a=>{a.onfinish=null;a.cancel()});
+  $$('.view').forEach(v=>v!==prev&&v!==next&&v.classList.remove('on'));
+  const enter=()=>{if(my!==tabTok)return;
+    if(prev)prev.classList.remove('on');next.classList.add('on');dockUnit();shown=null;S.inTab=1;recalc();S.inTab=0;
+    if(RM||!prev)return;
+    $$('.gh,.cal,.grp,.fl',next).forEach((e,k)=>play(e,[{opacity:0,transform:`translateX(${dir*38}px) scale(.97)`},{opacity:1,transform:'none'}],{duration:600,delay:k*50,easing:'cubic-bezier(.22,1,.36,1)',fill:'backwards'}));
+    resAnim(dir,90)};
+  if(RM||!prev||!prev.classList.contains('on'))enter();
+  else{const rg=document.querySelector('.rg');if(rg)play(rg,[{opacity:1,transform:'none'},{opacity:0,transform:'translateY(26px) scale(.92)'}],{duration:200,easing:'cubic-bezier(.4,0,1,1)',fill:'forwards'});
+    play(prev,[{opacity:1,transform:'none'},{opacity:0,transform:`translateX(${-dir*44}px) scale(.96)`}],{duration:200,easing:'cubic-bezier(.4,0,1,1)',fill:'forwards'},enter)}}
+/* barre : lentille qui suit le doigt (liquid-glass.js) ; sans le moteur, simple pastille */
+const sl=$('sl'),navCtl=window.LiquidGlass?LiquidGlass.tabs({wrap:$('navWrap'),inner:$('nav'),indicator:sl,items:nbs,onSelect:i=>setTab(i),glass:false})
+  :{select(i){sl.style.translate=nbs[i].offsetLeft+'px 0';sl.style.width=nbs[i].offsetWidth+'px'}};
+if(!window.LiquidGlass){nbs.forEach((b,i)=>b.addEventListener('click',()=>setTab(i)));addEventListener('resize',()=>navCtl.select(S.tab))}
+
+
+/* ---------- 11. Saisie, format décimal / scientifique, options, mémorisation ---------- */
+function save(){const o={_t:S.tgt};$$('.val,.exp,.sel').forEach(e=>{if(e.value&&!e.dataset.par)o[e.id]=e.value});sto.s('bcv_state',JSON.stringify(o));sto.s('bcv_par',JSON.stringify(S.par))}
+function setPar(path,v){const[tid,k]=path.split('.');(S.par[tid]=S.par[tid]||{})[k]=v;save()}
+function syncPar(){TABS.forEach(tb=>(tb.params||[]).forEach(p=>{if(p.t==='num')return;const v={...(tb.def||{}),...(S.par[tb.id]||{})}[p.k],el=$(`${tb.id}-p-${p.k}`);
+  if(p.t==='int')el.textContent=v;else if(p.t==='seg')segSet(el,Math.max(0,Object.keys(p.opts).indexOf(v)));else el.value=v==null?'':v}))}
+BC.addEventListener('input',e=>{const el=e.target;
+  if(el.matches('.pl')){setPar(el.dataset.par,el.value);recalc();return}
+  if(!el.matches('.val,.exp'))return;
+  const re=el.matches('.exp')?/[^0-9+\-−]/g:/[^0-9.,eE+\-−×x^*\/:]/g;if(re.test(el.value))el.value=el.value.replace(re,'');
+  recalc();save()});
+BC.addEventListener('change',e=>{const el=e.target;
+  if(el.matches('select[data-par]')){buzz();setPar(el.dataset.par,el.value);recalc();return}
+  if(el.matches('.sel')){buzz();recalc();save()}});
+BC.addEventListener('keydown',e=>{const el=e.target;if(!el.matches('.val,.exp,.pl'))return;
+  if(e.key==='Enter')el.blur();
+  if(el.matches('.exp')&&(e.key==='ArrowUp'||e.key==='ArrowDown')){e.preventDefault();el.value=(parseInt(el.value,10)||0)+(e.key==='ArrowUp'?1:-1);el.dispatchEvent(new Event('input',{bubbles:true}))}});
+BC.addEventListener('click',e=>{
+  const pi=e.target.closest('[data-pint]');if(pi){const[path,inc]=pi.dataset.pint.split(':'),[tid,k]=path.split('.'),tb=TABS.find(x=>x.id===tid),p=tb.params.find(x=>x.k===k),cur0={...(tb.def||{}),...(S.par[tid]||{})}[k];
+    const v=Math.min(p.max||99,Math.max(p.min||1,(+cur0||1)+Number(inc)));buzz(8);setPar(path,v);$(`${tid}-p-${k}`).textContent=v;recalc();return}
+  const pv=e.target.closest('.pseg button');if(pv){const sg=pv.parentNode;buzz();setPar(sg.dataset.par,pv.dataset.pv);segSet(sg,[...sg.querySelectorAll('button')].indexOf(pv));recalc();return}
+  const b=e.target.closest('.cal button');if(!b)return;
+  const tb=cur();if(S.tgt[tb.id]!==b.dataset.k)setTarget(tb,b.dataset.k,true)});
+/* changement de format : toutes les valeurs sont réécrites à pleine précision */
+const NUMS=TABS.flatMap(tb=>[...tb.vars.map(v=>[tb.id,v.k]),...(tb.params||[]).filter(p=>p.t==='num').map(p=>[tb.id,p.k])]);
+function setFmt(f,init){applyFx();return;if(S.fmt===f&&!init)return;
+  const vals=init?null:NUMS.map(([a,b])=>readVal(a,b));
+  if(!init)buzz();
+  S.fmt=f;BC.dataset.fmt=f;sto.s('bcv_fmt',f);segSet($('fmtSeg'),f==='sci'?1:0);
+  if(vals)NUMS.forEach(([a,b],i)=>{if('v' in vals[i])writeVal(a,b,vals[i].v,12)});
+  if(!init){recalc();save()}}
+$('bMore').addEventListener('click',()=>{if(!S.ok)return;buzz(8);S.more=!S.more;sto.s('bcv_more',S.more?'1':'0');moreBtn();renderMore();
+  if(S.more&&!RM)setTimeout(()=>$('more').scrollIntoView({behavior:'smooth',block:'nearest'}),60)});
+
+/* ---------- 12. Unité composée : unités nommées en haut, puis deux molettes numérateur | dénominateur ---------- */
+const upop=$('upop'),ROW=40;let ucap=null;
+const setUnit=(b,u)=>{b.value=u;b.textContent=u};
+function pickUnit(u){if(u===ucap.value)return;setUnit(ucap,u);ucap.dispatchEvent(new Event('change',{bubbles:true}))}
+/* position des molettes : une unité nommée prend la combinaison équivalente (M → mol/L) */
+function upPair(b){const dim=b.dataset.dim,d=D[dim],u=b.value,k=u.indexOf('/'),N=Object.keys(d.r[0]),Q=Object.keys(d.r[1]);
+  if(!(u in d.u)&&k>0)return[u.slice(0,k),u.slice(k+1)];
+  const f=fu(dim,u);for(const q of Q)for(const n of N)if(Math.abs(fu(dim,n+'/'+q)/f-1)<1e-9)return[n,q];return[N[0],Q[0]]}
+const centerIdx=w=>Math.max(0,Math.min(w.children.length-1,Math.round(w.scrollTop/ROW)));
+const toItem=(w,it,how)=>w.scrollTo({top:it.offsetTop-w.clientHeight/2+ROW/2,behavior:how});
+function wheelPick(){if(!ucap)return;const[n,q]=[...upop.querySelectorAll('.up-wh')].map(w=>w.children[centerIdx(w)].dataset.k),[n0,q0]=upPair(ucap);
+  if(n===n0&&q===q0)return;pickUnit(n+'/'+q);upop.querySelectorAll('.up-n .on').forEach(x=>x.classList.remove('on'))}
+/* position : dans la zone réellement visible (au-dessus du clavier s'il est encore ouvert) */
+function upPlace(){
+  if(!ucap)return;
+  const M=8,top=VV?VV.offsetTop:0,bottom=top+(VV?VV.height:innerHeight),
+        r=ucap.getBoundingClientRect(),w=upop.offsetWidth,h=upop.offsetHeight;
+  upop.style.left=Math.max(M,Math.min(innerWidth-w-M,r.right-w))+'px';
+  const fitsBelow=r.bottom+M+h<=bottom-M,fitsAbove=r.top-M-h>=top+M;
+  const y=fitsBelow?r.bottom+M:fitsAbove?r.top-M-h:bottom-M-h;
+  upop.style.top=Math.max(top+M,y)+'px';
+}
+/* libellé de l'unité « vide » (nombre sans unité) selon l'écriture choisie */
+function ulab(b){
+  if(b.classList.contains('u0'))b.textContent=(FX[b.id.replace(/-u$/,'')]||FXD)==='sci'?'×10ⁿ':'1,5';
+}
+function setFx(b,f){
+  const vid=b.id.replace(/-u$/,''),i=vid.lastIndexOf('-'),tab=vid.slice(0,i),k=vid.slice(i+1);
+  if((FX[vid]||FXD)===f)return;
+  buzz();
+  const r=readVal(tab,k);
+  FX[vid]=f;sto.s(FXK,JSON.stringify(FX));applyFx();
+  if('v' in r)writeVal(tab,k,r.v,12);
+  const sg=upop.querySelector('.fseg');if(sg)segSet(sg,f==='sci'?1:0);
+  recalc();save();
+}
+const SPRING='cubic-bezier(.34,1.45,.64,1)';
+const wheelHTML=(opts,sel)=>`<div class="up-wh">${Object.keys(opts).map(k=>`<div class="up-it${k===sel?' on':''}" data-k="${k}">${k}</div>`).join('')}</div>`;
+
+function upOpen(b){
+  ucap=b;
+  const act=document.activeElement;
+  if(act&&act.matches&&act.matches('input,textarea'))act.blur();   // ferme le clavier : la fenêtre a toute la place
+  const d=D[b.dataset.dim],named=Object.keys(d.u).filter(Boolean),comp=!!d.r,
+        sci=(FX[b.id.replace(/-u$/,'')]||FXD)==='sci';
+  /* écriture 1,5 / 1,5 × 10ⁿ */
+  let h=`<div class="upf"><span>Écriture</span><div class="seg fseg" style="--n:2;--i:${sci?1:0}"><i class="th"></i><button type="button" data-fx="std"${sci?'':' class="on"'}>1,5</button><button type="button" data-fx="sci"${sci?' class="on"':''}>1,5 × 10ⁿ</button></div></div>`;
+  /* unités nommées */
+  if(named.length>1||comp&&named.length){
+    h+=`<div class="up-n">${named.map(k=>`<button type="button" data-u="${k}"${k===b.value?' class="on"':''}>${k}</button>`).join('')}</div>`;
+  }
+  /* unité composée : deux molettes numérateur | dénominateur */
+  if(comp){
+    const[n,q]=upPair(b);
+    h+=`<div class="up-h"><span>${t(d.lab[0])}</span><span>${t(d.lab[1])}</span></div><div class="up-c"><i class="up-lens"></i>${wheelHTML(d.r[0],n)}${wheelHTML(d.r[1],q)}</div>`;
+  }
+  if(!h)return;
+  upop.innerHTML=h;upop.hidden=false;
+  upop.querySelectorAll('.up-wh').forEach(wheel=>{
+    toItem(wheel,wheel.querySelector('.on'),'instant');
+    let last=centerIdx(wheel),timer=0;
+    wheel.addEventListener('scroll',()=>{
+      const i=centerIdx(wheel);
+      if(i!==last){last=i;buzz(8);[...wheel.children].forEach((c,j)=>c.classList.toggle('on',j===i))}
+      clearTimeout(timer);timer=setTimeout(wheelPick,110);
+    },{passive:true});
+  });
+  upPlace();
+  if(!RM)upAnimateIn(b);
+}
+/* apparition : ressort qui part de l'unité touchée */
+function upAnimateIn(b){
+  upop.getAnimations().forEach(a=>a.cancel());
+  const r=b.getBoundingClientRect(),L=parseFloat(upop.style.left)||0,T=parseFloat(upop.style.top)||0,below=T>=r.top,
+        ox=Math.max(0,Math.min(upop.offsetWidth,r.left+r.width/2-L));
+  upop.style.transformOrigin=`${ox}px ${below?'0':'100%'}`;
+  upop.animate([{opacity:0,transform:`scale(.82) translateY(${below?-10:10}px)`},{opacity:1,transform:'none'}],{duration:460,easing:SPRING});
+  upop.querySelectorAll('.up-n button').forEach((x,k)=>x.animate(
+    [{opacity:0,transform:'scale(.6)'},{opacity:1,transform:'none'}],{duration:420,delay:70+k*22,easing:SPRING,fill:'backwards'}));
+}
+function upClose(){
+  if(upop.hidden)return;
+  ucap=null;
+  if(RM){upop.hidden=true;return}
+  const a=upop.animate([{opacity:1,transform:'none'},{opacity:0,transform:'scale(.9)'}],{duration:170,easing:'cubic-bezier(.4,0,1,1)',fill:'forwards'});
+  a.onfinish=()=>{if(!ucap)upop.hidden=true;a.cancel()};
+}
+
+document.addEventListener('click',e=>{
+  const el=e.target;
+  if(el.closest('[data-hap]'))return;
+  const cap=el.closest('.ucap');
+  if(cap){ucap===cap?upClose():upOpen(cap);return}
+  const fx=el.closest('#upop [data-fx]');
+  if(fx){if(ucap)setFx(ucap,fx.dataset.fx);return}
+  const unit=el.closest('#upop [data-u]');
+  if(unit){pickUnit(unit.dataset.u);upClose();return}
+  const item=el.closest('.up-it');
+  if(item){toItem(item.parentElement,item,'smooth');return}
+  if(!el.closest('#upop'))upClose();
+});
+/* rotation → fermer ; clavier qui monte/descend ou défilement → seulement replacer */
+let lastW=innerWidth;
+addEventListener('resize',()=>{
+  if(innerWidth!==lastW){lastW=innerWidth;upClose()}else upPlace();
+  fit();
+});
+if(VV)['resize','scroll'].forEach(ev=>VV.addEventListener(ev,upPlace));
+addEventListener('scroll',upPlace,{passive:true});
+addEventListener('keydown',e=>{if(e.key==='Escape'){upClose();hist(false)}});
+
+
+/* ---------- 13. Résultat flottant et clavier (mobile) ----------
+   La capsule #mini affiche le résultat quand la carte résultat n'est pas visible.
+   Clavier ouvert : elle se pose juste au-dessus du clavier et le champ en cours de saisie reste visible au-dessus d'elle. */
+const KB_MIN=120;                       // écart de hauteur (px) à partir duquel le clavier est considéré ouvert
+const MINI_GAP=10;                      // espace capsule ↔ clavier
+const FIELD_GAP=12;                     // espace champ ↔ capsule
+const FIELD_SEL='input,textarea,[contenteditable]';
+const mini=$('mini');
+let resInView=true;                     // la carte résultat est-elle à l'écran ? (IntersectionObserver)
+let kbOpen=false;
+let baseH=innerHeight;                  // hauteur de la fenêtre sans clavier
+
+const miniH=()=>mini.offsetHeight||46;
+const kbTop=()=>VV.offsetTop+VV.height; // bord haut du clavier = bas de la zone réellement visible
+
+/* la capsule s'affiche si le résultat n'est pas (entièrement) visible ; avec le clavier on teste la zone visible */
+function miniUpd(){
+  let seen=resInView;
+  if(kbOpen&&VV){
+    const r=$('rv').getBoundingClientRect(),limit=kbTop()-miniH()-16;
+    seen=r.top>=VV.offsetTop-4&&r.bottom<=limit+4;
+  }
+  mini.classList.toggle('on',S.ok&&!seen);
+}
+
+/* le champ en cours de saisie reste entièrement au-dessus de la capsule (ou du clavier si la capsule est masquée) */
+function keepFieldVisible(){
+  if(!kbOpen)return;
+  const f=document.activeElement;
+  if(!f||!f.matches(FIELD_SEL))return;
+  const box=f.closest('.fl')||f,
+        limit=(mini.classList.contains('on')?kbTop()-miniH()-MINI_GAP:kbTop())-FIELD_GAP,
+        overflow=box.getBoundingClientRect().bottom-limit;
+  if(overflow>2)scrollBy(0,overflow);
+}
+
+function onKeyboard(){
+  const f=document.activeElement,focused=!!f&&f.matches(FIELD_SEL);
+  if(!focused)baseH=Math.max(innerHeight,VV.height+VV.offsetTop);
+  kbOpen=focused&&(baseH-VV.height>KB_MIN||baseH-innerHeight>KB_MIN);   // 2e test : navigateurs qui redimensionnent la page
+  root.classList.toggle('kb',kbOpen);
+  mini.style.top=kbOpen?Math.max(0,Math.round(kbTop()-miniH()-MINI_GAP))+'px':'';
+  mini.style.bottom=kbOpen?'auto':'';
+  miniUpd();keepFieldVisible();
+}
+
+if('IntersectionObserver' in window){
+  new IntersectionObserver(es=>{resInView=es[0].isIntersecting;miniUpd()},{threshold:.3}).observe($('rv'));
+}
+if(VV){
+  VV.addEventListener('resize',onKeyboard);
+  VV.addEventListener('scroll',onKeyboard);
+  addEventListener('scroll',()=>{if(kbOpen)onKeyboard()},{passive:true});
+  addEventListener('input',()=>{if(kbOpen)requestAnimationFrame(onKeyboard)});
+  addEventListener('focusin',()=>[100,350,700].forEach(ms=>setTimeout(onKeyboard,ms)));   // le clavier met un moment à monter
+  addEventListener('focusout',()=>setTimeout(onKeyboard,120));
+}
+mini.addEventListener('click',()=>$('resBox').scrollIntoView({behavior:RM?'auto':'smooth',block:'center'}));
+
+/* ---------- 14. Thème, menu ---------- */
+const period=()=>{const h=new Date().getHours();return h>=7&&h<20?'day':'night'};
+function applyTheme(){root.dataset.theme=S.dark?'dark':'light';document.body.classList.toggle('theme-light',!S.dark);document.body.classList.toggle('theme-dark',S.dark);$('themeBtn').innerHTML=IC[S.dark?'sun':'moon'];$('metaTheme').content=S.dark?'#000000':'#f2f2f7'}
+$('themeBtn').addEventListener('click',()=>{buzz();S.dark=!S.dark;sto.s('bioConvertTheme',S.dark?'dark':'light');sto.s('bioConvertThemePeriod',period());applyTheme()});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{if(sto.g('bioConvertTheme')&&sto.g('bioConvertThemePeriod')===period())return;S.dark=e.matches;applyTheme()});
+function texts(){
+  $$('[data-key]').forEach(e=>e.textContent=t(e.dataset.key));
+  $$('[data-tk]').forEach(e=>{e.title=t(e.dataset.tk);e.setAttribute('aria-label',e.title)});
+  $$('[data-al]').forEach(e=>e.setAttribute('aria-label',t(e.dataset.al)));
+  $$('[data-ph]').forEach(e=>e.placeholder=dec(e.dataset.ph));
+  nbs.forEach((b,i)=>b.lastElementChild.textContent=t('nav')[i]);
+  $('rtt').innerHTML=t('tabs').map(x=>`<span>${x}</span>`).join('');
+  renderHist()}
+/* menu flottant (menu-flottant.js, chargé en fin de page) */
+$('mb').addEventListener('click',()=>{buzz();let n=0;const go=()=>typeof window.openCapsuleMenu==='function'?window.openCapsuleMenu():++n<40&&setTimeout(go,100);go()});
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+/* reflet du verre qui suit le pointeur */
+$$('.tools,.mb,.nav-in').forEach(b=>{
+  const aim=e=>{const r=b.getBoundingClientRect();b.style.setProperty('--mx',e.clientX-r.left+'px');b.style.setProperty('--my',e.clientY-r.top+'px')};
+  b.addEventListener('pointerenter',e=>{aim(e);b.classList.add('lit')});
+  b.addEventListener('pointerdown',e=>{aim(e);b.classList.add('lit')});
+  b.addEventListener('pointermove',aim);
+  b.addEventListener('pointerleave',()=>b.classList.remove('lit'));
+  ['pointerup','pointercancel'].forEach(n=>b.addEventListener(n,e=>e.pointerType!=='mouse'&&b.classList.remove('lit')))});
+
+/* ---------- 15. Copier, enregistrer, historique ---------- */
+const bump=b=>{b.classList.remove('bump');void b.offsetWidth;b.classList.add('bump')};
+$('bCopy').addEventListener('click',async()=>{if(!S.ok)return;const b=$('bCopy'),txt=pl(S.last.eq);bump(b);
+  try{await navigator.clipboard.writeText(txt)}
+  catch(e){const a=document.createElement('textarea');a.value=txt;a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(_){}a.remove()}
+  buzz(OK);setBtn(b,'check','btn_copied',true);setTimeout(()=>setBtn(b,'copy','btn_copy'),1500)});
+const saveHist=()=>sto.s('bioConvertHistory',JSON.stringify(S.hist));
+$('bSave').addEventListener('click',()=>{if(!S.ok)return;const{from,to}=S.last,b=$('bSave'),h=S.hist[0];bump(b);buzz(OK);
+  if(!(h&&h.from===from&&h.to===to&&h.tab===S.tab)){S.hist.unshift({tab:S.tab,from,to});S.hist.length=Math.min(S.hist.length,30);saveHist();renderHist();$('badge').classList.add('on')}
+  setBtn(b,'check','btn_saved',true)});
+/* texte simple : x<sub>1</sub> → x₁ (historique, copie) */
+const pl=v=>String(v).replace(/<sub>([^<]*)<\/sub>/g,(_,d)=>d.replace(/[0-9]/g,c=>'₀₁₂₃₄₅₆₇₈₉'[c])).replace(/<[^>]+>/g,'');
+function renderHist(){$('hl').innerHTML=S.hist.length?S.hist.map((h,i)=>`<div class="hi" style="animation-delay:${Math.min(i,8)*40}ms"><div><div class="ht">${esc(t('tabs')[h.tab]||'')}</div><div class="hd">${esc(pl(h.from))} → <b>${esc(pl(h.to))}</b></div></div><button class="hdel" data-i="${i}" aria-label="${t('t_del')}">${IC.close}</button></div>`).join('')
+  :`<div class="hempty">${t('hist_empty')}</div>`}
+function hist(on){if(on!==$('ov').classList.contains('on'))buzz(8);$('ov').classList.toggle('on',on);if(on)$('badge').classList.remove('on')}
+$('hl').addEventListener('click',e=>{const b=e.target.closest('.hdel');if(b){buzz();S.hist.splice(+b.dataset.i,1);saveHist();renderHist()}});
+$('histBtn').addEventListener('click',()=>hist(true));
+$('hClose').addEventListener('click',()=>hist(false));
+$('ov').addEventListener('click',e=>{if(e.target===$('ov'))hist(false)});
+$('hClr').addEventListener('click',()=>{buzz(OK);S.hist=[];sto.d('bioConvertHistory');renderHist()});
+
+/* ---------- Tests : BioConvert/?tests ---------- */
+window.BioConvertTests=()=>{const R=[],near=(a,b)=>Math.abs(a-b)<=1e-9*Math.max(1,Math.abs(b)),T_=(n,ok,got='')=>R.push({n,ok:!!ok,got});
+  const tb=id=>TABS.find(x=>x.id===id),cs=tb('conc').solve,q=tb('qty').solve,mol={U:{a:'M',b:'g/L'}},same={U:{a:'mM',b:'µM'}};
+  T_('2 kg = 2 000 000 mg',near(2*fu('mass','kg')/fu('mass','mg'),2e6));
+  T_('250 µL = 0,25 mL',near(250*fu('vol','µL')/fu('vol','mL'),.25));
+  let v=cs.b({a:.5,M:58.44},mol);T_('NaCl 0,5 M → 29,22 g/L',near(v,29.22),String(v));
+  v=cs.b({a:20*fu('conc','mg/mL'),M:180.16},{U:{a:'mg/mL',b:'mM'}})/fu('conc','mM');T_('Glucose 20 mg/mL → 111 mM',Math.abs(v-111.012)<.01,String(v));
+  v=cs.b({a:1e-3},same)/fu('conc','µM');T_('1 mM = 1 000 µM',near(v,1000),String(v));
+  T_('5 % (m/V) = 50 g/L ; 1 ppm = 1 mg/L',near(5*fu('conc','% (m/V)'),50)&&near(fu('conc','ppm'),fu('conc','mg/L')));
+  v=q.m({n:1e-3,M:58.44});T_('1 mmol de NaCl → 58,44 mg',near(v,.05844),String(v));
+  const ok=R.every(r=>r.ok);console[ok?'log':'warn'](`BioConvert : ${R.filter(r=>r.ok).length}/${R.length}`);return R};
+window.BioDiluTests=window.BioConvertTests;
+
+const HINT={
+ mass:['Écrivez la valeur à convertir.','Touchez la capsule grise pour choisir son unité.','Le résultat s’affiche en dessous : touchez son unité pour changer la conversion.'],
+ vol:['Écrivez le volume à convertir.','Touchez la capsule grise pour choisir son unité.','Le résultat s’affiche en dessous : touchez son unité pour choisir l’unité voulue.'],
+ conc:['Écrivez la concentration de départ et choisissez son unité.','Si vous passez de g/L à mol/L (ou l’inverse), renseignez la masse molaire M.','Le résultat s’affiche en dessous : touchez son unité pour choisir la cible.'],
+ qty:['Choisissez en haut ce que vous cherchez : n, M ou m.','Remplissez les deux autres champs.','Le résultat s’affiche en dessous, avec sa formule.']};
+const EX={mass:{a:'2'},vol:{a:'1,5'},conc:{a:'50',M:'58,44'},qty:{n:'1',M:'58,44'}};
+/* bloc replié : titre + flèche, contenu qui se déploie en dessous */
+const foldHead=(txt,cls)=>`<button type="button" class="fh" aria-expanded="false"><span>${txt}</span>${IC.chev}</button>`;
+TABS.forEach((tb,i)=>{const v=$('view'+i),fl=$(tb.id+'-fml').parentNode;
+ /* formule : le contenu existant est déplacé dans la zone repliée */
+ const sp=$(tb.id+'-fml');fl.querySelector('small').remove();fl.classList.add('fold');
+ fl.innerHTML=foldHead('Afficher la formule')+'<div class="fx"><div></div></div>';fl.querySelector('.fx>div').appendChild(sp);fl.dataset.t='la formule';
+ /* aide : placée en haut de l'onglet */
+ const how=document.createElement('div');how.className='fold how-w';how.dataset.t='comment ça marche';
+ how.innerHTML=foldHead('Comment ça marche ?')+`<div class="fx"><div><div class="hb how"><ol>${HINT[tb.id].map(x=>`<li>${x}</li>`).join('')}</ol><button type="button" class="ex" data-ex="${tb.id}">Essayer un exemple</button></div></div></div>`;
+ v.insertBefore(how,v.firstChild)});
+BC.addEventListener('click',e=>{
+ const fh=e.target.closest('.fh');
+ if(fh){const f=fh.parentNode,on=!f.classList.contains('open');buzz(8);f.classList.toggle('open',on);fh.setAttribute('aria-expanded',on);
+  const w=f.dataset.t,tx=fh.firstElementChild;tx.textContent=w==='la formule'?(on?'Masquer la formule':'Afficher la formule'):(on?'Masquer l’aide':'Comment ça marche ?')}
+ const ex=e.target.closest('[data-ex]');
+ if(ex){const id=ex.dataset.ex;buzz();Object.entries(EX[id]).forEach(([k,v])=>{const el=$(`${id}-${k}`);el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}))})}});
+/* reflet du verre qui suit le doigt / la souris, aussi sur les cartes */
+$$('.cal').forEach(c=>c.classList.add('glass'));
+$$('.grp,.rg,.fold,.cal').forEach(b=>{
+  const aim=e=>{const r=b.getBoundingClientRect();b.style.setProperty('--mx',e.clientX-r.left+'px');b.style.setProperty('--my',e.clientY-r.top+'px')};
+  b.addEventListener('pointerenter',e=>{aim(e);b.classList.add('lit')});
+  b.addEventListener('pointerdown',e=>{aim(e);b.classList.add('lit')});
+  b.addEventListener('pointermove',aim);
+  b.addEventListener('pointerleave',()=>b.classList.remove('lit'));
+  ['pointerup','pointercancel'].forEach(n=>b.addEventListener(n,e=>e.pointerType!=='mouse'&&b.classList.remove('lit')))});
+/* ---------- 16. Démarrage ---------- */
+applyTheme();
+try{S.hist=JSON.parse(sto.g('bioConvertHistory'))||[]}catch(e){S.hist=[]}
+try{S.par=JSON.parse(sto.g('bcv_par'))||{}}catch(e){S.par={}}
+setFmt(sto.g('bcv_fmt')==='sci'?'sci':'std',true);
+let st={};try{st=JSON.parse(sto.g('bcv_state'))||{}}catch(e){}
+Object.entries(st).forEach(([id,v])=>{const e=id[0]!=='_'&&typeof v==='string'&&$(id);if(!e||!BC.contains(e))return;
+  if(e.tagName==='SELECT'){if([...e.options].some(o=>o.value===v))e.value=v}
+  else if(e.classList.contains('ucap')){if(fu(e.dataset.dim,v)>0)setUnit(e,v)}
+  else e.value=v});
+texts();syncPar();
+TABS.forEach(tb=>{const k=st._t&&st._t[tb.id];setTarget(tb,tb.vars.some(v=>v.k===k)?k:tb.tgt)});
+const t0=parseInt(sto.g('bcv_tab'),10);setTab(t0>=0&&t0<TABS.length?t0:0,1);
+if(/[?&#]tests\b/.test(location.search+location.hash)){const R=BioConvertTests(),box=document.createElement('div');box.className='tests';
+  box.innerHTML=`<b>Tests BioConvert : ${R.filter(x=>x.ok).length}/${R.length}</b><br><br>`+R.map(x=>`<div class="${x.ok?'ok':'ko'}">${x.ok?'✓':'✗'} ${esc(x.n)}${x.got?` → ${esc(x.got)}`:''}</div>`).join('')+'<br><button type="button" class="clr" style="width:100%" onclick="this.parentNode.remove()">Fermer</button>';BC.appendChild(box)}
+/* pied de page : placé dans la page, sous le contenu */
+applyFx();
+document.addEventListener('DOMContentLoaded',()=>{const f=document.querySelector('.modern-transparent-footer');if(f)$('shell').appendChild(f)});
+})();
+</script>
+<script src="/menu-flottant.js"></script>
+</body>
+</html>

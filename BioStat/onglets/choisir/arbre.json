@@ -1,0 +1,967 @@
+{
+ "version": 2,
+ "racine": "objectif",
+ "noeuds": {
+  "objectif": {
+   "etape": "Objectif",
+   "question": "Que veux-tu faire ?",
+   "aide": "Repère combien de séries de mesures tu as et si elles portent sur les mêmes individus : c'est ce qui décide du test.",
+   "choix": [
+    {
+     "texte": "Comparer une série à une valeur théorique",
+     "detail": "Une moyenne, une médiane ou une proportion comparée à une norme, un seuil.",
+     "vers": "un_type",
+     "pourquoi": "Une seule série d'observations : on teste si ses paramètres diffèrent d'une valeur théorique (test de conformité)."
+    },
+    {
+     "texte": "Comparer des groupes ou des mesures répétées",
+     "detail": "Traitement contre placebo, avant contre après, plusieurs souches…",
+     "vers": "cmp_type",
+     "pourquoi": "Plusieurs séries : on teste si leurs paramètres diffèrent entre elles."
+    },
+    {
+     "texte": "Étudier le lien entre deux variables",
+     "detail": "Taille et poids, tabac et cancer…",
+     "vers": "lien_type",
+     "pourquoi": "Deux variables mesurées sur les mêmes individus : on cherche une liaison, pas une différence."
+    },
+    {
+     "texte": "Prédire un résultat binaire",
+     "detail": "Malade ou non, à partir de plusieurs facteurs.",
+     "feuille": {
+      "tests": [
+       "glm-logit"
+      ],
+      "conseil": 0
+     },
+     "pourquoi": "Variable réponse binaire et plusieurs facteurs : régression logistique, qui donne des odds ratios ajustés."
+    },
+    {
+     "texte": "Analyser une durée de survie",
+     "detail": "Temps jusqu'à un événement, avec des sujets perdus de vue.",
+     "vers": "survie",
+     "pourquoi": "Durées avec des données censurées : il faut des méthodes de survie."
+    },
+    {
+     "texte": "Vérifier les conditions d'un test",
+     "detail": "Normalité, égalité des variances.",
+     "vers": "cond",
+     "pourquoi": "Les tests paramétriques supposent la normalité et souvent l'égalité des variances : on les vérifie d'abord."
+    }
+   ]
+  },
+  "un_type": {
+   "etape": "Variable",
+   "question": "Que mesures-tu ?",
+   "choix": [
+    {
+     "texte": "Une variable quantitative",
+     "detail": "pH, taux de croissance, concentration, dénombrement…",
+     "vers": "un_norm",
+     "pourquoi": "Variable quantitative : on compare une moyenne ou une médiane à la valeur théorique."
+    },
+    {
+     "texte": "Une variable qualitative à 2 classes",
+     "detail": "Oui / non, pollué / dépollué : une proportion.",
+     "vers": "un_prop",
+     "pourquoi": "Deux classes : on compare une proportion observée à une proportion théorique."
+    },
+    {
+     "texte": "Une variable qualitative à plusieurs classes",
+     "detail": "Des effectifs par classe à comparer à une répartition attendue.",
+     "feuille": {
+      "tests": [
+       "chisq-gof"
+      ],
+      "conseil": 0
+     },
+     "pourquoi": "Plusieurs classes : le χ² d'ajustement compare les effectifs observés aux effectifs théoriques."
+    }
+   ]
+  },
+  "un_norm": {
+   "etape": "Conditions",
+   "question": "La variable est-elle continue et à peu près normale ?",
+   "aide": "Vérifie avec shapiro.test() et un Q-Q plot. Variable discrète (comptage, classe, score) : réponds Non : on prend directement le test de Wilcoxon.",
+   "choix": [
+    {
+     "texte": "Oui : continue et à peu près normale",
+     "feuille": {
+      "tests": [
+       "t-test-1",
+       "wilcox-1"
+      ],
+      "conseil": 0
+     },
+     "pourquoi": "Variable continue et normale : test de Student de conformité à une moyenne."
+    },
+    {
+     "texte": "Non : pas normale, ou variable discrète",
+     "feuille": {
+      "tests": [
+       "t-test-1",
+       "wilcox-1"
+      ],
+      "conseil": 1
+     },
+     "pourquoi": "Normalité non respectée ou variable discrète : test de Wilcoxon de conformité à une médiane, qui travaille sur les rangs."
+    },
+    {
+     "texte": "Je ne sais pas encore",
+     "feuille": {
+      "tests": [
+       "t-test-1",
+       "wilcox-1"
+      ],
+      "conseil": null,
+      "note": "Vérifie d'abord la normalité avec le code de la rubrique Conditions."
+     },
+     "pourquoi": "Le choix dépend de la normalité : commence par shapiro.test()."
+    }
+   ]
+  },
+  "un_prop": {
+   "etape": "Conditions",
+   "question": "As-tu au moins 5 succès et 5 échecs attendus ?",
+   "aide": "Règle usuelle du test Z : au moins 5 succès et 5 échecs (n·p₀ ≥ 5 et n·(1 − p₀) ≥ 5).",
+   "choix": [
+    {
+     "texte": "Oui",
+     "feuille": {
+      "tests": [
+       "prop-test-1",
+       "binom-test"
+      ],
+      "conseil": 0
+     },
+     "pourquoi": "Effectifs suffisants : test Z d'une proportion (prop.test dans R)."
+    },
+    {
+     "texte": "Non, petit effectif",
+     "feuille": {
+      "tests": [
+       "prop-test-1",
+       "binom-test"
+      ],
+      "conseil": 1
+     },
+     "pourquoi": "Trop peu de succès ou d'échecs : l'approximation du test Z n'est pas fiable, on prend le test binomial exact."
+    }
+   ]
+  },
+  "cmp_type": {
+   "etape": "Variable",
+   "question": "Quel est le type de la variable que tu compares ?",
+   "choix": [
+    {
+     "texte": "Quantitative",
+     "detail": "Une mesure ou un comptage : surface racinaire, nombre de plages de lyse…",
+     "vers": "cmp_k",
+     "pourquoi": "Variable quantitative : on compare des moyennes, des médianes ou des rangs."
+    },
+    {
+     "texte": "Qualitative",
+     "detail": "Des catégories : productif / non productif, secteur d'emploi…",
+     "vers": "quali_plan",
+     "pourquoi": "Variable qualitative : on compare des fréquences (tableau de contingence)."
+    }
+   ]
+  },
+  "cmp_k": {
+   "etape": "Séries",
+   "question": "Combien de séries compares-tu ?",
+   "choix": [
+    {
+     "texte": "2",
+     "vers": "k2_plan",
+     "pourquoi": "Deux séries : tests à deux échantillons."
+    },
+    {
+     "texte": "3 ou plus",
+     "vers": "k3_plan",
+     "pourquoi": "Trois séries ou plus : un test global (ANOVA, Kruskal-Wallis), puis des comparaisons par paires. Multiplier les tests à deux échantillons augmenterait le risque de se tromper."
+    },
+    {
+     "texte": "Plusieurs facteurs croisés",
+     "detail": "Deux ou trois facteurs à la fois : traitement × dose, azote × phosphate × potassium…",
+     "vers": "fact_n",
+     "pourquoi": "Chaque individu a un niveau de chaque facteur : une ANOVA à plusieurs facteurs teste chaque effet et leurs interactions."
+    }
+   ]
+  },
+  "k2_plan": {
+   "etape": "Plan",
+   "question": "Les 2 séries sont-elles indépendantes ou dépendantes (appariées) ?",
+   "aide": "Dépendantes : les mêmes individus mesurés 2 fois (avant / après), ou une correspondance entre chaque observation de la première série et de la seconde.",
+   "choix": [
+    {
+     "texte": "Indépendantes",
+     "detail": "Des individus différents dans chaque série.",
+     "vers": "k2i_norm",
+     "pourquoi": "Séries indépendantes : on compare deux groupes distincts."
+    },
+    {
+     "texte": "Dépendantes (appariées)",
+     "detail": "Avant / après sur les mêmes individus.",
+     "vers": "k2a_norm",
+     "pourquoi": "Séries appariées : le test travaille sur les différences individu par individu, ce qui retire la variabilité entre individus."
+    }
+   ]
+  },
+  "k2i_norm": {
+   "etape": "Conditions",
+   "question": "La variable est-elle continue et à peu près normale dans chaque série ?",
+   "aide": "Vérifie avec shapiro.test() dans chaque groupe. Variable discrète : réponds Non : on prend directement Mann-Whitney Wilcoxon.",
+   "choix": [
+    {
+     "texte": "Oui : continue et normale",
+     "vers": "k2i_var",
+     "pourquoi": "Normalité respectée : un test de Student est possible ; reste à vérifier l'égalité des variances."
+    },
+    {
+     "texte": "Non : pas normale, ou variable discrète",
+     "feuille": {
+      "tests": [
+       "t-test-welch",
+       "wilcox-mw"
+      ],
+      "conseil": 1
+     },
+     "pourquoi": "Normalité non respectée ou variable discrète : test de Mann-Whitney Wilcoxon, qui compare les rangs."
+    },
+    {
+     "texte": "Je ne sais pas encore",
+     "feuille": {
+      "tests": [
+       "t-test-welch",
+       "wilcox-mw"
+      ],
+      "conseil": null,
+      "note": "Vérifie d'abord la normalité dans chaque groupe."
+     },
+     "pourquoi": "Le choix dépend de la normalité : commence par shapiro.test() dans chaque groupe."
+    }
+   ]
+  },
+  "k2i_var": {
+   "etape": "Variances",
+   "question": "Les variances des 2 séries sont-elles égales (homoscédasticité) ?",
+   "aide": "Vérifie avec bartlett.test(), à faire seulement après avoir validé la normalité. Dans le doute, Welch reste valable : c'est le choix par défaut de t.test().",
+   "choix": [
+    {
+     "texte": "Oui",
+     "feuille": {
+      "tests": [
+       "t-test-student",
+       "wilcox-mw"
+      ],
+      "conseil": 0
+     },
+     "pourquoi": "Normalité et variances égales : test de Student, avec var.equal = TRUE."
+    },
+    {
+     "texte": "Non, ou je ne sais pas",
+     "feuille": {
+      "tests": [
+       "t-test-welch",
+       "wilcox-mw"
+      ],
+      "conseil": 0
+     },
+     "pourquoi": "Normalité mais variances inégales : test de Student avec la correction de Welch, appliquée par défaut par t.test()."
+    }
+   ]
+  },
+  "k2a_norm": {
+   "etape": "Conditions",
+   "question": "Les différences (après − avant) sont-elles continues et à peu près normales ?",
+   "aide": "Variable discrète : réponds Non : on prend directement le test de Wilcoxon des rangs signés.",
+   "choix": [
+    {
+     "texte": "Oui",
+     "feuille": {
+      "tests": [
+       "t-test-paired",
+       "wilcox-paired"
+      ],
+      "conseil": 0
+     },
+     "pourquoi": "Différences normales : test de Student pour séries appariées (paired = TRUE)."
+    },
+    {
+     "texte": "Non : pas normales, ou variable discrète",
+     "feuille": {
+      "tests": [
+       "t-test-paired",
+       "wilcox-paired"
+      ],
+      "conseil": 1
+     },
+     "pourquoi": "Normalité non respectée ou variable discrète : test de Wilcoxon des rangs signés (paired = TRUE)."
+    },
+    {
+     "texte": "Je ne sais pas encore",
+     "feuille": {
+      "tests": [
+       "t-test-paired",
+       "wilcox-paired"
+      ],
+      "conseil": null,
+      "note": "Vérifie la normalité des différences, pas celle de chaque série."
+     },
+     "pourquoi": "Le choix dépend de la normalité des différences."
+    }
+   ]
+  },
+  "k3_plan": {
+   "etape": "Plan",
+   "question": "Les séries sont-elles indépendantes ou s'agit-il de mesures répétées ?",
+   "choix": [
+    {
+     "texte": "Indépendantes",
+     "detail": "Plusieurs secteurs, souches ou traitements, des individus différents.",
+     "vers": "k3i_norm",
+     "pourquoi": "Plusieurs séries indépendantes : ANOVA ou Kruskal-Wallis."
+    },
+    {
+     "texte": "Mesures répétées",
+     "detail": "Les mêmes individus mesurés à J0, J7 et J30.",
+     "vers": "k3a_norm",
+     "pourquoi": "Plusieurs séries dépendantes : analyses plus complexes ; pour un vrai travail, fais-toi aider d'un statisticien."
+    }
+   ]
+  },
+  "k3i_norm": {
+   "etape": "Conditions",
+   "question": "Les séries sont-elles normales, et leurs variances égales ?",
+   "aide": "Normalité avec shapiro.test() (ou sur les résidus), puis variances avec bartlett.test().",
+   "choix": [
+    {
+     "texte": "Normales et variances égales",
+     "feuille": {
+      "tests": [
+       "anova-1",
+       "kruskal"
+      ],
+      "conseil": 0
+     },
+     "pourquoi": "Normalité et homoscédasticité : ANOVA, puis test t par paires avec correction de Bonferroni si elle est significative."
+    },
+    {
+     "texte": "Normales mais variances inégales",
+     "feuille": {
+      "tests": [
+       "anova-welch",
+       "kruskal"
+      ],
+      "conseil": 0
+     },
+     "pourquoi": "Homoscédasticité non respectée : test de Welch (ANOVA pour variances inégales)."
+    },
+    {
+     "texte": "Pas normales, ou variable discrète",
+     "feuille": {
+      "tests": [
+       "anova-1",
+       "kruskal"
+      ],
+      "conseil": 1
+     },
+     "pourquoi": "Conditions de l'ANOVA non respectées : Kruskal-Wallis, puis test de Wilcoxon par paires avec correction de Bonferroni."
+    },
+    {
+     "texte": "Je ne sais pas encore",
+     "feuille": {
+      "tests": [
+       "anova-1",
+       "kruskal"
+      ],
+      "conseil": null,
+      "note": "Ajuste le modèle, puis vérifie la normalité et les variances."
+     },
+     "pourquoi": "Le choix dépend de la normalité et des variances."
+    }
+   ]
+  },
+  "k3a_norm": {
+   "etape": "Conditions",
+   "question": "Les conditions de l'ANOVA à mesures répétées sont-elles respectées ?",
+   "aide": "Normalité des résidus et sphéricité.",
+   "choix": [
+    {
+     "texte": "Oui",
+     "feuille": {
+      "tests": [
+       "anova-rm",
+       "friedman"
+      ],
+      "conseil": 0
+     },
+     "pourquoi": "Conditions respectées : ANOVA à mesures répétées."
+    },
+    {
+     "texte": "Non",
+     "feuille": {
+      "tests": [
+       "anova-rm",
+       "friedman"
+      ],
+      "conseil": 1
+     },
+     "pourquoi": "Conditions non respectées : test de Friedman, sur les rangs."
+    },
+    {
+     "texte": "Je ne sais pas encore",
+     "feuille": {
+      "tests": [
+       "anova-rm",
+       "friedman"
+      ],
+      "conseil": null
+     },
+     "pourquoi": "Le choix dépend des conditions."
+    }
+   ]
+  },
+  "quali_plan": {
+   "etape": "Plan",
+   "question": "Les observations sont-elles indépendantes ou appariées ?",
+   "choix": [
+    {
+     "texte": "Indépendantes",
+     "detail": "Des individus différents dans chaque groupe.",
+     "vers": "chi_eff",
+     "pourquoi": "Séries indépendantes : χ² d'indépendance sur le tableau de contingence."
+    },
+    {
+     "texte": "Appariées",
+     "detail": "Les mêmes individus classés 2 fois (à l'installation / après 3 mois).",
+     "feuille": {
+      "tests": [
+       "mcnemar"
+      ],
+      "conseil": 0
+     },
+     "pourquoi": "Variable qualitative mesurée 2 fois sur les mêmes individus : test de McNemar, sur les couples discordants (règle usuelle : au moins 10)."
+    }
+   ]
+  },
+  "chi_eff": {
+   "etape": "Conditions",
+   "question": "Les effectifs théoriques sont-ils tous supérieurs à 5 ?",
+   "aide": "Effectif théorique = total de la ligne × total de la colonne / effectif total. R les donne avec chisq.test(tab)$expected.",
+   "choix": [
+    {
+     "texte": "Oui",
+     "feuille": {
+      "tests": [
+       "chisq",
+       "fisher"
+      ],
+      "conseil": 0
+     },
+     "pourquoi": "Effectifs théoriques suffisants : χ² d'indépendance."
+    },
+    {
+     "texte": "Non",
+     "feuille": {
+      "tests": [
+       "chisq",
+       "fisher"
+      ],
+      "conseil": 1
+     },
+     "pourquoi": "Effectifs théoriques trop petits : le χ² n'est plus fiable, on prend le test exact de Fisher."
+    },
+    {
+     "texte": "Je ne sais pas encore",
+     "feuille": {
+      "tests": [
+       "chisq",
+       "fisher"
+      ],
+      "conseil": null,
+      "note": "Calcule les effectifs théoriques avec le code de la rubrique Conditions."
+     },
+     "pourquoi": "Le choix dépend des effectifs théoriques."
+    }
+   ]
+  },
+  "lien_type": {
+   "etape": "Variables",
+   "question": "De quels types sont les deux variables ?",
+   "choix": [
+    {
+     "texte": "Deux quantitatives",
+     "detail": "Taille et poids, dose et réponse.",
+     "vers": "cor_but",
+     "pourquoi": "Deux variables quantitatives : corrélation ou régression."
+    },
+    {
+     "texte": "Deux qualitatives",
+     "detail": "Diplôme et secteur d'emploi.",
+     "vers": "quali_plan",
+     "pourquoi": "Deux variables qualitatives : tableau de contingence (χ², Fisher ou McNemar)."
+    },
+    {
+     "texte": "Une quantitative et une qualitative",
+     "detail": "C'est une comparaison de groupes : la qualitative définit les groupes.",
+     "vers": "cmp_k",
+     "pourquoi": "La variable qualitative définit des groupes : on compare la variable quantitative entre ces groupes."
+    }
+   ]
+  },
+  "cor_but": {
+   "etape": "But",
+   "question": "Que cherches-tu ?",
+   "choix": [
+    {
+     "texte": "Mesurer la force du lien (corrélation)",
+     "detail": "Les deux variables jouent le même rôle.",
+     "vers": "cor_norm",
+     "pourquoi": "On mesure la liaison avec un coefficient de corrélation et on teste s'il est différent de 0."
+    },
+    {
+     "texte": "Expliquer une variable réponse par une variable contrôlée",
+     "detail": "Pente, prédiction, R² (régression).",
+     "feuille": {
+      "tests": [
+       "lm-reg"
+      ],
+      "conseil": 0
+     },
+     "pourquoi": "Une variable contrôlée et une variable réponse : régression linéaire, qui modélise l'effet par une droite."
+    }
+   ]
+  },
+  "cor_norm": {
+   "etape": "Conditions",
+   "question": "La relation est-elle linéaire, les variables normales et sans valeurs aberrantes ?",
+   "aide": "Regarde d'abord le nuage de points. Relation courbe mais toujours croissante ou décroissante, ou variables ordinales : réponds Non.",
+   "choix": [
+    {
+     "texte": "Oui",
+     "feuille": {
+      "tests": [
+       "cor-pearson",
+       "cor-spearman"
+      ],
+      "conseil": 0
+     },
+     "pourquoi": "Relation linéaire et loi normale : corrélation de Pearson."
+    },
+    {
+     "texte": "Non : relation non linéaire, rangs, valeurs aberrantes",
+     "feuille": {
+      "tests": [
+       "cor-pearson",
+       "cor-spearman"
+      ],
+      "conseil": 1
+     },
+     "pourquoi": "Relation non linéaire ou variables ordinales : corrélation de Spearman, sur les rangs."
+    },
+    {
+     "texte": "Je ne sais pas encore",
+     "feuille": {
+      "tests": [
+       "cor-pearson",
+       "cor-spearman"
+      ],
+      "conseil": null,
+      "note": "Commence par tracer le nuage de points."
+     },
+     "pourquoi": "Le choix dépend de la forme du nuage de points."
+    }
+   ]
+  },
+  "survie": {
+   "etape": "But",
+   "question": "Que veux-tu faire avec la survie ?",
+   "choix": [
+    {
+     "texte": "Décrire la survie",
+     "detail": "Courbe, médiane de survie.",
+     "feuille": {
+      "tests": [
+       "km"
+      ],
+      "conseil": 0
+     },
+     "pourquoi": "Décrire : courbe de Kaplan-Meier."
+    },
+    {
+     "texte": "Comparer 2 groupes ou plus",
+     "detail": "Survie sous traitement A ou B.",
+     "feuille": {
+      "tests": [
+       "logrank",
+       "km"
+      ],
+      "conseil": 0
+     },
+     "pourquoi": "Comparer des courbes : test du log-rank."
+    },
+    {
+     "texte": "Mesurer l'effet de plusieurs facteurs",
+     "detail": "Hazard ratios ajustés.",
+     "feuille": {
+      "tests": [
+       "cox"
+      ],
+      "conseil": 0
+     },
+     "pourquoi": "Plusieurs facteurs : modèle de Cox."
+    }
+   ]
+  },
+  "cond": {
+   "etape": "Condition",
+   "question": "Quelle condition veux-tu vérifier ?",
+   "aide": "Dans l'ordre : la normalité d'abord, puis l'égalité des variances (Bartlett ne se fait que si la normalité est respectée).",
+   "choix": [
+    {
+     "texte": "La normalité",
+     "feuille": {
+      "tests": [
+       "shapiro",
+       "qqnorm"
+      ],
+      "conseil": null,
+      "note": "Utilise les deux : le test et le graphique se complètent."
+     },
+     "pourquoi": "Shapiro-Wilk teste la normalité ; le Q-Q plot la montre."
+    },
+    {
+     "texte": "L'égalité des variances",
+     "feuille": {
+      "tests": [
+       "bartlett",
+       "var-test",
+       "levene"
+      ],
+      "conseil": 0
+     },
+     "pourquoi": "Bartlett est le test le plus courant (au moins 2 groupes, après la normalité) ; Levene est moins sensible à la non-normalité."
+    }
+   ]
+  },
+  "fact_n": {
+   "etape": "Facteurs",
+   "question": "Combien de facteurs croisés étudies-tu ?",
+   "aide": "Un facteur = une variable qualitative qui définit des groupes (traitement, dose, souche…). Variable quantitative mesurée, plutôt normale dans chaque case du plan.",
+   "choix": [
+    {
+     "texte": "2 facteurs",
+     "detail": "Par exemple le supplément (2 types) et la dose (3 doses).",
+     "feuille": {
+      "tests": [
+       "anova-2"
+      ],
+      "conseil": 0,
+      "note": "Vérifie la normalité des résidus et l'homogénéité des variances entre les cases : sans elles, il n'existe pas d'équivalent non paramétrique simple, fais-toi aider."
+     },
+     "pourquoi": "Deux facteurs croisés : l'ANOVA à deux facteurs teste l'effet de chacun et leur interaction (l'effet de l'un dépend-il de l'autre ?)."
+    },
+    {
+     "texte": "3 facteurs",
+     "detail": "Par exemple azote, phosphate et potassium, chacun présent ou absent.",
+     "feuille": {
+      "tests": [
+       "anova-3"
+      ],
+      "conseil": 0,
+      "note": "Il faut au moins 2 individus par case pour tester l'interaction triple ; vérifie la normalité des résidus et l'homogénéité des variances."
+     },
+     "pourquoi": "Trois facteurs croisés : l'ANOVA à trois facteurs teste les 3 effets principaux, les 3 interactions doubles et l'interaction triple."
+    }
+   ]
+  }
+ },
+ "synthese": [
+  {
+   "titre": "Une série comparée à une valeur théorique",
+   "lignes": [
+    {
+     "cas": "Quantitative continue, loi normale",
+     "test": "t-test-1",
+     "ch": [
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "cas": "Quantitative continue non normale, ou discrète",
+     "test": "wilcox-1",
+     "ch": [
+      0,
+      0,
+      1
+     ]
+    },
+    {
+     "cas": "Qualitative à 2 classes (proportion) : test Z",
+     "test": "prop-test-1",
+     "ch": [
+      0,
+      1,
+      0
+     ]
+    },
+    {
+     "cas": "Qualitative à plusieurs classes",
+     "test": "chisq-gof",
+     "ch": [
+      0,
+      2
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Deux séries indépendantes",
+   "lignes": [
+    {
+     "cas": "Continue, loi normale, variances égales",
+     "test": "t-test-student",
+     "ch": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "cas": "Continue, loi normale, variances inégales",
+     "test": "t-test-welch",
+     "ch": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+     ]
+    },
+    {
+     "cas": "Non normale, ou discrète",
+     "test": "wilcox-mw",
+     "ch": [
+      1,
+      0,
+      0,
+      0,
+      1
+     ]
+    },
+    {
+     "cas": "Qualitative",
+     "test": "chisq",
+     "ch": [
+      1,
+      1,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Deux séries dépendantes (mêmes individus)",
+   "lignes": [
+    {
+     "cas": "Continue, loi normale : séries appariées",
+     "test": "t-test-paired",
+     "ch": [
+      1,
+      0,
+      0,
+      1,
+      0
+     ]
+    },
+    {
+     "cas": "Non paramétrique (non normale ou discrète)",
+     "test": "wilcox-paired",
+     "ch": [
+      1,
+      0,
+      0,
+      1,
+      1
+     ]
+    },
+    {
+     "cas": "Lien linéaire, loi normale",
+     "test": "cor-pearson",
+     "ch": [
+      2,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "cas": "Lien non linéaire, ou variable discrète",
+     "test": "cor-spearman",
+     "ch": [
+      2,
+      0,
+      0,
+      1
+     ]
+    },
+    {
+     "cas": "Une variable contrôlée, une variable réponse",
+     "test": "lm-reg",
+     "ch": [
+      2,
+      0,
+      1
+     ]
+    },
+    {
+     "cas": "Qualitative mesurée deux fois",
+     "test": "mcnemar",
+     "ch": [
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Plusieurs séries indépendantes",
+   "lignes": [
+    {
+     "cas": "Loi normale, variances égales, puis test t par paires",
+     "test": "anova-1",
+     "ch": [
+      1,
+      0,
+      1,
+      0,
+      0
+     ]
+    },
+    {
+     "cas": "Loi normale, variances inégales",
+     "test": "anova-welch",
+     "ch": [
+      1,
+      0,
+      1,
+      0,
+      1
+     ]
+    },
+    {
+     "cas": "Non paramétrique, puis Wilcoxon par paires",
+     "test": "kruskal",
+     "ch": [
+      1,
+      0,
+      1,
+      0,
+      2
+     ]
+    },
+    {
+     "cas": "Qualitative",
+     "test": "chisq",
+     "ch": [
+      1,
+      1,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Plusieurs facteurs croisés",
+   "lignes": [
+    {
+     "cas": "2 facteurs, loi normale, variances égales",
+     "test": "anova-2",
+     "ch": [
+      1,
+      0,
+      2,
+      0
+     ]
+    },
+    {
+     "cas": "3 facteurs, loi normale, variances égales",
+     "test": "anova-3",
+     "ch": [
+      1,
+      0,
+      2,
+      1
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Plusieurs séries dépendantes",
+   "lignes": [
+    {
+     "cas": "Loi normale (mesures répétées)",
+     "test": "anova-rm",
+     "ch": [
+      1,
+      0,
+      1,
+      1,
+      0
+     ]
+    },
+    {
+     "cas": "Non paramétrique",
+     "test": "friedman",
+     "ch": [
+      1,
+      0,
+      1,
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Conditions, à vérifier d'abord",
+   "lignes": [
+    {
+     "cas": "Normalité : test de Shapiro-Wilk",
+     "test": "shapiro",
+     "ch": [
+      5,
+      0
+     ]
+    },
+    {
+     "cas": "Normalité : Q-Q plot",
+     "test": "qqnorm",
+     "ch": [
+      5,
+      0
+     ]
+    },
+    {
+     "cas": "Égalité des variances, après la normalité",
+     "test": "bartlett",
+     "ch": [
+      5,
+      1
+     ]
+    }
+   ]
+  }
+ ]
+}

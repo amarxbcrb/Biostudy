@@ -1,0 +1,499 @@
+{
+ "version": 1,
+ "fiches": [
+  {
+   "id": "graphique",
+   "titre": "Le bon graphique",
+   "sous": "boîtes, histogramme, nuage de points, barres",
+   "icone": "chart",
+   "couleur": "blue",
+   "groupe": "Bases",
+   "sections": [
+    {
+     "titre": "Une variable quantitative selon des groupes : boîtes à moustaches",
+     "code": "library(ggplot2)\nggplot(PlantGrowth, aes(x = group, y = weight)) +\n  geom_boxplot()",
+     "apercu": {
+      "jeu": "PlantGrowth",
+      "geom": "boxplot",
+      "x": "group",
+      "y": "weight"
+     }
+    },
+    {
+     "titre": "Boîtes avec chaque point par-dessus",
+     "texte": "Utile avec peu de valeurs : on voit toutes les données.",
+     "code": "library(ggplot2)\nggplot(PlantGrowth, aes(x = group, y = weight)) +\n  geom_boxplot(outlier.shape = NA) +\n  geom_jitter(width = 0.15)",
+     "apercu": {
+      "jeu": "PlantGrowth",
+      "geom": "boxplot",
+      "x": "group",
+      "y": "weight",
+      "points": true
+     }
+    },
+    {
+     "titre": "Distribution d'une variable : histogramme",
+     "code": "library(ggplot2)\nggplot(faithful, aes(x = eruptions)) +\n  geom_histogram(bins = 20)",
+     "apercu": {
+      "jeu": "faithful",
+      "geom": "histogram",
+      "x": "eruptions",
+      "bins": 20
+     }
+    },
+    {
+     "titre": "Deux variables quantitatives : nuage de points et droite de régression",
+     "code": "library(ggplot2)\nggplot(women, aes(x = height, y = weight)) +\n  geom_point() +\n  geom_smooth(method = \"lm\")   # droite et sa bande de confiance",
+     "apercu": {
+      "jeu": "women",
+      "geom": "point",
+      "x": "height",
+      "y": "weight",
+      "smooth": true
+     }
+    },
+    {
+     "titre": "Effectifs d'une variable qualitative : barres",
+     "code": "library(ggplot2)\nggplot(mtcars, aes(x = factor(cyl))) +\n  geom_bar()",
+     "apercu": {
+      "jeu": "mtcars",
+      "geom": "bar",
+      "x": "cyl",
+      "xlab": "factor(cyl)"
+     }
+    }
+   ]
+  },
+  {
+   "id": "titres",
+   "titre": "Titre et noms des axes",
+   "sous": "labs()",
+   "icone": "code",
+   "couleur": "indigo",
+   "groupe": "Mettre en forme",
+   "sections": [
+    {
+     "titre": "Titre, sous-titre, axes et source",
+     "code": "library(ggplot2)\nggplot(PlantGrowth, aes(x = group, y = weight)) +\n  geom_boxplot() +\n  labs(title = \"Poids des plantes selon le traitement\",\n       subtitle = \"30 plantes, 3 groupes\",\n       x = \"Groupe\",\n       y = \"Poids sec (g)\",\n       caption = \"Données : PlantGrowth\")",
+     "apercu": {
+      "jeu": "PlantGrowth",
+      "geom": "boxplot",
+      "x": "group",
+      "y": "weight",
+      "titre": "Poids des plantes selon le traitement",
+      "soustitre": "30 plantes, 3 groupes",
+      "xlab": "Groupe",
+      "ylab": "Poids sec (g)",
+      "caption": "Données : PlantGrowth"
+     }
+    },
+    {
+     "titre": "Centrer le titre",
+     "code": "theme(plot.title = element_text(hjust = 0.5))",
+     "apercu": {
+      "jeu": "PlantGrowth",
+      "geom": "boxplot",
+      "x": "group",
+      "y": "weight",
+      "titre": "Poids des plantes selon le traitement",
+      "centre": true,
+      "note": "Aperçu : boîtes de PlantGrowth avec un titre centré."
+     }
+    }
+   ]
+  },
+  {
+   "id": "legende",
+   "titre": "Légende",
+   "sous": "titre, position, masquer, renommer, ordre",
+   "icone": "table",
+   "couleur": "orange",
+   "groupe": "Mettre en forme",
+   "sections": [
+    {
+     "titre": "Changer le titre de la légende",
+     "texte": "Le nom vient de fill (ou colour) : labs() le remplace.",
+     "code": "library(ggplot2)\nggplot(ToothGrowth, aes(x = supp, y = len, fill = supp)) +\n  geom_boxplot() +\n  labs(fill = \"Supplément\")",
+     "apercu": {
+      "jeu": "ToothGrowth",
+      "geom": "boxplot",
+      "x": "supp",
+      "y": "len",
+      "fill": "supp",
+      "legendeTitre": "Supplément"
+     }
+    },
+    {
+     "titre": "Placer la légende",
+     "texte": "\"bottom\", \"top\", \"left\" ou \"right\" (par défaut).",
+     "code": "theme(legend.position = \"bottom\")",
+     "apercu": {
+      "jeu": "ToothGrowth",
+      "geom": "boxplot",
+      "x": "supp",
+      "y": "len",
+      "fill": "supp",
+      "legende": "bottom",
+      "note": "Aperçu : boîtes de ToothGrowth, légende en bas."
+     }
+    },
+    {
+     "titre": "Masquer la légende",
+     "code": "theme(legend.position = \"none\")\n# ou seulement celle de fill :\nguides(fill = \"none\")",
+     "apercu": {
+      "jeu": "ToothGrowth",
+      "geom": "boxplot",
+      "x": "supp",
+      "y": "len",
+      "fill": "supp",
+      "legende": "none",
+      "note": "Aperçu : boîtes de ToothGrowth, sans légende."
+     }
+    },
+    {
+     "titre": "Renommer les éléments de la légende",
+     "texte": "Les noms se donnent dans l'ordre des niveaux du facteur.",
+     "code": "scale_fill_discrete(labels = c(\"Jus d'orange\", \"Vitamine C\"))",
+     "apercu": {
+      "jeu": "ToothGrowth",
+      "geom": "boxplot",
+      "x": "supp",
+      "y": "len",
+      "fill": "supp",
+      "labels": [
+       "Jus d'orange",
+       "Vitamine C"
+      ],
+      "note": "Aperçu : boîtes de ToothGrowth, légende renommée."
+     }
+    },
+    {
+     "titre": "Couleurs et noms en même temps",
+     "code": "scale_fill_manual(values = c(\"#E69F00\", \"#56B4E9\"),\n                  labels = c(\"Jus d'orange\", \"Vitamine C\"))",
+     "apercu": {
+      "jeu": "ToothGrowth",
+      "geom": "boxplot",
+      "x": "supp",
+      "y": "len",
+      "fill": "supp",
+      "couleurs": [
+       "#E69F00",
+       "#56B4E9"
+      ],
+      "labels": [
+       "Jus d'orange",
+       "Vitamine C"
+      ],
+      "note": "Aperçu : boîtes de ToothGrowth."
+     }
+    },
+    {
+     "titre": "Changer l'ordre dans la légende",
+     "code": "scale_fill_discrete(breaks = c(\"VC\", \"OJ\"))",
+     "apercu": {
+      "jeu": "ToothGrowth",
+      "geom": "boxplot",
+      "x": "supp",
+      "y": "len",
+      "fill": "supp",
+      "breaks": [
+       "VC",
+       "OJ"
+      ],
+      "note": "Aperçu : boîtes de ToothGrowth, VC en premier dans la légende."
+     }
+    },
+    {
+     "titre": "Légende sur une seule ligne",
+     "code": "guides(fill = guide_legend(nrow = 1))",
+     "apercu": {
+      "jeu": "iris",
+      "geom": "boxplot",
+      "x": "Species",
+      "y": "Sepal.Length",
+      "fill": "Species",
+      "legende": "bottom",
+      "nrow1": true,
+      "note": "Aperçu : boîtes d'iris, légende en bas sur une ligne."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ordre",
+   "titre": "Ordre des groupes",
+   "sous": "factor(levels = …)",
+   "icone": "bars",
+   "couleur": "purple",
+   "groupe": "Mettre en forme",
+   "sections": [
+    {
+     "titre": "Choisir l'ordre des groupes sur l'axe et dans la légende",
+     "texte": "Par défaut, R range les groupes par ordre alphabétique. On fixe l'ordre une fois pour toutes dans les données.",
+     "code": "PlantGrowth$group <- factor(PlantGrowth$group, levels = c(\"trt1\", \"ctrl\", \"trt2\"))\nlevels(PlantGrowth$group)   # vérifier l'ordre",
+     "apercu": {
+      "jeu": "PlantGrowth",
+      "geom": "boxplot",
+      "x": "group",
+      "y": "weight",
+      "ordre": [
+       "trt1",
+       "ctrl",
+       "trt2"
+      ],
+      "note": "Aperçu : trt1 passe en premier."
+     }
+    },
+    {
+     "titre": "Seulement sur l'axe, sans toucher aux données",
+     "code": "scale_x_discrete(limits = c(\"trt1\", \"ctrl\", \"trt2\"))",
+     "apercu": {
+      "jeu": "PlantGrowth",
+      "geom": "boxplot",
+      "x": "group",
+      "y": "weight",
+      "ordre": [
+       "trt1",
+       "ctrl",
+       "trt2"
+      ],
+      "note": "Aperçu : même résultat à l'écran."
+     }
+    },
+    {
+     "titre": "Renommer les groupes sur l'axe",
+     "code": "scale_x_discrete(labels = c(\"Contrôle\", \"Traitement 1\", \"Traitement 2\"))",
+     "apercu": {
+      "jeu": "PlantGrowth",
+      "geom": "boxplot",
+      "x": "group",
+      "y": "weight",
+      "axeLabels": [
+       "Contrôle",
+       "Traitement 1",
+       "Traitement 2"
+      ],
+      "note": "Aperçu : groupes renommés sur l'axe."
+     }
+    }
+   ]
+  },
+  {
+   "id": "theme",
+   "titre": "Thème",
+   "sous": "theme_minimal(), theme_classic()…",
+   "icone": "palette",
+   "couleur": "pink",
+   "groupe": "Mettre en forme",
+   "sections": [
+    {
+     "titre": "Thèmes tout prêts",
+     "texte": "Ajoute-le avant tes propres réglages theme() : placé après, il les effacerait.",
+     "code": "theme_minimal()   # sans cadre, grille légère\ntheme_classic()   # axes seuls, sans grille : style article\ntheme_bw()        # fond blanc, cadre et grille\ntheme_light()     # grille et cadre gris clair",
+     "apercu": {
+      "jeu": "PlantGrowth",
+      "geom": "boxplot",
+      "x": "group",
+      "y": "weight",
+      "multi": [
+       "minimal",
+       "classic",
+       "bw",
+       "light"
+      ],
+      "note": "Aperçu : les mêmes boîtes avec chaque thème."
+     }
+    },
+    {
+     "titre": "Agrandir tout le texte du thème",
+     "code": "theme_classic(base_size = 14)",
+     "apercu": {
+      "jeu": "PlantGrowth",
+      "geom": "boxplot",
+      "x": "group",
+      "y": "weight",
+      "theme": "classic",
+      "taille": 1.27,
+      "note": "Aperçu : thème classique, texte agrandi."
+     }
+    },
+    {
+     "titre": "Exemple complet",
+     "code": "library(ggplot2)\nggplot(PlantGrowth, aes(x = group, y = weight, fill = group)) +\n  geom_boxplot() +\n  labs(x = \"Groupe\", y = \"Poids sec (g)\") +\n  theme_classic(base_size = 14) +\n  theme(legend.position = \"none\")",
+     "apercu": {
+      "jeu": "PlantGrowth",
+      "geom": "boxplot",
+      "x": "group",
+      "y": "weight",
+      "fill": "group",
+      "xlab": "Groupe",
+      "ylab": "Poids sec (g)",
+      "theme": "classic",
+      "taille": 1.27,
+      "legende": "none"
+     }
+    }
+   ]
+  },
+  {
+   "id": "texte",
+   "titre": "Taille et style du texte",
+   "sous": "theme(… element_text())",
+   "icone": "grow",
+   "couleur": "teal",
+   "groupe": "Mettre en forme",
+   "sections": [
+    {
+     "titre": "Tout le texte",
+     "code": "theme(text = element_text(size = 14))",
+     "apercu": {
+      "jeu": "PlantGrowth",
+      "geom": "boxplot",
+      "x": "group",
+      "y": "weight",
+      "taille": 1.27,
+      "note": "Aperçu : tout le texte passe à 14."
+     }
+    },
+    {
+     "titre": "Seulement les graduations ou les titres des axes",
+     "code": "theme(axis.text = element_text(size = 12),\n      axis.title = element_text(size = 14, face = \"bold\"))",
+     "apercu": {
+      "jeu": "PlantGrowth",
+      "geom": "boxplot",
+      "x": "group",
+      "y": "weight",
+      "tailleAxe": 10.9,
+      "tailleTitreAxe": 12.7,
+      "titresAxesGras": true,
+      "note": "Aperçu : graduations à 12, titres des axes à 14 en gras."
+     }
+    },
+    {
+     "titre": "Incliner les étiquettes de l'axe x",
+     "texte": "Pratique quand les noms des groupes se chevauchent.",
+     "code": "theme(axis.text.x = element_text(angle = 45, hjust = 1))",
+     "apercu": {
+      "jeu": "chickwts",
+      "geom": "boxplot",
+      "x": "feed",
+      "y": "weight",
+      "angle": 45,
+      "note": "Aperçu : poids des poulets selon l'aliment (chickwts), étiquettes inclinées."
+     }
+    },
+    {
+     "titre": "Titre en gras et plus grand",
+     "code": "theme(plot.title = element_text(size = 16, face = \"bold\"))",
+     "apercu": {
+      "jeu": "PlantGrowth",
+      "geom": "boxplot",
+      "x": "group",
+      "y": "weight",
+      "titre": "Poids des plantes selon le traitement",
+      "titreTaille": 13.9,
+      "titreGras": true,
+      "note": "Aperçu : titre à 16, en gras."
+     }
+    }
+   ]
+  },
+  {
+   "id": "axes",
+   "titre": "Axes",
+   "sous": "limites, échelle log, pourcentages",
+   "icone": "scale",
+   "couleur": "brown",
+   "groupe": "Mettre en forme",
+   "sections": [
+    {
+     "titre": "Zoomer sans retirer de données",
+     "texte": "coord_cartesian() garde toutes les valeurs dans les calculs (boîtes, moyennes) ; ylim() supprimerait celles qui sortent des limites.",
+     "code": "coord_cartesian(ylim = c(0, 10))",
+     "apercu": {
+      "jeu": "PlantGrowth",
+      "geom": "boxplot",
+      "x": "group",
+      "y": "weight",
+      "ylim": [
+       0,
+       10
+      ],
+      "note": "Aperçu : l'axe va de 0 à 10, toutes les valeurs restent dans les boîtes."
+     }
+    },
+    {
+     "titre": "Échelle logarithmique",
+     "code": "scale_y_log10()"
+    },
+    {
+     "titre": "Axe en pourcentages",
+     "texte": "Pour des proportions entre 0 et 1. Le package scales est installé avec ggplot2.",
+     "code": "scale_y_continuous(labels = scales::percent)"
+    }
+   ]
+  },
+  {
+   "id": "fill",
+   "titre": "fill ou colour ?",
+   "sous": "remplissage ou contour",
+   "icone": "okc",
+   "couleur": "green",
+   "groupe": "Couleurs",
+   "sections": [
+    {
+     "titre": "La règle",
+     "texte": "fill colore l'intérieur (barres, boîtes, aires) ; colour colore les points, les lignes et les contours. Les fonctions suivent : scale_fill_…() pour fill, scale_colour_…() pour colour."
+    },
+    {
+     "titre": "Points colorés par groupe",
+     "code": "library(ggplot2)\nggplot(iris, aes(x = Petal.Length, y = Petal.Width, colour = Species)) +\n  geom_point() +\n  scale_colour_manual(values = c(\"#E69F00\", \"#56B4E9\", \"#009E73\"))",
+     "apercu": {
+      "jeu": "iris",
+      "geom": "point",
+      "x": "Petal.Length",
+      "y": "Petal.Width",
+      "colour": "Species",
+      "couleurs": [
+       "#E69F00",
+       "#56B4E9",
+       "#009E73"
+      ]
+     }
+    },
+    {
+     "titre": "Une seule couleur pour tout le graphique",
+     "texte": "En dehors de aes() : la couleur ne dépend d'aucune variable.",
+     "code": "library(ggplot2)\nggplot(faithful, aes(x = eruptions)) +\n  geom_histogram(bins = 20, fill = \"steelblue\", colour = \"white\")",
+     "apercu": {
+      "jeu": "faithful",
+      "geom": "histogram",
+      "x": "eruptions",
+      "bins": 20,
+      "histFill": "#4682B4",
+      "histColour": "#FFFFFF"
+     }
+    }
+   ]
+  },
+  {
+   "id": "enregistrer",
+   "titre": "Enregistrer le graphique",
+   "sous": "ggsave()",
+   "icone": "ext",
+   "couleur": "indigo",
+   "groupe": "Bases",
+   "sections": [
+    {
+     "titre": "En image pour un rapport",
+     "texte": "ggsave() enregistre le dernier graphique affiché, dans le dossier de travail (getwd()).",
+     "code": "ggsave(\"figure.png\", width = 15, height = 10, units = \"cm\", dpi = 300)"
+    },
+    {
+     "titre": "En PDF (vectoriel, net à toute taille)",
+     "code": "ggsave(\"figure.pdf\", width = 15, height = 10, units = \"cm\")"
+    }
+   ]
+  }
+ ]
+}

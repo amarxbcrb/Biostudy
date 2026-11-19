@@ -1,0 +1,42 @@
+BIOGENE : biologie moleculaire et genetique
+============================================
+index.html   L'outil, en un seul fichier (HTML + CSS + JS), sans build ni
+             framework, au style maison (Liquid Glass / Reglages iOS, barre
+             d'onglets LiquidGlass.tabs, icones Lucide en SVG, theme clair/sombre
+             memorise par periode jour/nuit).
+
+Cinq onglets :
+  0. Sequence       Colle un brin d'ADN ou d'ARN -> brin complementaire, inverse,
+                    inverse complementaire (5'->3'), transcription ARN, traduction
+                    protéine (6 cadres de lecture), GC %, Tm estime, longueur, masse.
+  1. Code genetique Recherche a double sens : on tape un acide amine (lysine, Lys,
+                    K) ou un codon (AAA) et tous les codons synonymes s'affichent.
+                    Table complete des 20 acides amines + stop, couleur par classe.
+                    Code genetique standard (table NCBI 1), verifie.
+  2. CRISPR         Colle une cible -> liste des protospacers (20 nt) + PAM sur les
+                    deux brins (SpCas9 NGG / NAG, Cas12a TTTV), %GC, site de coupure
+                    estime, alertes (GC hors 40-80 %, poly-T). Reperes usuels, pas de
+                    regles rigides ; verification des hors-cibles a faire a part.
+  3. Plasmide       Carte circulaire : nom, taille (pb), elements (origine, resistance,
+                    promoteur, gene/insert, etiquette, site de clonage, terminateur),
+                    sens de chaque element. Export PNG et SVG (dessines a la main,
+                    aucune bibliotheque).
+  4. Clonage        Calculs type NEBioCalculator, places dans l'outil adapte :
+                    - masse <-> moles d'ADN double brin : MW = (pb x 617,96) + 36,04
+                      g/mol, n = masse / MW (50 ng d'un fragment de 3 kb -> ~27 fmol,
+                      valeur de reference) ;
+                    - rapport de ligature insert:vecteur : masse insert = masse
+                      vecteur x rapport x (L_insert / L_vecteur).
+
+Details techniques
+  - Les unites s'ouvrent dans une petite fenetre (popup) TOUJOURS maintenue dans
+    l'ecran (jamais coupee en bas, meme sur PC) : voir openPop().
+  - Haptique partagee via /haptique.js (chargee par menu-flottant.js), pas de
+    data-haptic="own".
+  - Pas de manifest, d'icones ni de service worker par outil (regle du site).
+  - Cles localStorage : bioGene_tab, bioGene_seq, bioGene_gq, bioGene_cr,
+    bioGene_plasmid, bioGene_clone, bioGeneTheme + bioGeneThemePeriod.
+
+A refaire apres toute modification des calculs : revoir les cas de reference
+(ADN 50 ng / 3 kb -> 27 fmol ; complement de ATGGCATTGCAACGTGA -> TACCGTAACGTTGCACT ;
+traduction cadre +1 de ATGGCATTGCAACGTGA -> MALQR ; lysine -> AAA, AAG).

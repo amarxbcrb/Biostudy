@@ -1,0 +1,115 @@
+{
+ "source": {
+  "nom": "Rdatasets (Vincent Arel-Bundock)",
+  "depot": "https://github.com/vincentarelbundock/Rdatasets",
+  "index": "https://raw.githubusercontent.com/vincentarelbundock/Rdatasets/master/datasets.csv",
+  "brut": "https://raw.githubusercontent.com/vincentarelbundock/Rdatasets/master/",
+  "site": "https://vincentarelbundock.github.io/Rdatasets/"
+ },
+ "conseilles": [
+  {
+   "package": "datasets",
+   "item": "PlantGrowth",
+   "texte": "Poids de plantes dans 3 groupes : contrôle et 2 traitements.",
+   "colonnes": "30 lignes · weight, group",
+   "pour": "ANOVA à un facteur ou Kruskal-Wallis",
+   "test": "anova-1"
+  },
+  {
+   "package": "datasets",
+   "item": "ToothGrowth",
+   "texte": "Croissance des dents de cobayes selon le supplément de vitamine C (jus d'orange OJ ou acide ascorbique VC) et la dose.",
+   "colonnes": "60 lignes · len, supp, dose",
+   "pour": "Test t de Welch (len selon supp)",
+   "test": "t-test-welch"
+  },
+  {
+   "package": "datasets",
+   "item": "sleep",
+   "texte": "Heures de sommeil gagnées par 10 patients avec 2 somnifères (les mêmes patients).",
+   "colonnes": "20 lignes · extra, group, ID",
+   "pour": "Test t apparié",
+   "test": "t-test-paired"
+  },
+  {
+   "package": "datasets",
+   "item": "InsectSprays",
+   "texte": "Nombre d'insectes comptés après 6 insecticides (des comptages).",
+   "colonnes": "72 lignes · count, spray",
+   "pour": "Kruskal-Wallis",
+   "test": "kruskal"
+  },
+  {
+   "package": "datasets",
+   "item": "chickwts",
+   "texte": "Poids de poulets selon 6 aliments.",
+   "colonnes": "71 lignes · weight, feed",
+   "pour": "ANOVA à un facteur",
+   "test": "anova-1"
+  },
+  {
+   "package": "datasets",
+   "item": "women",
+   "texte": "Taille et poids de 15 femmes.",
+   "colonnes": "15 lignes · height, weight",
+   "pour": "Corrélation de Pearson, régression",
+   "test": "cor-pearson"
+  },
+  {
+   "package": "datasets",
+   "item": "cars",
+   "texte": "Vitesse et distance de freinage de 50 voitures.",
+   "colonnes": "50 lignes · speed, dist",
+   "pour": "Régression linéaire",
+   "test": "lm-reg"
+  },
+  {
+   "package": "datasets",
+   "item": "trees",
+   "texte": "Diamètre, hauteur et volume de 31 cerisiers.",
+   "colonnes": "31 lignes · Girth, Height, Volume",
+   "pour": "Corrélation, régression",
+   "test": "cor-pearson"
+  },
+  {
+   "package": "datasets",
+   "item": "iris",
+   "texte": "Mesures des fleurs de 3 espèces d'iris.",
+   "colonnes": "150 lignes · 4 mesures, Species",
+   "pour": "ANOVA, corrélation",
+   "test": "anova-1"
+  },
+  {
+   "package": "datasets",
+   "item": "faithful",
+   "texte": "Durée des éruptions d'un geyser et attente entre deux éruptions.",
+   "colonnes": "272 lignes · eruptions, waiting",
+   "pour": "Normalité : distribution à deux bosses",
+   "test": "shapiro"
+  },
+  {
+   "package": "datasets",
+   "item": "warpbreaks",
+   "texte": "Casses de fils selon la laine et la tension.",
+   "colonnes": "54 lignes · breaks, wool, tension",
+   "pour": "ANOVA, Kruskal-Wallis",
+   "test": "kruskal"
+  },
+  {
+   "package": "datasets",
+   "item": "infert",
+   "texte": "Étude cas-témoins sur l'infertilité.",
+   "colonnes": "248 lignes · case, induced, spontaneous…",
+   "pour": "Régression logistique, χ²",
+   "test": "glm-logit"
+  },
+  {
+   "package": "datasets",
+   "item": "airquality",
+   "texte": "Qualité de l'air à New York, avec des valeurs manquantes (NA).",
+   "colonnes": "153 lignes · Ozone, Temp, Month…",
+   "pour": "S'entraîner à gérer les NA",
+   "test": ""
+  }
+ ]
+}

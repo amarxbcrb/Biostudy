@@ -1,0 +1,26 @@
+BIOSTAT : BIOSTATISTIQUE AVEC R PAS À PAS
+=========================================
+Accompagne ceux qui débutent avec R (il ne remplace pas RStudio) : choisir le
+bon test et savoir pourquoi, écrire le code R, mettre en forme les graphiques,
+comprendre chaque test avec des visualisations interactives.
+
+Un dossier par onglet (onglets/<id>/) : le supprimer retire l'onglet de la
+barre ; pour modifier un onglet, on ne touche qu'à son dossier. Détails dans
+README.md.
+
+  index.html            Page (en-tête, contenu, barre du bas + bouton rond de recherche)
+  css/style.css         Style commun (Réglages iOS, verre, clair / sombre)
+  js/app.js             Socle : charge les onglets, routeur, recherche, briques communes
+  js/rdatasets.js       Données extérieures : catalogue Rdatasets (jeux de données R en CSV)
+  js/stats.js           Lois et tests vérifiés contre R (partagés)
+  js/dessin.js          Briques des figures SVG (partagées)
+  data/tests.json       Les 32 tests (commun à plusieurs onglets)
+  img/icones.svg        Icônes Lucide
+  onglets/choisir/      Choisir : assistant, pourquoi ce test, vue d'ensemble, fiches, pièges
+  onglets/coder/        Coder : code R (base et tidyverse), statistiques descriptives, tester (webR),
+                        interpréter un résultat (phrases scientifiques), tableau 2×2, jeux de données
+  onglets/graphiques/   Graphiques : composer sa palette, mise en forme ggplot2 avec aperçus, couleurs
+  onglets/comprendre/   Comprendre : visualisations interactives (dont ANOVA à 2 facteurs), réviser
+  tools/check-data.mjs  Vérifie les JSON : node tools/check-data.mjs
+  docs/a-verifier.md    Ce qui a été vérifié dans R et ce qui reste à confirmer
+  docs/reference/       Aide-mémoire ggplot2 (Posit, CC BY-SA) donné comme référence

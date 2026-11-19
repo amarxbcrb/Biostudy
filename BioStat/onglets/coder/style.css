@@ -1,0 +1,36 @@
+/* Onglet Coder : tableau 2 × 2, aperçu d'un jeu de données */
+.t22{width:100%;border-collapse:collapse;font-size:14px}
+.t22 th{padding:12px 6px 6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--tx2);text-align:center}
+.t22 th[scope=row]{text-align:left;padding:8px 6px 8px 16px;text-transform:none;letter-spacing:0;font-size:15px;color:var(--tx)}
+.t22 th small{display:block;font-size:12px;font-weight:500;color:var(--tx2)}
+.t22 td{padding:6px;text-align:center;border-top:.5px solid var(--sep)}
+.t22 th[scope=row]{border-top:.5px solid var(--sep)}
+.t22 tr:first-child>*{border-top:0}
+.t22 td:last-child{padding-right:16px}
+.t22 .in{text-align:center;padding:0 10px;font-family:var(--mono)}
+.cell{position:relative;display:block}
+.cell b{position:absolute;left:12px;top:50%;transform:translateY(-50%);font:700 12px var(--mono);color:var(--acc-tx);pointer-events:none}
+.cell .in{padding-left:24px}
+.tot{font-weight:700;color:var(--tx2);font-variant-numeric:tabular-nums}
+.ms{flex-direction:column;align-items:stretch;gap:4px}
+.ms .mh{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.ms .mh b{font-size:16px}.ms .mh small{font-size:13.5px;color:var(--tx2)}
+.ms .mv{font-size:clamp(26px,7vw,32px);font-weight:800;letter-spacing:-.5px;font-variant-numeric:tabular-nums;color:var(--acc-tx)}
+.ms .mi{font-size:14px;font-weight:600;color:var(--tx2);font-variant-numeric:tabular-nums}
+.ms .fm{margin:4px 0 0;padding:8px 12px;border-radius:12px;background:var(--code);font:500 12px/1.55 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere;color:var(--tx2)}
+
+@media(max-width:599px){.t22 th[scope=row]{padding-left:12px}.t22 td{padding:5px 3px}.t22 td:last-child{padding-right:12px}}
+/* aperçu d'un jeu de données : le tableau seul défile en largeur */
+.apercu{overflow-x:auto}
+.apercu table{border-collapse:collapse;font:500 13px var(--mono);white-space:nowrap}
+.apercu th{padding:12px 12px 6px;text-align:left;font:700 12px var(--mono);color:var(--tx2)}
+.apercu td{padding:7px 12px;border-top:.5px solid var(--sep);font-variant-numeric:tabular-nums}
+.apercu i{color:var(--tx3)}
+/* statistiques descriptives : valeur à droite, boîtes à moustaches, tableau par groupe */
+.row .dv{flex-shrink:0;max-width:55%;text-align:right;font:700 15px var(--mono);font-variant-numeric:tabular-nums;color:var(--acc-tx)}
+.fig .bo{fill:color-mix(in srgb,var(--gc) 22%,transparent);stroke:var(--gc);stroke-width:1.5}
+.fig .mo{stroke:var(--gc);stroke-width:1.5}
+.fig .me{stroke:var(--gc);stroke-width:3;stroke-linecap:round}
+.fig .moy{fill:var(--tx)}.fig .at{fill:var(--c-pink)}
+.dt th[scope=row]{text-align:left;padding:7px 12px;font:600 13px -apple-system,sans-serif;color:var(--tx);border-top:.5px solid var(--sep)}
+.dt{width:100%}.dt thead th{text-align:right;padding-right:12px}.dt td{padding-right:12px}.dt td{text-align:right}

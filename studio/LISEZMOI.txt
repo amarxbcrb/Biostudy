@@ -1,0 +1,15 @@
+STUDIO : espace d'administration
+===================================
+index.html   Accès par mot de passe (secret VITRINE_CLE dans Cloudflare, jamais dans
+             le code). Deux onglets :
+             - Contenus : fenêtres, cartes ou bandes mises en avant sur le site
+               (pages, durée, nombre d'affichages, appareils…).
+             - Site : changer le logo et le favicon, masquer un outil (retiré du
+               menu et de l'accueil) ou le mettre en maintenance (message
+               d'attente ; l'administrateur connecté peut toujours l'ouvrir).
+Les noms « vitrine » et « studio » sont volontairement neutres (pas de mots
+comme pub ou promo, souvent bloqués par les bloqueurs de publicité).
+
+Onglets : Contenus (vitrine), Site (logo, favicon, taille du logo, outils visibles / masqués /
+en maintenance / « Nouveau » / description, site entier en maintenance, retour prévu, messages
+des visiteurs, sauvegarde) , Avis (avis notés laissés sur l'accueil, à publier) et Messages (messages envoyés depuis le menu des outils).

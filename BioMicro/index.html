@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="fr" data-verre="calc" data-haptic="own" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-visual">
+<meta name="theme-color" content="#f2f2f7" id="metaTheme">
+<title>BioMicro | UFC/mL, DO, temps de génération – calculs de microbiologie</title>
+<meta name="description" content="BioMicro : calcul des UFC/mL (dénombrement), conversion DO₆₀₀ → cellules/mL, dilution d'une culture à une DO visée et temps de génération bactérien.">
+<link rel="canonical" href="https://www.biostudy.xyz/BioMicro/">
+<link rel="icon" type="image/png" href="/Pictures/favicon.png">
+<link rel="apple-touch-icon" href="/Pictures/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="BioStudy">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script>
+/* thème avant le premier rendu : choix mémorisé pour la période (jour / nuit) en cours, sinon celui du système */
+(()=>{const g=k=>{try{return localStorage.getItem(k)}catch(e){return null}},h=new Date().getHours(),th=g('bioMicroTheme');
+document.documentElement.dataset.theme=th&&g('bioMicroThemePeriod')===(h>=7&&h<20?'day':'night')?th:matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'})();
+</script>
+<style>
+/* ===== 1. Jetons : palette Réglages iOS (clair #f2f2f7 / groupes blancs ; sombre noir / groupes #1c1c1e) ===== */
+#bc{--serif:"Iowan Old Style","Palatino Linotype",Georgia,serif;--ease:cubic-bezier(.22,1,.36,1);--spring:cubic-bezier(.34,1.45,.64,1);
+--top:70px;--gx:14px;--navh:60px;--blur:22px;
+--grp:#fff;--fill:rgba(118,118,128,.12);--thumb:#fff;--tx:#000;--tx2:#6c6c70;--tx3:#8a8a8e;--sep:rgba(60,60,67,.18);
+--acc:var(--c-blue);--acc-tx:color-mix(in srgb,var(--acc) 78%,#000);--brand:#0064d2;
+--c-blue:#007aff;--c-indigo:#5856d6;--c-purple:#af52de;--c-pink:#ff2d55;--c-orange:#ff9500;--c-green:#34c759;--c-teal:#30b0c7;--c-cyan:#32ade6;--c-mint:#00c7be;--c-brown:#a2845e;
+--ok:#1f8a3b;--err:#d70015;--warn:#ff9500;
+--lg-rgb:255,255,255;--lg-a:.68;--lg-hi:#fff;--lg-sh:rgba(0,0,0,.12);--hair:rgba(0,0,0,.09);
+--fb:rgba(60,60,67,.3);--lens:rgba(120,120,128,.16);--lens-line:rgba(255,255,255,.9);--veil:rgba(0,0,0,.22);--blob:.3;
+color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",sans-serif;font-size:16px;line-height:1.4}
+[data-theme=dark] #bc{--grp:#1c1c1e;--fill:#2c2c2e;--thumb:#636366;--tx:#fff;--tx2:#a1a1a6;--tx3:#8e8e93;--sep:rgba(84,84,88,.6);
+--acc-tx:color-mix(in srgb,var(--acc) 72%,#fff);--brand:#4da3ff;
+--c-blue:#0a84ff;--c-indigo:#5e5ce6;--c-purple:#bf5af2;--c-pink:#ff375f;--c-orange:#ff9f0a;--c-green:#30d158;--c-teal:#40cbe0;--c-cyan:#64d2ff;--c-mint:#63e6e2;--c-brown:#ac8e68;
+--ok:#30d158;--err:#ff453a;
+--lg-rgb:28,28,30;--lg-a:.66;--lg-hi:rgba(255,255,255,.34);--lg-sh:rgba(0,0,0,.5);--hair:rgba(255,255,255,.08);
+--fb:rgba(235,235,245,.26);--lens:rgba(255,255,255,.17);--lens-line:rgba(255,255,255,.26);--veil:rgba(0,0,0,.5);--blob:0}
+/* accent par onglet : molarité bleu, massique sarcelle, molalité indigo, masse volumique orange, solution commerciale rose */
+#bc{--acc:var(--c-green)}#bc[data-tab="1"]{--acc:var(--c-indigo)}#bc[data-tab="2"]{--acc:var(--c-teal)}#bc[data-tab="3"]{--acc:var(--c-pink)}
+#bc .nb:nth-of-type(1){--nc:var(--c-green)}#bc .nb:nth-of-type(2){--nc:var(--c-indigo)}#bc .nb:nth-of-type(3){--nc:var(--c-teal)}#bc .nb:nth-of-type(4){--nc:var(--c-pink)}
+@media(min-width:600px){#bc{--gx:24px;--top:80px}}
+@media(min-width:900px){#bc{--gx:36px;--top:92px}}
+html{background:#f2f2f7;color-scheme:light;-webkit-text-size-adjust:100%;overflow-x:clip;overscroll-behavior:none;transition:background .4s}
+html[data-theme=dark]{background:#000;color-scheme:dark}
+body{margin:0;min-height:100dvh;overflow-x:clip;overscroll-behavior:none;-webkit-font-smoothing:antialiased}
+#bc::before{content:"";position:fixed;inset:-50%;z-index:-1;pointer-events:none;opacity:var(--blob);filter:blur(60px);animation:flow 20s ease-in-out infinite alternate;
+background:radial-gradient(circle at 20% 30%,rgba(10,132,255,.5),transparent 40%),radial-gradient(circle at 80% 70%,rgba(94,92,230,.25),transparent 40%),radial-gradient(circle at 50% 10%,rgba(142,142,147,.15),transparent 40%)}
+@keyframes flow{to{transform:translate(-4%,3%) rotate(8deg)}}
+:where(#bc) *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:where(#bc) :is(button,input,select){font:inherit;color:inherit}
+:where(#bc) button{border:0;background:none;cursor:pointer;touch-action:manipulation}
+#bc :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+#bc :is(input,select):focus-visible{outline:none}
+#bc [hidden]{display:none!important}
+.ic{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+/* ===== 2. Verre (barres, menus, historique) : un seul style, reflet qui suit la souris ===== */
+.glass{position:relative;background:rgba(var(--lg-rgb),var(--lg-a));-webkit-backdrop-filter:blur(var(--blur)) saturate(190%);backdrop-filter:blur(var(--blur)) saturate(190%);
+box-shadow:inset 0 1px 0 var(--lg-hi),0 0 0 .5px var(--hair),0 12px 30px var(--lg-sh)}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;
+background:radial-gradient(circle 90px at var(--mx,50%) var(--my,50%),rgba(255,255,255,.28),transparent 70%)}
+.glass.lit::after{opacity:1}
+@media(prefers-reduced-transparency:reduce){.glass{background:var(--grp);-webkit-backdrop-filter:none;backdrop-filter:none}}
+
+/* ===== 3. En-tête ===== */
+header{position:fixed;top:0;left:0;right:0;z-index:20;padding-top:env(safe-area-inset-top);pointer-events:none}
+.hin{max-width:1080px;margin:auto;padding:12px var(--gx);display:flex;justify-content:space-between;align-items:center;gap:8px;animation:drop .7s var(--ease)}
+@keyframes drop{from{opacity:0;transform:translateY(-100%)}}
+.logo-c{flex:1;min-width:0;pointer-events:auto}
+.logo{font-size:clamp(1.45rem,6.4vw,1.9rem);font-weight:800;letter-spacing:-.6px;line-height:1;white-space:nowrap}
+.logo i{font-style:normal;color:var(--brand)}
+.sub{font-size:.75rem;font-weight:600;color:var(--tx2);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hact{pointer-events:auto;display:flex;align-items:center;gap:8px;position:relative}
+.tools{height:48px;padding:0 4px;border-radius:999px;display:flex;align-items:center;gap:2px}
+.tb,.mb{display:grid;place-items:center;border-radius:50%;font-size:20px;transition:transform .35s var(--spring),background .3s}
+.tb{width:40px;height:40px;position:relative;z-index:1}
+.mb{width:48px;height:48px}
+.tb:active{transform:scale(.86);background:var(--fill)}
+.mb:active{transform:scale(.88)}
+@media(hover:hover){.tb:hover{background:var(--fill)}.mb:hover{transform:scale(1.06)}}
+.badge{position:absolute;top:7px;right:7px;width:9px;height:9px;border-radius:50%;background:var(--warn);transform:scale(0);transition:transform .35s var(--spring)}
+.badge.on{transform:none;animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,159,10,.8)}70%,to{box-shadow:0 0 0 8px transparent}}
+.pop{position:absolute;top:calc(100% + 10px);right:56px;padding:6px;border-radius:26px;display:none;flex-direction:column;transform-origin:top right}
+.pop.on{display:flex;animation:pop .45s var(--spring)}
+.lmenu{min-width:176px}
+@keyframes pop{from{opacity:0;transform:scale(.86) translateY(-8px)}}
+.lmenu button{position:relative;z-index:1;min-height:44px;padding:11px 16px;border-radius:999px;text-align:left;font-size:15px;font-weight:600}
+.lmenu button:hover,.lmenu button.on{background:var(--fill);color:var(--acc-tx)}
+
+/* ===== 4. Page : saisie puis résultat ===== */
+.shell{min-height:100dvh;max-width:1080px;margin:auto;display:flex;flex-direction:column;
+padding:calc(var(--top) + env(safe-area-inset-top)) var(--gx) calc(var(--navh) + 96px + env(safe-area-inset-bottom))}
+.stage{flex:1 0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:26px;align-content:center;animation:rise .7s var(--ease) backwards}
+@keyframes rise{from{opacity:0;transform:translateY(24px)}}
+@media(min-width:900px){.stage{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:32px}}
+.inputs{display:flex;flex-direction:column;min-width:0}
+.thead{display:flex;align-items:center;gap:10px;margin:0 4px 14px}
+.roll{height:38px;overflow:hidden}
+.roll>div{transition:transform .8s var(--spring)}
+.roll span{height:38px;display:grid;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rnb{width:30px;flex-shrink:0;font-size:27px;color:var(--acc-tx)}
+.rnb span{place-items:center}
+.rttl{flex:1;min-width:0;font-size:clamp(22px,5vw,27px);font-weight:800;letter-spacing:-.6px}
+.view{display:none}
+.view.on{display:block}
+/* en-têtes de groupe façon Réglages */
+.gh{margin:20px 16px 7px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--tx2)}
+/* segments : la pastille se place en CSS (--i : index, --n : nombre) */
+.seg{position:relative;display:flex;padding:3px;border-radius:999px;background:var(--fill);--i:0;--n:2}
+.seg .th{position:absolute;top:3px;bottom:3px;left:3px;width:calc((100% - 6px)/var(--n));border-radius:999px;background:var(--thumb);box-shadow:0 2px 6px rgba(0,0,0,.18);
+transform:translateX(calc(var(--i)*100%));transition:transform .5s var(--spring)}
+.seg button{flex:1;min-width:0;height:34px;position:relative;z-index:1;border-radius:999px;font-size:14px;font-weight:600;color:var(--tx2);white-space:nowrap;transition:color .3s,transform .35s var(--spring)}
+.seg button:active{transform:scale(.94)}
+.seg button.on{color:var(--tx)}
+/* « Calculer » : symbole + nom court ; la grandeur choisie disparaît des valeurs connues */
+.cal button{height:52px;padding:0 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.cal b,.sym,.fl{font-family:var(--serif);font-style:italic;color:var(--acc-tx)}
+.cal b{font-size:20px;line-height:1}
+.cal small{max-width:100%;font-size:11px;overflow:hidden;text-overflow:ellipsis}
+:is(.cal b,.sym,.fl) sub{font-size:.6em}
+/* valeurs connues : un groupe, une ligne par grandeur ; seule l'unité est en capsule */
+.grp{background:var(--grp);border-radius:22px;overflow:hidden}
+.vr{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;min-height:58px;padding:8px 12px 8px 16px;transition:background .25s}
+.vr:not([hidden])~.vr::before{content:"";position:absolute;top:0;left:16px;right:0;height:.5px;background:var(--sep)}
+.vr:focus-within{background:color-mix(in srgb,var(--grp) 94%,var(--acc))}
+.lb{flex:1 1 96px;min-width:0;display:flex;align-items:baseline;gap:10px;font-size:15px;font-weight:600;line-height:1.25}
+.lb .ls{display:none}
+@media(max-width:599px){.lb .ln{display:none}.lb .ls{display:inline}}
+/* scientifique sur mobile : tout tient sur la ligne (champs plus compacts) */
+@media(max-width:599px){.vr:has(>.ctl.sci) .lb{flex-basis:56px}.ctl.sci{gap:5px}.ctl.sci .val{flex-basis:78px;width:78px;padding:0 10px;font-size:17px}
+.ctl.sci .exp{flex-basis:42px;width:42px}.ctl.sci .sel{flex-basis:92px;width:92px;padding:0 22px 0 11px;font-size:14px;background-position:right 8px center}}
+/* décimale sur mobile (Ajuster DO, durées) : mêmes champs compacts, valeur et unité sur la ligne du libellé */
+@media(max-width:599px){.vr:has(>.ctl:not(.sci)) .lb{flex-basis:56px}.ctl:not(.sci) .val{flex-basis:96px;width:96px;padding:0 12px;font-size:17px}.ctl:not(.sci) .sel{flex-basis:92px;width:92px;padding:0 22px 0 11px;font-size:14px;background-position:right 8px center}.hm{flex-basis:96px;width:96px;padding:0 12px;font-size:17px}}
+.sym{flex-shrink:0;min-width:28px;height:28px;padding:0 7px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;align-self:center;background:var(--sc);color:#fff;font-size:16px;font-weight:700;line-height:1;white-space:nowrap}
+.lb{align-items:center}
+.ctl{flex:1 0 auto;display:flex;align-items:center;justify-content:flex-end;gap:8px}
+/* champs modifiables : capsule bordée teintée (les unités restent des capsules grises à chevron) */
+.val,.exp{border:1.5px solid var(--fb);background:transparent;border-radius:999px;font-weight:600;cursor:text;
+transition:border-color .2s,box-shadow .2s,background .2s}
+.val{flex:0 0 112px;width:112px;min-width:0;height:42px;padding:0 14px;font-size:19px;text-align:right}
+.ctl.sci .val{flex-basis:92px;width:92px}
+.exp{flex:0 0 52px;width:52px;height:38px;font-size:16px;text-align:center}
+/* heures de début et de fin (Ajuster DO) : même champ bordé, sans exposant ni unité */
+/* bloc Δt : début et fin côte à côte (heures | minutes), jour de fin, Δt calculé en dessous */
+.vr.dtr{flex-direction:column;align-items:stretch;gap:10px;padding:12px 16px 14px}.vr.dtr>.lb{flex:none}
+.clk{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.clk.one{grid-template-columns:1fr}
+.hc{min-width:0;display:flex;flex-direction:column;gap:6px}
+.hc>small{font-size:12px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.3px}
+.hh{display:flex;align-items:center;gap:6px}
+.hh b{font-size:15px;font-weight:700;color:var(--tx2)}
+.hn{flex:1 1 0;min-width:0;max-width:72px;height:42px;padding:0 6px;border:1.5px solid var(--fb);background:transparent;border-radius:999px;font:600 19px/1 inherit;color:inherit;text-align:center;cursor:text;transition:border-color .2s,box-shadow .2s,background .2s}
+.hn:focus{outline:0;border-color:var(--acc);background:var(--grp);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 22%,transparent)}
+.hn::placeholder{color:var(--tx3);font-weight:500}
+.day{display:flex;align-items:center;gap:10px}.day>small{flex-shrink:0;font-size:12px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.3px}
+.day .seg{flex:1}.day .seg button{height:30px;font-size:13px}.day .seg button:disabled{opacity:.35}
+.dtres{padding:10px 14px;border-radius:999px;background:color-mix(in srgb,var(--acc) 12%,transparent);color:var(--acc-tx);font-size:16px;font-weight:700;text-align:center}
+.dtres.w{background:var(--fill);color:var(--tx3);font-weight:500}
+.val:focus,.exp:focus{border-color:var(--acc);background:var(--grp);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 22%,transparent)}
+.val::placeholder,.exp::placeholder{color:var(--tx3);font-weight:500}
+.x10{font-size:13px;font-weight:700;color:var(--tx2)}
+.ctl:not(.sci) :is(.x10,.exp){display:none}
+.sel{flex:0 0 108px;width:108px;height:38px;padding:0 28px 0 14px;border:0;border-radius:999px;appearance:none;-webkit-appearance:none;cursor:pointer;
+background:var(--fill) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a8f9b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e") no-repeat right 10px center/12px;
+font-size:15px;font-weight:600;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:transform .3s var(--spring)}
+.sel:active{transform:scale(.97)}
+.sel:focus-visible{box-shadow:0 0 0 2px var(--acc)}
+.sel option{background:var(--grp);color:var(--tx)}
+.sel.one{background-image:none;padding-right:14px;pointer-events:none}
+.sel.ghost{visibility:hidden}#ru .ghost{display:none}
+.fl{margin:12px 0 0;padding:12px 20px;border-radius:999px;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;
+background:color-mix(in srgb,var(--acc) 12%,transparent);border:1px solid color-mix(in srgb,var(--acc) 28%,transparent);font-size:22px;font-weight:600;font-style:normal}
+.fl small{font:700 11px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;letter-spacing:.5px;text-transform:uppercase;color:var(--acc-tx);opacity:.8}
+.fl span{font-style:italic;white-space:nowrap;line-height:1.35;text-align:center}
+.fl.hit{animation:lawpop .45s var(--spring)}
+@keyframes lawpop{40%{transform:scale(1.04)}}
+/* résultat : valeur + unité (capsule), équation, actions */
+.results{display:flex;flex-direction:column;min-width:0}
+.results>.gh{margin-top:0}
+.rg{background:var(--grp);border-radius:22px;overflow:hidden;text-align:center}
+.rv{min-height:92px;padding:22px 16px 8px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px}
+.num{font-size:clamp(32px,10vw,44px);font-weight:800;letter-spacing:-1px;line-height:1.1;white-space:nowrap;font-variant-numeric:tabular-nums}
+#ru .sel{flex:none;width:auto;height:42px;padding:0 34px 0 16px;background-position:right 12px center;font-size:20px;font-weight:700;color:var(--acc-tx)}
+.eq{padding:0 16px 16px;font-size:14px;font-weight:500;color:var(--tx2);line-height:1.45;overflow-wrap:anywhere}
+.acts{display:flex;border-top:.5px solid var(--sep)}
+.ab{flex:1;height:50px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:600;color:var(--acc-tx);transition:opacity .2s,color .2s}
+.ab+.ab{border-left:.5px solid var(--sep)}
+.ab .ic{font-size:17px}
+.ab:active{opacity:.5}
+.ab:disabled{opacity:.35;pointer-events:none}
+.ab.ok{color:var(--ok)}
+.bump{animation:bump .55s var(--spring)}
+@keyframes bump{40%{transform:scale(1.07)}}
+.tip{margin:10px 16px 0;display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--tx2);line-height:1.45}
+.tip:empty{display:none}
+.tip .ic{margin-top:2px;font-size:15px}
+.tip.err{color:var(--err);font-weight:600}
+.tip.warn{color:var(--warn);font-weight:600}
+.tip span{white-space:pre-line}
+
+/* ===== 5. Barre d'onglets (façon BioCampus) et résultat flottant ===== */
+.nav{position:fixed;z-index:30;bottom:max(12px,env(safe-area-inset-bottom));left:12px;right:12px;max-width:440px;height:var(--navh);margin-inline:auto;border-radius:999px;
+animation:navin .8s var(--ease) backwards .2s}
+@keyframes navin{from{opacity:0;translate:0 40px;scale:.94}}
+@keyframes navin-d{from{opacity:0;translate:0 -30px;scale:.94}}
+.nav-in{height:100%;padding:5px;border-radius:999px;display:flex;touch-action:pan-y;-webkit-user-select:none;user-select:none;cursor:grab}
+.nav-in.dragging{cursor:grabbing}
+.sl{position:absolute;top:5px;bottom:5px;left:0;width:80px;z-index:1;border-radius:999px;pointer-events:none;translate:5px 0;
+background:var(--lens);border:1px solid var(--lens-line);box-shadow:inset 0 1px 1px rgba(255,255,255,.5),0 4px 14px rgba(0,0,0,.14);
+transition:translate .6s var(--spring),width .3s var(--ease),scale .3s var(--spring)}
+.sl.interacting{scale:1.06 1.12}
+.dragging .sl{transition:scale .25s var(--spring)}
+.nb{flex:1;position:relative;z-index:2;border-radius:999px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+font-size:.66rem;font-weight:500;color:var(--tx2);white-space:nowrap;transition:color .3s,transform .45s var(--spring)}
+.nb:active{transform:scale(.92)}
+.nb .ic{font-size:20px}
+.nb.on{color:var(--acc-tx);font-weight:600}
+.nb .ic{color:var(--nc);opacity:.75;transition:opacity .3s}.nb.on .ic{opacity:1}
+.nb.on .ic{animation:ipop .35s var(--ease)}
+@keyframes ipop{from{transform:scale(.85)}}
+.mini{position:fixed;z-index:29;left:12px;right:12px;max-width:440px;margin-inline:auto;bottom:calc(max(12px,env(safe-area-inset-bottom)) + var(--navh) + 10px);
+min-height:46px;padding:8px 18px;border-radius:999px;display:flex;align-items:baseline;justify-content:center;gap:8px;font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;
+opacity:0;translate:0 16px;pointer-events:none;transition:opacity .3s,translate .45s var(--spring)}
+.mini.on{opacity:1;translate:0;pointer-events:auto}
+#bc.kb .mini{bottom:auto}
+#bc.kb .nav{visibility:hidden}
+.mini span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini .ml{font:italic 700 17px var(--serif);color:var(--acc-tx)}
+.mini .mu{font-size:16px;color:var(--acc-tx)}
+
+/* ===== 6. Historique (verre), choix d'unité composée (molettes façon horloge) ===== */
+.ov{position:fixed;inset:0;z-index:40;display:flex;justify-content:flex-end;visibility:hidden;transition:background .4s,visibility 0s .6s}
+.ov.on{background:var(--veil);visibility:visible;transition:background .4s}
+.sheet{--lg-a:.7;--blur:30px;width:88%;max-width:420px;height:100%;border-radius:32px 0 0 32px;display:flex;flex-direction:column;
+padding:max(20px,env(safe-area-inset-top)) 18px max(20px,env(safe-area-inset-bottom));transform:translateX(104%);transition:transform .6s var(--ease)}
+.ov.on .sheet{transform:none}
+.oh{display:flex;justify-content:space-between;align-items:center;padding:0 4px 12px;border-bottom:.5px solid var(--sep)}
+.ot{font-size:20px;font-weight:800}
+.x,.hdel{width:40px;height:40px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;font-size:17px;transition:transform .45s var(--spring),color .2s}
+.x{background:var(--fill)}
+.x:active{transform:scale(.85) rotate(90deg)}
+.hl{flex:1;overflow-y:auto;overscroll-behavior:contain;padding-bottom:14px}
+.hi{display:flex;align-items:center;gap:8px;padding:12px 0 12px 4px;border-bottom:.5px solid var(--sep);animation:slide .5s var(--ease) backwards}
+@keyframes slide{from{opacity:0;transform:translateY(-8px)}}
+.hi>div{flex:1;min-width:0}
+.ht{font-size:12px;font-weight:700;color:var(--acc-tx)}
+.hd{margin-top:3px;font-size:14px;font-weight:500;line-height:1.45;overflow-wrap:anywhere}
+.hd b{color:var(--acc-tx)}
+.hdel{color:var(--tx2)}
+.hdel:hover{color:var(--err)}
+.hempty{padding:30px 0;text-align:center;font-size:14px;color:var(--tx2)}
+.clr{min-height:48px;margin-top:8px;border-radius:999px;border:1.5px solid var(--err)!important;color:var(--err);font-size:14px;font-weight:700;transition:transform .35s var(--spring)}
+.clr:active{transform:scale(.95)}
+.upop{--lg-a:.86;position:fixed;z-index:60;width:min(300px,calc(100vw - 16px));padding:12px;border-radius:22px;max-height:calc(100dvh - 16px);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.up-n{display:flex;flex-wrap:wrap;gap:6px;padding-bottom:12px;margin-bottom:8px;border-bottom:.5px solid var(--sep)}
+.up-n button{min-height:34px;padding:0 12px;border-radius:999px;background:var(--fill);font-size:14px;font-weight:600}
+.up-n button.on{background:var(--acc);color:#fff}
+.up-h{display:grid;grid-template-columns:1fr 1fr;padding:4px 0 6px;text-align:center;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tx2)}
+.up-c{position:relative;height:200px;display:grid;grid-template-columns:1fr 1fr;
+-webkit-mask-image:linear-gradient(transparent,#000 28%,#000 72%,transparent);mask-image:linear-gradient(transparent,#000 28%,#000 72%,transparent)}
+.up-lens{position:absolute;left:0;right:0;top:80px;height:40px;border-radius:12px;background:var(--fill);pointer-events:none}
+.up-wh{position:relative;padding:80px 0;overflow-y:auto;scroll-snap-type:y mandatory;overscroll-behavior:contain;scrollbar-width:none}
+.up-wh::-webkit-scrollbar{display:none}
+.up-it{height:40px;line-height:40px;text-align:center;scroll-snap-align:center;font-size:19px;font-weight:500;color:var(--tx2);cursor:pointer;transition:color .15s}
+.up-it.on{color:var(--tx);font-weight:700}
+
+/* ===== 7. Pied de page (footer-global.js) : dans le flux, sous le contenu ===== */
+#bc .shell>footer{position:relative!important;z-index:1!important;margin-top:24px!important;padding:24px 0 0!important}
+[data-theme=light] #bc .shell>footer a{background:var(--grp)!important;color:#000!important;border:1px solid rgba(0,0,0,.1)!important}
+[data-theme=light] #bc .shell>footer svg{filter:brightness(0)!important}
+[data-theme=light] #bc .shell>footer :is(span,p){color:#000!important}
+
+/* ===== 8. Adaptations ===== */
+@media(max-width:599px){.sub{display:none}
+#bc .shell>footer{width:100vw!important;max-width:100vw!important;margin-left:calc(50% - 50vw)!important;padding-inline:6px!important}
+#bc .shell>footer div{flex-wrap:nowrap!important;gap:4px!important;justify-content:center!important}
+#bc .shell>footer a{padding-inline:8px!important;font-size:11px!important;white-space:nowrap!important;flex-shrink:1!important}}
+@media(max-width:389px){.tools{height:44px}.tb{width:34px;height:34px;font-size:18px}.mb{width:44px;height:44px}.nb{font-size:.62rem}.sel{flex-basis:104px;width:104px}}
+@media(max-height:480px) and (orientation:landscape) and (min-aspect-ratio:3/2) and (max-width:1023px){#bc{--navh:52px;--top:62px}.stage{grid-template-columns:1fr 1fr}.nb{flex-direction:row;gap:6px}}
+/* PC ≥ 1024 × 600 : barre en haut, saisie à gauche, résultat à droite */
+@media(min-width:1024px) and (min-height:600px){
+#bc{--top:84px;--gx:32px}
+.hin{max-width:none;padding:16px 32px}
+.logo{font-size:1.8rem}.sub{font-size:.85rem}
+.tools{height:52px}.tb{width:44px;height:44px}.mb{width:52px;height:52px}.pop{right:62px}
+.nav{top:calc(env(safe-area-inset-top) + 14px);bottom:auto;left:0;right:0;width:min(700px,calc(100vw - 640px));max-width:none;height:56px;animation-name:navin-d}
+.nb{flex-direction:row;gap:8px;font-size:.78rem}
+.mini{display:none}
+.shell{max-width:none;margin:0;padding:calc(var(--top) + env(safe-area-inset-top)) var(--gx) 24px}
+.stage{width:100%;max-width:1400px;margin:0 auto;padding-top:24px;grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);align-content:start;gap:40px}
+.inputs{display:grid;grid-template-columns:minmax(0,1fr) 250px;align-items:center;column-gap:18px}
+.thead{margin-bottom:0}
+.view{grid-column:1/-1}
+.vr{min-height:62px}
+.val{flex-basis:150px;width:150px}.ctl.sci .val{flex-basis:120px;width:120px}.sel{flex-basis:118px;width:118px}
+.results{padding-top:52px}
+.rv{min-height:170px}
+.num{font-size:clamp(44px,4.4vw,72px)}
+#ru .sel{height:48px;font-size:24px}
+#bc .shell>footer{margin-top:32px!important}}
+@media(min-width:1024px) and (min-height:600px) and (max-width:1279px){.sub{display:none}.nb{flex-direction:column;gap:2px;font-size:11.5px}.nb .ic{font-size:18px}}
+@media(prefers-reduced-motion:reduce){#bc *,#bc ::before,#bc ::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* écriture des nombres choisie par champ, dans la fenêtre de l'unité */
+.upf{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:12px;margin-bottom:10px;border-bottom:.5px solid var(--sep);font-size:12px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.4px}
+.upf:last-child{padding-bottom:0;margin-bottom:0;border-bottom:0}
+.upf .seg{flex:0 0 172px}.upf .seg button{height:32px;font-size:13.5px;text-transform:none;letter-spacing:0}
+.ucap.u0{min-width:0}
+#upop .up-n:last-child{border-bottom:0;padding-bottom:0;margin-bottom:0}
+/* grandeur sans unité : pas de capsule ; unité unique sans choix d'écriture : capsule grise fixe, sans chevron */
+.ucap.u0{display:none!important}.ucap.u1:not(.tg){pointer-events:none;background-image:none;padding-right:14px}
+@media(max-width:599px){.vr>.lb{min-width:fit-content}}
+</style>
+<link rel="stylesheet" href="/verre.css">
+</head>
+<body>
+<div id="bc" data-fmt="sci">
+
+<header><div class="hin">
+  <div class="logo-c"><div class="logo">Bio<i>Micro</i></div><div class="sub" data-key="subtitle"></div></div>
+  <div class="hact">
+    <div class="tools glass">
+      <button class="tb" id="histBtn" data-tk="t_hist" data-ic="hist"><i id="badge" class="badge"></i></button>
+      <button class="tb" id="langBtn" data-tk="t_lang" data-ic="lang" aria-haspopup="true"></button>
+      <button class="tb" id="themeBtn" data-tk="t_theme"></button>
+    </div>
+    <div class="pop lmenu glass" id="lmenu"><button data-l="fr">FR · Français</button><button data-l="en">EN · English</button></div>
+    <button class="mb glass" id="mb" type="button" data-menu data-tk="t_menu" data-ic="menu"></button>
+  </div>
+</div></header>
+
+<div class="shell" id="shell">
+  <main class="stage" id="card">
+    <section class="inputs">
+      <div class="thead" aria-hidden="true"><div class="roll rnb"><div id="rn"></div></div><div class="roll rttl"><div id="rtt"></div></div></div>
+      <div id="views" style="display:contents"></div>
+    </section>
+    <section class="results" id="resBox">
+      <p class="gh" id="rt"></p>
+      <div class="rg">
+        <div class="rv" id="rv" aria-live="polite"><div id="num" class="num">-</div><div id="ru"></div></div>
+        <div id="eq" class="eq"></div>
+        <div class="acts"><button class="ab" id="bCopy"></button><button class="ab" id="bSave"></button></div>
+      </div>
+      <div id="tip" class="tip"></div>
+    </section>
+  </main>
+  <script src="/footer-global.js"></script>
+</div>
+
+<nav class="nav" id="navWrap" aria-label="Navigation"><div class="nav-in glass" id="nav"><span class="sl" id="sl"></span></div></nav>
+<button class="mini glass" id="mini" type="button"><span class="ml" id="ml"></span><span id="miniN"></span><span class="mu" id="miniU"></span></button>
+
+<div class="ov" id="ov" role="dialog" aria-modal="true" aria-labelledby="hT"><div class="sheet glass">
+  <div class="oh"><span class="ot" id="hT" data-key="hist_title"></span><button class="x" id="hClose" data-ic="close" data-tk="t_close"></button></div>
+  <div class="hl" id="hl"></div><button class="clr" id="hClr" data-key="hist_clear"></button>
+</div></div>
+<div class="upop glass" id="upop" hidden></div>
+</div>
+
+<script src="/liquid-glass.js"></script>
+<script>
+(()=>{'use strict';
+/* ---------- 1. Outils ---------- */
+const $=id=>document.getElementById(id),BC=$('bc'),root=document.documentElement;
+const $$=(s,c=BC)=>[...c.querySelectorAll(s)];
+const sto={g(k){try{return localStorage.getItem(k)}catch(e){return null}},s(k,v){try{localStorage.setItem(k,v)}catch(e){}},d(k){try{localStorage.removeItem(k)}catch(e){}}};
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1;
+/* retour haptique : vibration courte (Android), sinon interrupteur natif caché (iPhone, iOS 18+) */
+function buzz(p=14){try{if(navigator.vibrate){navigator.vibrate(p);return}if(!IOS)return;
+  const l=document.createElement('label'),i=document.createElement('input');i.type='checkbox';i.setAttribute('switch','');
+  l.dataset.hap='';l.style.display='none';l.appendChild(i);document.head.appendChild(l);l.click();l.remove()}catch(e){}}
+const OK=[12,60,18];
+
+/* ---------- 2. Icônes : Lucide (ISC) ---------- */
+const IC=Object.fromEntries(Object.entries({
+  dish:'<circle cx="12" cy="12" r="9"/><circle cx="9" cy="9.5" r="1.3"/><circle cx="14.8" cy="9" r="1"/><circle cx="13.2" cy="14.6" r="1.5"/><circle cx="8.6" cy="15" r=".9"/>',
+  cuv:'<path d="M8 2h8"/><path d="M9 2v18a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2V2"/><path d="M9 12h6"/><path d="M2 8h4"/><path d="M18 8h4"/>',
+  pip:'<path d="m12 9-8.4 8.4A2 2 0 0 0 3 18.8v1.4a2 2 0 0 1-.6 1.4 2 2 0 0 1 1.4-.6h1.4a2 2 0 0 0 1.4-.6L15 12"/><path d="m18 9 .4.4a1 1 0 1 1-3 3l-3.8-3.8a1 1 0 1 1 3-3l.4.4 3.4-3.4a1 1 0 1 1 3 3z"/>',
+  grow:'<path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/>',
+  clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+  hist:'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+  lang:'<path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+  moon:'<path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/>',
+  dl:'<path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/>',
+  menu:'<path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/>',
+  copy:'<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
+  save:'<path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  close:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+  warn:'<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>'
+}).map(([k,d])=>[k,`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`]));
+
+/* ---------- 3. Textes ---------- */
+const T={
+fr:{subtitle:"Calculs de microbiologie",fmt_std:"Décimale",fmt_sci:"Scientifique",calc:"Grandeur recherchée",known:"Données",law:"Relation",
+a_exp:"Exposant de 10",a_unit:"Unité",
+btn_copy:"Copier",btn_copied:"Copié",btn_save:"Enregistrer",btn_saved:"Enregistré",
+hist_title:"Historique",hist_empty:"Aucun calcul enregistré.",hist_clear:"Effacer l'historique",
+t_hist:"Historique",t_lang:"Langue",t_theme:"Changer le thème",t_menu:"Menu",t_close:"Fermer",t_del:"Supprimer",
+wait:"En attente de saisie",tip_wait:"Saisissez les données : le résultat s'affiche aussitôt.",
+bad:"Format non valide",tip_bad:"Écriture non reconnue : corrigez la saisie (exemples acceptés : 150 ; 1,5 ; 2e-3 ; 10^-6 ; 1/1000).",
+neg:"Valeur négative",tip_neg:"Une valeur négative n'a pas de sens ici : saisissez une valeur positive ou nulle.",
+zero:"Calcul impossible",tip_zero:"Une valeur nulle se trouve au dénominateur : saisissez une valeur non nulle.",
+ovf:"Résultat hors limites",tip_ovf:"Résultat trop grand ou trop petit pour être calculé : vérifiez les valeurs et les exposants saisis.",
+conc:"Dilution impossible",tip_conc:"Une dilution ne peut que diminuer la DO : la DO visée doit être inférieure ou égale à la DO de la culture, et le volume de culture prélevé au plus égal au volume final.",
+vol:"Volume impossible",tip_vol:"Le volume de culture à prélever ne peut pas dépasser le volume final : vérifiez les DO et les volumes saisis.",
+grow:"Pas de croissance",tip_grow:"Sans croissance (N ≤ N₀), le temps de génération n'est pas défini : la population finale N doit être supérieure à la population initiale N₀.",
+foot_dev:"Design & Développement",
+nav:["UFC/mL","DO → cellules","Ajuster DO","Croissance"],
+tabs:["Dénombrement (UFC/mL)","DO → concentration cellulaire","Ajuster la DO d'une culture","Croissance exponentielle"],
+v_n:"Colonies comptées",v_Vp:"Volume ensemencé",v_d:"Dilution ensemencée",v_C:"Concentration de l'échantillon initial",
+v_A:"DO₆₀₀ lue",v_f:"Facteur de dilution avant lecture",v_k:"Cellules/mL pour une DO₆₀₀ de 1",v_X:"Concentration cellulaire",
+v_N0:"Population initiale",v_N:"Population finale",v_t:"Durée (en phase exponentielle)",v_g:"Temps de génération",
+s_n:"Colonies",s_Vp:"Volume",s_d:"Dilution",s_C:"UFC/mL",s_A:"DO lue",s_f:"Fact. dil.",s_k:"Cell. à DO 1",s_X:"Cellules",
+s_N0:"Initiale",s_N:"Finale",s_t:"Durée",s_g:"Génération",
+n_log:"log₁₀ C = {v} (C en UFC/mL)",n_int:"Un nombre de colonies est un entier : vérifiez la saisie.",n_ok:"Boîte dénombrable (repère usuel : 30 à 300 colonies).",n_few:"Moins de 30 colonies : estimation peu précise (repère usuel : 30 à 300). Comptez plutôt la boîte d'une dilution moins poussée.",
+n_many:"Plus de 300 colonies : comptage peu fiable (repère usuel : 30 à 300). Comptez plutôt la boîte d'une dilution plus poussée.",n_fac:"Facteur de dilution {v} saisi : le calcul utilise la dilution correspondante (1 / facteur).",n_ff:"Valeur {v} saisie comme dilution : le calcul utilise le facteur de dilution correspondant, {w}.",
+n_od:"DO₆₀₀ de l'échantillon non dilué (A · f) : {v}",n_hi:"DO lue supérieure à 1 : souvent hors de la zone de linéarité (elle dépend du spectrophotomètre). Diluez l'échantillon avant lecture et indiquez le facteur de dilution.",
+n_lo:"DO lue inférieure à 0,05 : trop proche du blanc, lecture peu fiable. Lisez si possible un échantillon moins dilué.",n_k:"Le facteur DO₆₀₀ → cellules/mL dépend de l'organisme, de l'état des cellules et du spectrophotomètre : établissez-le par un comptage. Ordres de grandeur souvent cités : E. coli ≈ 8 × 10⁸ ; levure (S. cerevisiae) ≈ 3 × 10⁷ cellules/mL.",
+n_lin:"DO supérieure à 1 : souvent hors de la zone de linéarité du spectrophotomètre, la DO n'est plus proportionnelle au nombre de cellules. Diluez avant lecture et saisissez la DO × facteur de dilution.",n_add:"Compléter jusqu'au volume final avec {v} de milieu stérile (V_f − V_i).",n_mu:"Taux de croissance spécifique μ = ln 2 / g = {v} h⁻¹",n_gen:"Nombre de générations n = log₂(N / N₀) = {v}",
+when:"DO visée atteinte",w_now:"Tout de suite",w_later:"Après croissance",
+v_Dt:"Durée de croissance (de l'ensemencement au moment voulu)",v_Lag:"Phase de latence (vide = 0)",v_Dft:"DO₆₀₀ visée",v_Ap:"DO₆₀₀ de la culture de départ (si lue diluée : lecture × facteur de dilution)",v_Vm:"Volume final",v_Vin:"Volume de culture à prélever",
+c_t:"Durée de croissance Δt (de l'ensemencement à la DO visée)",c_a:"Début",c_a1:"Début (facultatif)",c_b:"Fin",c_d0:"Même jour",c_d1:"Lendemain",c_d2:"J+2",
+dt_w:"Saisissez l'heure de début et l'heure de fin",dt_r:"Δt = {d} = {v} h",s_h0:"Début",s_h1:"Fin",a_hh:"Heures",a_mm:"Minutes",
+hm:"Heure non valide",tip_hm:"Heures de 0 à 23 et minutes de 0 à 59 (ex. 17 h 30).",
+e_end:"Fin prévue : {b}{d}",d1:" le lendemain",dn:" (J+{n})",
+s_Dt:"Durée",s_Lag:"Latence",s_Dft:"DO visée",s_Ap:"DO départ",s_Vm:"V final",s_Vin:"V culture",
+lag:"Durée trop courte",tip_lag:"La durée Δt doit dépasser la latence L : pendant la latence, les cellules ne se divisent pas encore. Allongez Δt ou vérifiez la latence saisie.",
+over:"DO visée déjà dépassée",tip_over:"Dès l'ensemencement, la culture serait à une DO supérieure ou égale à la DO visée : prélevez moins de culture ou visez une DO plus élevée.",
+e_n:"n = (Δt − L) / g = {n} générations ; DO juste après l'ensemencement = {v}",e_nt:"n = log₂(DO_f / DO_i) = {n} générations, avec DO_i = DO_c · V_i / V_f = {v}",e_nolag:"Sans latence (L = 0) : V_i = {v}",
+e_small:"Moins de 1 µL : difficile à prélever avec précision. Diluez d'abord la culture de départ à {d} dans du milieu stérile (dilutions successives au 1/10), puis prélevez {v} de cette dilution.",
+e_exp:"Croissance supposée exponentielle jusqu'à la DO visée."},
+en:{subtitle:"Microbiology calculations",fmt_std:"Decimal",fmt_sci:"Scientific",calc:"Unknown",known:"Data",law:"Relation",
+a_exp:"Power of 10",a_unit:"Unit",
+btn_copy:"Copy",btn_copied:"Copied",btn_save:"Save",btn_saved:"Saved",
+hist_title:"History",hist_empty:"No saved calculations.",hist_clear:"Clear history",
+t_hist:"History",t_lang:"Language",t_theme:"Toggle theme",t_menu:"Menu",t_close:"Close",t_del:"Delete",
+wait:"Awaiting input",tip_wait:"Enter the data: the result appears instantly.",
+bad:"Invalid format",tip_bad:"Notation not recognised: correct the entry (accepted examples: 150, 1.5, 2e-3, 10^-6, 1/1000).",
+neg:"Negative value",tip_neg:"A negative value makes no sense here: enter a positive value or zero.",
+zero:"Calculation impossible",tip_zero:"A zero value is in the denominator: enter a non-zero value.",
+ovf:"Result out of range",tip_ovf:"The result is too large or too small to compute: check the values and exponents entered.",
+conc:"Dilution impossible",tip_conc:"Dilution can only lower the OD: the target OD must not exceed the culture OD, and the culture volume taken must not exceed the final volume.",
+vol:"Impossible volume",tip_vol:"The culture volume to take cannot exceed the final volume: check the ODs and volumes entered.",
+grow:"No growth",tip_grow:"Without growth (N ≤ N₀) the generation time is undefined: the final population N must be greater than the initial population N₀.",
+foot_dev:"Design & Development",
+nav:["CFU/mL","OD → cells","Adjust OD","Growth"],
+tabs:["Plate count (CFU/mL)","OD → cell concentration","Adjust culture OD","Exponential growth"],
+v_n:"Colonies counted",v_Vp:"Volume plated",v_d:"Dilution plated",v_C:"Concentration of the original sample",
+v_A:"Measured OD₆₀₀",v_f:"Dilution factor before reading",v_k:"Cells/mL at OD₆₀₀ = 1",v_X:"Cell concentration",
+v_N0:"Initial population",v_N:"Final population",v_t:"Time (in exponential phase)",v_g:"Generation time",
+s_n:"Colonies",s_Vp:"Volume",s_d:"Dilution",s_C:"CFU/mL",s_A:"OD read",s_f:"Dil. factor",s_k:"Cells at OD 1",s_X:"Cells",
+s_N0:"Initial",s_N:"Final",s_t:"Time",s_g:"Generation",
+n_log:"log₁₀ C = {v} (C in CFU/mL)",n_int:"A colony count is a whole number: check the entry.",n_ok:"Countable plate (usual guideline: 30 to 300 colonies).",n_few:"Fewer than 30 colonies: imprecise estimate (usual guideline: 30 to 300). Count the plate from a less diluted sample instead.",
+n_many:"More than 300 colonies: unreliable count (usual guideline: 30 to 300). Count the plate from a more diluted sample instead.",n_fac:"Dilution factor {v} entered: the calculation uses the corresponding dilution (1 / factor).",n_ff:"Value {v} entered as a dilution: the calculation uses the corresponding dilution factor, {w}.",
+n_od:"OD₆₀₀ of the undiluted sample (A · f): {v}",n_hi:"Measured OD above 1: often outside the linear range (which depends on the spectrophotometer). Dilute the sample before reading and enter the dilution factor.",
+n_lo:"Measured OD below 0.05: too close to the blank, unreliable reading. Read a less diluted sample if possible.",n_k:"The OD₆₀₀ → cells/mL factor depends on the organism, the cell state and the spectrophotometer: determine it with a cell count. Commonly cited orders of magnitude: E. coli ≈ 8 × 10⁸, yeast (S. cerevisiae) ≈ 3 × 10⁷ cells/mL.",
+n_lin:"OD above 1: often outside the spectrophotometer linear range, the OD is no longer proportional to cell number. Dilute before reading and enter OD × dilution factor.",n_add:"Make up to the final volume with {v} of sterile medium (V_f − V_i).",n_mu:"Specific growth rate μ = ln 2 / g = {v} h⁻¹",n_gen:"Number of generations n = log₂(N / N₀) = {v}",
+when:"Target OD reached",w_now:"Right away",w_later:"After growth",
+v_Dt:"Growth time (from inoculation to the desired moment)",v_Lag:"Lag phase (empty = 0)",v_Dft:"Target OD₆₀₀",v_Ap:"OD₆₀₀ of the starting culture (if read diluted: reading × dilution factor)",v_Vm:"Final volume",v_Vin:"Culture volume to take",
+c_t:"Growth time Δt (from inoculation to the target OD)",c_a:"Start",c_a1:"Start (optional)",c_b:"End",c_d0:"Same day",c_d1:"Next day",c_d2:"D+2",
+dt_w:"Enter the start time and the end time",dt_r:"Δt = {d} = {v} h",s_h0:"Start",s_h1:"End",a_hh:"Hours",a_mm:"Minutes",
+hm:"Invalid time",tip_hm:"Hours from 0 to 23 and minutes from 0 to 59 (e.g. 17:30).",
+e_end:"Expected end: {b}{d}",d1:" the next day",dn:" (D+{n})",
+s_Dt:"Time",s_Lag:"Lag",s_Dft:"Target OD",s_Ap:"Start OD",s_Vm:"Final V",s_Vin:"Culture V",
+lag:"Time too short",tip_lag:"The time Δt must exceed the lag L: during the lag phase the cells do not divide yet. Increase Δt or check the lag entered.",
+over:"Target OD already exceeded",tip_over:"Right after inoculation the culture would already be at or above the target OD: take less culture or aim for a higher OD.",
+e_n:"n = (Δt − L) / g = {n} generations; OD right after inoculation = {v}",e_nt:"n = log₂(OD_f / OD_i) = {n} generations, with OD_i = OD_c · V_i / V_f = {v}",e_nolag:"Without lag (L = 0): V_i = {v}",
+e_small:"Less than 1 µL: hard to pipette accurately. First dilute the starting culture to {d} in sterile medium (successive 1/10 dilutions), then take {v} of this dilution.",
+e_exp:"Growth is assumed exponential up to the target OD."}};
+const S={lang:'fr',dark:root.dataset.theme==='dark',fmt:'sci',tab:-1,tgt:{},ok:false,last:null,hist:[]};
+const t=k=>T[S.lang][k],tv=(k,v)=>t(k).replace('{v}',v);
+
+/* ---------- 4. Unités : facteur vers l'unité de base de chaque grandeur ----------
+   bases : masse g, volume L, conc. molaire mol/L, conc. massique g/L, masse molaire g/mol, molalité mol/kg, masse volumique g/mL, %.
+   u : unités nommées ; r : unités composées « numérateur / dénominateur » = [numérateurs, dénominateurs, facteur vers la base] */
+const VOLm={L:1e3,mL:1,'µL':1e-3};
+/* bases : volume mL, concentrations par mL, temps h ; '' = grandeur sans unité */
+const D={cnt:{u:{colonies:1}},vol:{u:VOLm},dil:{u:{'':1}},cfu:{u:{'UFC/mL':1,'UFC/µL':1e3,'UFC/L':1e-3}},
+  od:{u:{'':1}},fac:{u:{'':1}},conv:{u:{'cell./mL':1}},cell:{u:{'cell./mL':1,'cell./µL':1e3,'cell./L':1e-3}},
+  pop:{u:{DO:1,'cell./mL':1,'UFC/mL':1}},time:{u:{min:1/60,h:1,j:24}}};
+function fu(dim,u){const d=D[dim];if(u in d.u)return d.u[u];const k=u.indexOf('/');
+  if(d.r&&k>0){const n=d.r[0][u.slice(0,k)],q=d.r[1][u.slice(k+1)];if(n&&q)return n/q*d.r[2]}return NaN}
+
+/* ---------- 5. Outils : grandeurs, lois, résolution pour chaque inconnue (valeurs en unités de base) ---------- */
+const V=(k,s,dim,u,n,ph,sh)=>({k,s,dim,u,n,ph,sh:sh||s});
+/* couleur de chaque type de grandeur */
+const DC={cnt:'orange',vol:'cyan',dil:'purple',cfu:'green',od:'indigo',fac:'purple',conv:'brown',cell:'green',pop:'teal',time:'pink'};
+const sub=(a,b)=>`${a}<sub>${b}</sub>`;
+/* une dilution saisie comme facteur (10⁶) est comprise comme 10⁻⁶ */
+const dl=d=>d>1?1/d:d;
+/* un facteur de dilution saisi comme dilution (0,1) est compris comme le facteur 10 */
+const fl=f=>f>0&&f<1?1/f:f;
+const TABS=[
+{id:'ufc',ic:'dish',sci:['C'],fix:['d'],vars:[V('n','N','cnt','colonies','n','150'),V('V','V','vol','µL','Vp','100'),V('d','d','dil','','d','1e-6'),V('C','C','cfu','UFC/mL','C','')],
+ f:{C:'C = N / (V · d)',n:'N = C · V · d',V:'V = N / (C · d)',d:'d = N / (C · V)'},
+ solve:{C:x=>x.n/(x.V*dl(x.d)),n:x=>x.C*x.V*dl(x.d),V:x=>x.n/(x.C*dl(x.d)),d:x=>x.n/(x.C*x.V)},
+ note:x=>{const o=[tv('n_log',dec(Math.log10(x.C).toFixed(2)))],n=x.n;let w=false;
+   if(S.tgt.ufc!=='n'&&Math.abs(n-Math.round(n))>1e-9){o.push(t('n_int'));w=true}
+   if(n<30){o.push(t('n_few'));w=true}else if(n>300){o.push(t('n_many'));w=true}else o.push(t('n_ok'));
+   if(x.d>1)o.push(tv('n_fac',fmt(x.d)).replace('{v}',fmt(x.d)));return(w?'!':'')+o.join('\n')}},
+{id:'do',ic:'cuv',sci:['k','X'],vars:[V('A','A','od','','A','0.5'),V('f','f','fac','','f','1'),V('k','k','conv','cell./mL','k','8e8'),V('X','X','cell','cell./mL','X','')],
+ f:{X:'X = A · f · k',A:'A = X / (f · k)',f:'f = X / (A · k)',k:'k = X / (A · f)'},
+ solve:{X:x=>x.A*fl(x.f)*x.k,A:x=>x.X/(fl(x.f)*x.k),f:x=>x.X/(x.A*x.k),k:x=>x.X/(x.A*fl(x.f))},
+ note:x=>{const o=[tv('n_od',fmt(x.A*fl(x.f)))];let w=false;if(S.tgt.do!=='f'&&x.f<1)o.push(t('n_ff').replace('{v}',fmt(x.f)).replace('{w}',fmt(1/x.f)));
+   if(x.A>1){o.push(t('n_hi'));w=true}else if(x.A<.05){o.push(t('n_lo'));w=true}
+   o.push(t('n_k'));return(w?'!':'')+o.join('\n')}},
+/* ajuster la DO : tout de suite (V_i = DO_f · V_f / DO_c) ou après croissance (V_i = DO_f · V_f / (DO_c · 2ⁿ), n = (Δt − L) / g) ; bases : temps h, volume mL */
+{id:'ens',ic:'pip',cal:['t','Df','Vi'],modes:1,clock:1,off:['t','L','g'],z:{t:0,L:0,g:1},
+ vars:[V('t','Δt','time','h','Dt','20.5'),{...V('L','L','time','h','Lag','0'),def:0},V('g','g','time','h','g','1.5'),V('Df','DOf','od','','Dft','0.1',sub('DO','f')),
+   V('A','DOc','od','','Ap','1.2',sub('DO','c')),V('Vf','Vf','vol','mL','Vm','50',sub('V','f')),V('Vi','Vi','vol','mL','Vin','',sub('V','i'))],
+ f0:{Vi:`${sub('V','i')} = ${sub('DO','f')} · ${sub('V','f')} / ${sub('DO','c')}`,Df:`${sub('DO','f')} = ${sub('DO','c')} · ${sub('V','i')} / ${sub('V','f')}`},
+ f:{Vi:`${sub('V','i')} = ${sub('DO','f')} · ${sub('V','f')} / (${sub('DO','c')} · 2<sup>n</sup>)`,Df:`${sub('DO','f')} = ${sub('DO','c')} · ${sub('V','i')} · 2<sup>n</sup> / ${sub('V','f')}`,t:`Δt = L + n · g`},
+ solve:{Vi:x=>x.Df*x.Vf/(x.A*2**((x.t-x.L)/x.g)),Df:x=>x.A*x.Vi*2**((x.t-x.L)/x.g)/x.Vf,t:x=>x.L+x.g*Math.log2(x.Df*x.Vf/(x.A*x.Vi))},
+ check:x=>!x.g||!x.A||!x.Vf?'zero':S.ensM==='now'?(x.Df>x.A*(1+1e-12)?'conc':x.Vi>x.Vf*(1+1e-12)?'vol':'')
+   :S.tgt.ens!=='t'&&x.t<=x.L?'lag':x.A*x.Vi/x.Vf>=x.Df*(1-1e-12)?'over':x.Vi>x.Vf*(1+1e-12)?'vol':'',
+ note:x=>{const fv=v=>v<1?`${fmt(v*1e3)} µL`:`${fmt(v)} mL`,k=Math.ceil(Math.log10(5e-3/x.Vi)-1e-9),
+   small=x.Vi<1e-3*(1-1e-9)?t('e_small').replace('{d}','10'+sup(-k)).replace('{v}',fv(x.Vi*10**k)):'';
+   if(S.ensM==='now')return(small?'!'+small+'\n':'')+tv('n_add',fv(x.Vf-x.Vi));
+   const n=(x.t-x.L)/x.g,o=[t(S.tgt.ens==='t'?'e_nt':'e_n').replace('{n}',fmt(n)).replace('{v}',fmt(x.Df/2**n))],c=S.clk;
+   if(c&&S.tgt.ens==='t'){const e=c.a+x.t,j=Math.floor(e/24+1e-9),d=j<1?'':j<2?t('d1'):t('dn').replace('{n}',j);o.unshift(t('e_end').replace('{b}',fh(e)).replace('{d}',d))}   // Δt calculé : heure de fin prévue
+   if(S.tgt.ens==='Vi'&&x.L>0)o.push(tv('e_nolag',fv(x.Df*x.Vf/(x.A*2**(x.t/x.g)))));
+   if(small)o.push(small);o.push(t('e_exp'));return(small?'!':'')+o.join('\n')}},
+{id:'gen',ic:'grow',vars:[V('N0','N0','pop','DO','N0','0.1',sub('N','0')),V('N','N','pop','DO','N','0.8'),V('t','t','time','min','t','90'),V('g','g','time','min','g','')],
+ f:{g:`g = t · ln 2 / ln(N / ${sub('N','0')})`,t:`t = g · log₂(N / ${sub('N','0')})`,N:`N = ${sub('N','0')} · 2<sup>t / g</sup>`,N0:`${sub('N','0')} = N / 2<sup>t / g</sup>`},
+ solve:{g:x=>x.t*Math.LN2/Math.log(x.N/x.N0),t:x=>x.g*Math.log2(x.N/x.N0),N:x=>x.N0*2**(x.t/x.g),N0:x=>x.N/2**(x.t/x.g)},
+ check:x=>x.N<=x.N0?'grow':'',
+ note:x=>{const o=[tv('n_mu',fmt(Math.LN2/x.g)),tv('n_gen',fmt(Math.log2(x.N/x.N0)))],od=$('gen-N0-u').value==='DO',w=od&&Math.max(x.N,x.N0)>1;
+   if(w)o.push(t('n_lin'));return(w?'!':'')+o.join('\n')}},
+];
+/* heure saisie : 17h30, 17:30, 17.30, 17,30 (minutes) ; 17,5 (heure décimale) ; 14 */
+/* heure saisie en deux champs : heures (0–23) et minutes (0–59, vide = 0) */
+function hm(id){const H=$(id+'h').value.trim(),M=$(id+'m').value.trim();if(!H&&!M)return{e:1};if(!H)return{e:1};
+  if(!/^\d{1,2}$/.test(H)||M&&!/^\d{1,2}$/.test(M))return{bad:1};const h=+H,m=+(M||0);return h<24&&m<60?{v:h+m/60}:{bad:1}}
+/* durée en heures → « 20 h 30 min » */
+const dur=h=>{const m=Math.round(h*60),H=Math.floor(m/60),M=m%60;return`${H} h${M?` ${String(M).padStart(2,'0')} min`:''}`};
+const fh=h=>{const m=Math.round(h*60)%1440,H=Math.floor(m/60),M=m%60;return S.lang==='fr'?`${H} h${M?' '+String(M).padStart(2,'0'):''}`:`${H}:${String(M).padStart(2,'0')}`};
+const calV=tb=>tb.cal?tb.vars.filter(v=>tb.cal.includes(v.k)):tb.vars;
+/* grandeurs masquées par le choix « Tout de suite » (valeurs fixées par tb.z) */
+S.ensM='now';const offK=tb=>new Set(tb.modes&&S.ensM==='now'?tb.off:[]);
+TABS.forEach(tb=>S.tgt[tb.id]=tb.vars[tb.vars.length-1].k);
+const cur=()=>TABS[S.tab];
+
+/* ---------- 6. Nombres : lecture souple, affichage à 4 chiffres significatifs ---------- */
+const sup=s=>String(s).replace(/./g,c=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[c]||({'-':'⁻','+':'⁺'}[c]||c));
+const clean=n=>Number.isFinite(n)&&n!==0?Number(n.toPrecision(12)):n;
+const dec=s=>S.lang==='fr'?s.replace('.',','):s;
+const grp=s=>{const p=s.split('.');p[0]=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f');return p.join('.')};
+function sciStr(c){const[m,e]=c.toExponential(11).split('e'),k=+e,mt=dec(String(Number(m)));return k?`${mt} × 10${sup(k)}`:mt}
+/* résultat : écriture du champ de la grandeur recherchée (S.rsci), sinon puissance de 10 seulement pour les très grands ou très petits nombres */
+const fmtR=n=>S.rsci&&Number.isFinite(n)&&n!==0?sciStr(Number(n.toPrecision(4))):fmt(n);
+function fmt(n){if(!Number.isFinite(n))return'-';if(n===0)return'0';const c=Number(n.toPrecision(4)),a=Math.abs(c);
+  return a<1e-3||a>=1e4?sciStr(c):dec(grp(String(c)))}   // résultats : puissance de 10 seulement pour les très grands ou très petits nombres
+/* valeur saisie telle quelle dans l'équation (pleine précision) */
+const echo=v=>{if(v===0)return'0';const c=clean(v),a=Math.abs(c);return a>=1e-3&&a<1e4?dec(String(c)):sciStr(c)};
+/* saisie : virgule ou point, 2e-3, 2×10^-3, 2x10-3 */
+function num(raw){let c=String(raw||'').replace(/\s+/g,'').replace(/,/g,'.').replace(/[−–]/g,'-').replace(/[⁻⁰¹²³⁴⁵⁶⁷⁸⁹]/g,ch=>'-0123456789'['⁻⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(ch)]).replace(/[×x*·]10\^?/i,'e');
+  const p=c.match(/^10(?:\^([+-]?\d+)|(-\d+))$/);if(p)c='1e'+(p[1]||p[2]);
+  const q=c.match(/^(\d+(?:\.\d+)?)[\/:](\d+(?:\.\d+)?(?:e[+-]?\d+)?)$/i);if(q){const v=+q[1]/+q[2];return Number.isFinite(v)?{v}:{bad:1}}
+  if(!c)return{empty:1};
+  if(!/^[+-]?(\d+(\.\d*)?|\.\d+)(e[+-]?\d+)?$/i.test(c))return{bad:1};
+  const v=Number(c);return Number.isFinite(v)?{v}:{bad:1}}
+/* lecture d'une ligne : décimale, ou mantisse × 10^exposant en mode scientifique */
+const FXK='bmi2_fx',FXD='std';let FX={};try{FX=JSON.parse(sto.g(FXK))||{}}catch(e){}
+/* écriture par défaut : décimale, sauf les grandeurs qui s'écrivent en puissances de 10 (dilution, UFC/mL, cellules/mL) ;
+   chaque champ peut changer d'écriture dans la fenêtre de son unité (FX, clé bmi2_fx) */
+const TG=new Set,FIX=new Set;TABS.forEach(tb=>{(tb.sci||[]).forEach(k=>TG.add(tb.id+'-'+k));(tb.fix||[]).forEach(k=>FIX.add(tb.id+'-'+k))});
+/* TG : écriture au choix (défaut 10ⁿ) ; FIX : toujours 10ⁿ ; le reste : toujours décimale (on peut quand même taper 1e6 ou 10^-3) */
+const POP=new Set;TABS.forEach(tb=>tb.vars.forEach(v=>{if(v.dim==='pop')POP.add(tb.id+'-'+v.k)}));
+const fxOf=id=>FIX.has(id)?'sci':POP.has(id)?(($(id+'-u')||{}).value||'DO')==='DO'?'std':'sci':TG.has(id)?FX[id]||'sci':'std';
+const isSci=(id,k)=>fxOf(id+'-'+k)==='sci';
+function applyFx(){$$('.ctl').forEach(c=>{const v=c.querySelector('.val');if(!v||!v.id)return;const sc=fxOf(v.id)==='sci',e=$(v.id+'-e'),p=Number(sc&&v.dataset.phs||v.dataset.ph);c.classList.toggle('sci',sc);
+  if(v.dataset.ph&&Number.isFinite(p)){if(sc&&p){const[m,x]=p.toExponential().split('e');v.placeholder=dec(m);e.placeholder=String(+x)}else{v.placeholder=dec(grp(String(p)));e.placeholder='0'}}});$$('.ucap').forEach(ulab)}
+function readVal(id,k){const raw=$(`${id}-${k}`).value,r=num(raw);if(!('v' in r)||!isSci(id,k))return r;
+  if(/[e×x*^\/:⁰¹²³⁴⁵⁶⁷⁸⁹⁻]|^\s*10\s*[−–-]\s*\d/i.test(raw))return r;   // puissance déjà écrite dans le champ (8x10^-2, 1e6, 1/1000) : l'exposant à côté est ignoré
+  const e=$(`${id}-${k}-e`).value.trim().replace(/[−–]/g,'-');if(!e)return r;
+  return /^[+-]?\d+$/.test(e)?{v:r.v*10**+e}:{bad:1}}
+/* écriture d'une valeur au format courant (sig chiffres significatifs) */
+function writeVal(id,k,v,sig){const A=$(`${id}-${k}`),E=$(`${id}-${k}-e`);
+  if(v==null||v===0){A.value=v===0?'0':'';E.value='';return}
+  if(isSci(id,k)){const[m,e]=v.toExponential(sig-1).split('e');A.value=dec(String(Number(m)));E.value=String(+e)}
+  else{A.value=dec(String(Number(v.toPrecision(sig))));E.value=''}}
+
+/* ---------- 7. Construction : barre d'onglets, titres, vues ---------- */
+const unitCtl=(id,dim,u)=>{const k=Object.keys(D[dim].u);return`<button type="button" id="${id}" class="sel ucap${D[dim].r||k.length>1?'':k[0]?' u1':' u0'}${TG.has(id.replace(/-u$/,''))?' tg':''}" data-dim="${dim}" value="${u}" data-al="a_unit">${u}</button>`};
+const hnF=(id,al,ph)=>`<input id="${id}" class="hn" type="text" inputmode="numeric" maxlength="2" autocomplete="off" data-al="${al}" data-ph="${ph}">`;
+const field=(id,cls,al,mode,ph='')=>`<input id="${id}" class="${cls}" type="text" inputmode="${mode}" autocomplete="off" spellcheck="false" data-al="${al}" data-ph="${ph}">`;
+$('views').innerHTML=TABS.map((tb,i)=>`<section class="view" id="view${i}">
+${tb.modes?`<p class="gh" data-key="when"></p><div class="seg mode" id="${tb.id}-mode" role="group" style="--n:2"><i class="th"></i><button type="button" data-m="now" data-key="w_now"></button><button type="button" data-m="later" data-key="w_later"></button></div>`:''}
+<p class="gh" data-key="calc"></p>
+<div class="seg cal" id="${tb.id}-cal" role="group" style="--n:${calV(tb).length}"><i class="th"></i>${calV(tb).map(v=>`<button type="button" data-k="${v.k}"><b style="color:var(--c-${DC[v.dim]})">${v.sh}</b><small data-key="s_${v.n}"></small></button>`).join('')}</div>
+<p class="fl"><small data-key="law"></small><span id="${tb.id}-fml"></span></p>
+<p class="gh" data-key="known"></p>
+<div class="grp">${tb.clock?`<div class="vr dtr" id="${tb.id}-r-clk"><div class="lb"><span class="sym" style="--sc:var(--c-pink)">Δt</span><span data-key="c_t"></span></div>
+<div class="clk" id="${tb.id}-clk">${['h0','h1'].map(h=>`<div class="hc" id="${tb.id}-hc-${h}"><small data-key="${h==='h0'?'c_a':'c_b'}"></small><div class="hh">${hnF(`${tb.id}-${h}h`,'a_hh',h==='h0'?'17':'14')}<b>h</b>${hnF(`${tb.id}-${h}m`,'a_mm',h==='h0'?'30':'00')}<b>min</b></div></div>`).join('')}</div>
+<div class="day" id="${tb.id}-day"><div class="seg" id="${tb.id}-dseg" role="group" style="--n:3"><i class="th"></i>${[0,1,2].map(j=>`<button type="button" data-day="${j}" data-key="c_d${j}"></button>`).join('')}</div></div>
+<div class="dtres w" id="${tb.id}-dtv"></div></div>`:''}${tb.vars.map(v=>`<div class="vr" id="${tb.id}-r-${v.k}"><div class="lb"><span class="sym" style="--sc:var(--c-${DC[v.dim]})">${v.sh}</span><span class="ln" data-key="v_${v.n}"></span><span class="ls" data-key="s_${v.n}"></span></div>
+<div class="ctl">${field(`${tb.id}-${v.k}`,'val','v_'+v.n,'decimal',v.ph)}<span class="x10">×10</span>${field(`${tb.id}-${v.k}-e`,'exp','a_exp','text','0')}${unitCtl(`${tb.id}-${v.k}-u`,v.dim,v.u)}</div></div>`).join('')}</div>
+</section>`).join('');
+/* exemples grisés de N₀ et N en cellules ou UFC (écriture 10ⁿ) */
+$('gen-N0').dataset.phs='1e6';$('gen-N').dataset.phs='8e6';
+$('nav').insertAdjacentHTML('beforeend',TABS.map((tb,i)=>`<button class="nb" data-tab="${i}">${IC[tb.ic]}<span></span></button>`).join(''));
+$('rn').innerHTML=TABS.map(tb=>`<span>${IC[tb.ic]}</span>`).join('');
+$$('[data-ic]').forEach(e=>{e.insertAdjacentHTML('afterbegin',IC[e.dataset.ic]);e.removeAttribute('data-ic')});
+const nbs=$$('.nb');
+
+/* ---------- 8. Grandeur à calculer : choisie dans « Calculer », masquée des valeurs connues ----------
+   son unité passe dans le résultat ; l'ancienne inconnue redevient une ligne saisissable, avec sa valeur calculée */
+const segSet=(seg,i)=>{seg.style.setProperty('--i',i);seg.querySelectorAll('button[hidden]').forEach(b=>b.classList.remove('on'));seg.querySelectorAll('button:not([hidden])').forEach((b,j)=>{b.classList.toggle('on',j===i);b.setAttribute('aria-pressed',j===i)})};
+const home=u=>$(u.id.replace(/^(\w+)-(\w+)-u$/,'$1-r-$2')).lastElementChild;
+function dockUnit(){const tb=cur(),u=$(`${tb.id}-${S.tgt[tb.id]}-u`),ru=$('ru'),o=ru.firstElementChild;
+  if(o===u)return;if(o)home(o).appendChild(o);ru.appendChild(u)}
+function setTarget(tb,k,user){
+  const off=offK(tb);S.tgt[tb.id]=k;segSet($(tb.id+'-cal'),calV(tb).filter(v=>!off.has(v.k)).findIndex(v=>v.k===k));
+  if(tb.clock){const tt=k==='t';$(`${tb.id}-r-clk`).hidden=off.has('t');$(`${tb.id}-hc-h1`).hidden=$(`${tb.id}-day`).hidden=$(`${tb.id}-dtv`).hidden=tt;
+    $(`${tb.id}-clk`).classList.toggle('one',tt);$(`${tb.id}-hc-h0`).firstElementChild.dataset.key=tt?'c_a1':'c_a';$(`${tb.id}-hc-h0`).firstElementChild.textContent=t(tt?'c_a1':'c_a')}
+  tb.vars.forEach(v=>{const r=$(`${tb.id}-r-${v.k}`),hide=v.k===k||off.has(v.k)||tb.clock&&v.k==='t';
+    if(user&&r.hidden&&!hide&&!RM)r.animate([{opacity:0,transform:'translateY(-6px)'},{opacity:1,transform:'none'}],{duration:350,easing:'cubic-bezier(.22,1,.36,1)'});
+    r.hidden=hide});
+  const fl=$(tb.id+'-fml');fl.innerHTML=(off.size&&tb.f0||tb.f)[k];
+  if(user&&!RM){fl.parentNode.classList.remove('hit');void fl.offsetWidth;fl.parentNode.classList.add('hit')}
+  if(user){buzz();dockUnit();recalc();save()}}
+
+/* ---------- 9. Calcul et affichage ---------- */
+let shown=null,raf=0;
+function fit(){const n=$('num'),a=$('rv').clientWidth-32;n.style.fontSize='';const w=n.scrollWidth;
+  if(w>a)n.style.fontSize=Math.max(16,parseFloat(getComputedStyle(n).fontSize)*a/w*.98)+'px'}
+/* la valeur glisse vers la nouvelle (interpolation logarithmique) */
+function setNum(v){cancelAnimationFrame(raf);const n=$('num');
+  if(v==null||RM||!(shown>0&&v>0)||shown===v||Math.abs(Math.log10(v/shown))>40){shown=v;n.textContent=v==null?'-':fmtR(v);return fit()}
+  const a=Math.log(shown),b=Math.log(v),t0=performance.now();
+  (function f(now){const p=Math.min(1,(now-t0)/380);shown=p<1?Math.exp(a+(b-a)*(1-(1-p)**3)):v;n.textContent=fmtR(shown);fit();if(p<1)raf=requestAnimationFrame(f)})(t0)}
+const setBtn=(b,icon,key,ok)=>{b.classList.toggle('ok',!!ok);b.innerHTML=`${IC[icon]}<span>${t(key)}</span>`};
+const resetBtns=()=>{setBtn($('bCopy'),'copy','btn_copy');setBtn($('bSave'),'save','btn_save')};
+function show(v,o){const ok=v!=null,was=S.ok;S.ok=ok;if(ok&&!was&&!RM&&!S.inTab&&window.bsResAnim)bsResAnim(0,0);S.last=ok?o.rec:null;
+  setNum(v);$('eq').textContent=o.eq;
+  const tp=$('tip');tp.classList.toggle('err',!!o.err);tp.classList.toggle('warn',!!o.warn);tp.innerHTML=o.tip?`${IC[o.err||o.warn?'warn':'info']}<span>${esc(o.tip)}</span>`:'';
+  $('bCopy').disabled=$('bSave').disabled=!ok;resetBtns();
+  $('miniN').textContent=ok?fmtR(v):'';$('miniU').textContent=ok?o.u:'';miniUpd()}
+function recalc(){S.rsci=isSci(cur().id,S.tgt[cur().id]);
+  const tb=cur(),id=tb.id,k=S.tgt[id],kv=tb.vars.find(v=>v.k===k),un=$(`${id}-${k}-u`).value,x={},parts=[];
+  $('rt').textContent=t('v_'+kv.n);$('ml').innerHTML=kv.sh+' =';
+  let err='',empty=false,res,val;
+  const off=offK(tb);S.clk=null;
+  if(tb.clock&&!off.has('t')){const a=hm(id+'-h0'),b=k==='t'?{e:1}:hm(id+'-h1'),dv=$(id+'-dtv'),ds=$(id+'-dseg');dv.textContent=t('dt_w');dv.classList.add('w');
+    if(a.bad||b.bad)err='hm';
+    else if(k==='t'){if(!a.e){S.clk={a:a.v};parts.push(`${t('s_h0')} ${fh(a.v)}`)}}
+    else if(a.e||b.e){empty=true;segSet(ds,S.day==null?0:S.day)}
+    else{const same=b.v>a.v+1e-9,j=S.day==null?(same?0:1):same?S.day:Math.max(1,S.day),d=b.v-a.v+24*j;   // fin avant le début : au plus tôt le lendemain
+      ds.querySelector('[data-day="0"]').disabled=!same;segSet(ds,j);x.t=d;
+      dv.textContent=Math.abs(d*60-Math.round(d)*60)<.5?`Δt = ${dur(d)}`:t('dt_r').replace('{d}',dur(d)).replace('{v}',fmt(d));dv.classList.remove('w');S.clk={a:a.v};
+      parts.push(`${t('s_h0')} ${fh(a.v)} • ${t('s_h1')} ${fh(b.v)}${j?' (J+'+j+')':''} • Δt = ${fmt(d)} h`)}}
+  for(const v of tb.vars){if(err)break;if(v.k===k)continue;
+    if(off.has(v.k)){x[v.k]=tb.z[v.k];continue}
+    if(tb.clock&&v.k==='t')continue;
+    const r=readVal(id,v.k);
+    if(r.empty){if(v.def!=null){x[v.k]=v.def;continue}empty=true;continue}
+    if(r.bad){err='bad';break}
+    if(r.v<0){err='neg';break}
+    const u=$(`${id}-${v.k}-u`).value;x[v.k]=r.v*fu(v.dim,u);
+    if(!Number.isFinite(x[v.k])){err='ovf';break}
+    parts.push(`${v.s} = ${echo(r.v)} ${u}`)}
+  if(!err&&empty){writeVal(id,k,null);return show(null,{eq:t('wait'),tip:t('tip_wait')})}
+  if(!err){res=tb.solve[k](x);val=res/fu(kv.dim,un);
+    err=(tb.check&&tb.check({...x,[k]:res}))||(!Number.isFinite(res)?(Object.values(x).includes(0)?'zero':'ovf'):res<0?'neg':!Number.isFinite(val)?'ovf':'')}
+  if(err){writeVal(id,k,null);return show(null,{eq:t(err),tip:t('tip_'+err),err:1})}
+  x[k]=res;writeVal(id,k,val,4);
+  const from=parts.join(' • '),to=`${kv.s} = ${fmtR(val)} ${un}`,eq=`${from} → ${to}`;
+  const nt=tb.note?tb.note(x):'',warn=nt[0]==='!';
+  show(val,{eq,u:un,tip:warn?nt.slice(1):nt,warn,rec:{from,to,eq}})}
+/* « DO visée atteinte » : tout de suite (simple dilution) ou après croissance */
+function modeSet(tb,m,user){S.ensM=m;const off=offK(tb),cal=$(tb.id+'-cal');segSet($(tb.id+'-mode'),m==='now'?0:1);
+  cal.querySelectorAll('button').forEach(b=>b.hidden=off.has(b.dataset.k));cal.style.setProperty('--n',cal.querySelectorAll('button:not([hidden])').length);
+  if(user)setUnit($(tb.id+'-Vi-u'),m==='now'?'mL':'µL');   // dilution directe : mL ; après croissance : souvent quelques µL
+  setTarget(tb,off.has(S.tgt[tb.id])?'Vi':S.tgt[tb.id],user)}
+/* résultat flottant (mobile) : visible quand la carte résultat est hors écran */
+let resSeen=true;
+const miniUpd=()=>$('mini').classList.toggle('on',S.ok&&!resSeen);
+if('IntersectionObserver' in window)new IntersectionObserver(es=>{resSeen=es[0].isIntersecting;miniUpd()},{threshold:.3}).observe($('rv'));
+/* clavier ouvert (mobile) : le résultat flottant se place juste au-dessus du clavier, la barre d'onglets s'efface */
+if(window.visualViewport){const vv=visualViewport,m=$('mini');
+  const kb=()=>{const a=document.activeElement,open=innerHeight-vv.height>120&&!!a&&a.matches('input');
+    BC.classList.toggle('kb',open);m.style.top=open?Math.round(vv.offsetTop+vv.height-m.offsetHeight-8)+'px':''};
+  vv.addEventListener('resize',kb);vv.addEventListener('scroll',kb);
+  addEventListener('focusin',()=>setTimeout(kb,350));addEventListener('focusout',()=>setTimeout(kb,120))}
+$('mini').addEventListener('click',()=>$('resBox').scrollIntoView({behavior:RM?'auto':'smooth',block:'center'}));
+
+/* ---------- 10. Onglets : sortie 200 ms, entrée en cascade, zoom ressort du résultat ---------- */
+let anims=[],tabTok=0;
+function play(el,kf,o,done){const a=el.animate(kf,o);anims.push(a);a.onfinish=()=>{anims=anims.filter(x=>x!==a);a.cancel();done&&done()}}
+function setTab(i,dir){
+  const old=S.tab;if(i===old)return;
+  const next=$('view'+i),prev=old>=0?$('view'+old):null,my=++tabTok;
+  dir=dir||(i>old?1:-1);S.tab=i;BC.dataset.tab=i;sto.s('bmi_tab',i);
+  navCtl.select(i);nbs.forEach((b,k)=>b.classList.toggle('on',k===i));
+  $('rn').style.transform=$('rtt').style.transform=`translateY(${-i*100/TABS.length}%)`;
+  if(prev){buzz();scrollTo(0,0)}
+  anims.splice(0).forEach(a=>{a.onfinish=null;a.cancel()});
+  $$('.view').forEach(v=>v!==prev&&v!==next&&v.classList.remove('on'));
+  const enter=()=>{if(my!==tabTok)return;
+    if(prev)prev.classList.remove('on');next.classList.add('on');dockUnit();shown=null;S.inTab=1;recalc();S.inTab=0;
+    if(RM||!prev)return;
+    $$('.gh,.mode,.cal,.grp,.fl',next).forEach((e,k)=>play(e,[{opacity:0,transform:`translateX(${dir*38}px) scale(.97)`},{opacity:1,transform:'none'}],{duration:600,delay:k*50,easing:'cubic-bezier(.22,1,.36,1)',fill:'backwards'}));
+    (window.bsResAnim&&bsResAnim(dir,90))};
+  if(RM||!prev||!prev.classList.contains('on'))enter();
+  else{const rg=document.querySelector('.rg');if(rg)play(rg,[{opacity:1,transform:'none'},{opacity:0,transform:'translateY(26px) scale(.92)'}],{duration:200,easing:'cubic-bezier(.4,0,1,1)',fill:'forwards'});
+    play(prev,[{opacity:1,transform:'none'},{opacity:0,transform:`translateX(${-dir*44}px) scale(.96)`}],{duration:200,easing:'cubic-bezier(.4,0,1,1)',fill:'forwards'},enter)}}
+/* barre : lentille qui suit le doigt (liquid-glass.js) ; sans le moteur, simple pastille */
+const sl=$('sl'),navCtl=window.LiquidGlass?LiquidGlass.tabs({wrap:$('navWrap'),inner:$('nav'),indicator:sl,items:nbs,onSelect:i=>setTab(i),glass:false})
+  :{select(i){sl.style.translate=nbs[i].offsetLeft+'px 0';sl.style.width=nbs[i].offsetWidth+'px'}};
+if(!window.LiquidGlass){nbs.forEach((b,i)=>b.addEventListener('click',()=>setTab(i)));addEventListener('resize',()=>navCtl.select(S.tab))}
+/* balayage horizontal sur la carte */
+(()=>{let x0,y0,t0,ok=false;const c=$('card');
+  c.addEventListener('touchstart',e=>{ok=!e.target.closest('input,select,button');const p=e.touches[0];x0=p.clientX;y0=p.clientY;t0=Date.now()},{passive:true});
+  c.addEventListener('touchend',e=>{if(!ok)return;const p=e.changedTouches[0],dx=p.clientX-x0,dy=p.clientY-y0,sp=Math.abs(dx)/(Date.now()-t0);
+    if(Math.abs(dx)>(sp>.5?35:80)&&Math.abs(dx)>Math.abs(dy)*1.6){const n=S.tab+(dx<0?1:-1);if(n>=0&&n<TABS.length)setTab(n,dx<0?1:-1)}},{passive:true})})();
+
+/* ---------- 11. Saisie, format décimal / scientifique, mémorisation ---------- */
+function save(){const o={_t:S.tgt,_m:S.ensM};$$('.val,.exp,.sel,.hn').forEach(e=>{if(e.value)o[e.id]=e.value});if(S.day!=null)o._d=S.day;sto.s('bmi_state',JSON.stringify(o))}
+BC.addEventListener('input',e=>{const el=e.target;
+  if(el.matches('.hn')){if(/\D/.test(el.value))el.value=el.value.replace(/\D/g,'');
+    if(/h$/.test(el.id)&&el.value.length===2)$(el.id.replace(/h$/,'m')).focus();   // heures saisies : on passe aux minutes
+    recalc();save();return}
+  if(!el.matches('.val,.exp'))return;
+  const re=el.matches('.exp')?/[^0-9+\-−]/g:/[^0-9.,eE+\-−×x^*\/:]/g;if(re.test(el.value))el.value=el.value.replace(re,'');
+  recalc();save()});
+BC.addEventListener('change',e=>{if(e.target.matches('.sel')){buzz();recalc();save()}});
+BC.addEventListener('keydown',e=>{const el=e.target;if(!el.matches('.val,.exp,.hn'))return;
+  if(e.key==='Enter')el.blur();
+  if(el.matches('.exp')&&(e.key==='ArrowUp'||e.key==='ArrowDown')){e.preventDefault();el.value=(parseInt(el.value,10)||0)+(e.key==='ArrowUp'?1:-1);el.dispatchEvent(new Event('input',{bubbles:true}))}});
+BC.addEventListener('click',e=>{const db=e.target.closest('.day button');if(db){if(!db.disabled){S.day=+db.dataset.day;buzz();recalc();save()}return}
+  const mb=e.target.closest('.mode button');if(mb){if(mb.dataset.m!==S.ensM)modeSet(cur(),mb.dataset.m,true);return}
+  const b=e.target.closest('.cal button');if(!b)return;
+  const tb=cur();if(S.tgt[tb.id]!==b.dataset.k)setTarget(tb,b.dataset.k,true)});
+/* saisie toujours en notation scientifique (mantisse × 10^exposant) */
+
+/* ---------- 12. Unité composée : unités nommées en haut, puis deux molettes numérateur | dénominateur ---------- */
+const upop=$('upop'),ROW=40;let ucap=null;
+const setUnit=(b,u)=>{b.value=u;b.textContent=u};
+function pickUnit(u){if(u===ucap.value)return;
+  if(ucap.dataset.dim==='pop'){const tab=ucap.id.split('-')[0],ks=[...POP].filter(i=>i.startsWith(tab+'-')).map(i=>i.slice(tab.length+1)),vs=ks.map(k=>readVal(tab,k));
+    ks.forEach(k=>setUnit($(`${tab}-${k}-u`),u));applyFx();ks.forEach((k,i)=>{if('v' in vs[i])writeVal(tab,k,vs[i].v,12)});   // N₀ et N toujours dans la même unité
+    ucap.dispatchEvent(new Event('change',{bubbles:true}));return}
+  setUnit(ucap,u);ucap.dispatchEvent(new Event('change',{bubbles:true}))}
+/* position des molettes : une unité nommée prend la combinaison équivalente (M → mol/L) */
+function upPair(b){const dim=b.dataset.dim,d=D[dim],u=b.value,k=u.indexOf('/'),N=Object.keys(d.r[0]),Q=Object.keys(d.r[1]);
+  if(!(u in d.u)&&k>0)return[u.slice(0,k),u.slice(k+1)];
+  const f=fu(dim,u);for(const q of Q)for(const n of N)if(Math.abs(fu(dim,n+'/'+q)/f-1)<1e-9)return[n,q];return[N[0],Q[0]]}
+const centerIdx=w=>Math.max(0,Math.min(w.children.length-1,Math.round(w.scrollTop/ROW)));
+const toItem=(w,it,how)=>w.scrollTo({top:it.offsetTop-w.clientHeight/2+ROW/2,behavior:how});
+function wheelPick(){if(!ucap)return;const[n,q]=[...upop.querySelectorAll('.up-wh')].map(w=>w.children[centerIdx(w)].dataset.k),[n0,q0]=upPair(ucap);
+  if(n===n0&&q===q0)return;pickUnit(n+'/'+q);upop.querySelectorAll('.up-n .on').forEach(x=>x.classList.remove('on'))}
+function upPlace(){const r=ucap.getBoundingClientRect(),w=upop.offsetWidth,h=upop.offsetHeight;
+  upop.style.left=Math.max(8,Math.min(innerWidth-w-8,r.right-w))+'px';
+  upop.style.top=(r.bottom+8+h<=innerHeight-8?r.bottom+8:Math.max(8,r.top-8-h>=8?r.top-8-h:innerHeight-8-h))+'px'}
+function ulab(b){if(b.classList.contains('u0'))b.textContent=fxOf(b.id.replace(/-u$/,''))==='sci'?'×10ⁿ':'1,5'}
+const TOGFX=true;
+function setFx(b,f){const vid=b.id.replace(/-u$/,''),i=vid.lastIndexOf('-'),tab=vid.slice(0,i),k=vid.slice(i+1);if(fxOf(vid)===f)return;buzz();
+  const r=readVal(tab,k);FX[vid]=f;sto.s(FXK,JSON.stringify(FX));applyFx();if('v' in r)writeVal(tab,k,r.v,12);
+  const sg=upop.querySelector('.fseg');if(sg)segSet(sg,f==='sci'?1:0);recalc();save()}
+function upOpen(b){ucap=b;const d=D[b.dataset.dim],named=Object.keys(d.u).filter(Boolean),comp=!!d.r,sci=fxOf(b.id.replace(/-u$/,''))==='sci';
+  const wheel=(o,s_)=>`<div class="up-wh">${Object.keys(o).map(k=>`<div class="up-it${k===s_?' on':''}" data-k="${k}">${k}</div>`).join('')}</div>`;
+  let h=TOGFX&&TG.has(b.id.replace(/-u$/,''))?`<div class="upf"><span>Écriture</span><div class="seg fseg" style="--n:2;--i:${sci?1:0}"><i class="th"></i><button type="button" data-fx="std"${sci?'':' class="on"'}>1,5</button><button type="button" data-fx="sci"${sci?' class="on"':''}>1,5 × 10ⁿ</button></div></div>`:'';
+  if(named.length>1||comp&&named.length)h+=`<div class="up-n">${named.map(k=>`<button type="button" data-u="${k}"${k===b.value?' class="on"':''}>${k}</button>`).join('')}</div>`;
+  if(comp){const[n,q]=upPair(b);h+=`<div class="up-h"><span>${t(d.lab[0])}</span><span>${t(d.lab[1])}</span></div><div class="up-c"><i class="up-lens"></i>${wheel(d.r[0],n)}${wheel(d.r[1],q)}</div>`}
+  if(!h)return;upop.innerHTML=h;upop.hidden=false;
+  upop.querySelectorAll('.up-wh').forEach(w=>{toItem(w,w.querySelector('.on'),'instant');let tm=0;
+    let last=centerIdx(w);w.addEventListener('scroll',()=>{const i=centerIdx(w);if(i!==last){last=i;buzz(8);[...w.children].forEach((c,j)=>c.classList.toggle('on',j===i))}clearTimeout(tm);tm=setTimeout(wheelPick,110)},{passive:true})});
+  upPlace()}
+const upClose=()=>{if(upop.hidden)return;ucap=null;if(RM||!window.bsUpOut){upop.hidden=true;return}bsUpOut(upop,()=>{if(!ucap)upop.hidden=true})};
+document.addEventListener('click',e=>{const el=e.target;if(el.closest('[data-hap]'))return;
+  if(!el.closest('.hact'))pops();
+  const b=el.closest('.ucap');if(b){ucap===b?upClose():upOpen(b);return}
+  const fxb=el.closest('#upop [data-fx]');if(fxb){if(ucap)setFx(ucap,fxb.dataset.fx);return}
+  const o=el.closest('#upop [data-u]');if(o){pickUnit(o.dataset.u);upClose();return}
+  const it=el.closest('.up-it');if(it){toItem(it.parentElement,it,'smooth');return}
+  if(!el.closest('#upop'))upClose()});
+addEventListener('resize',()=>{upClose();fit()});
+addEventListener('scroll',()=>ucap&&upPlace(),{passive:true});
+addEventListener('keydown',e=>{if(e.key==='Escape'){upClose();hist(false);pops()}});
+
+/* ---------- 13. Thème, langue, plein écran, menu ---------- */
+const period=()=>{const h=new Date().getHours();return h>=7&&h<20?'day':'night'};
+function applyTheme(){root.dataset.theme=S.dark?'dark':'light';document.body.classList.toggle('theme-light',!S.dark);document.body.classList.toggle('theme-dark',S.dark);$('themeBtn').innerHTML=IC[S.dark?'sun':'moon'];$('metaTheme').content=S.dark?'#000000':'#f2f2f7'}
+$('themeBtn').addEventListener('click',()=>{buzz();S.dark=!S.dark;sto.s('bioMicroTheme',S.dark?'dark':'light');sto.s('bioMicroThemePeriod',period());applyTheme()});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{if(sto.g('bioMicroTheme')&&sto.g('bioMicroThemePeriod')===period())return;S.dark=e.matches;applyTheme()});
+/* menus surgissants : un seul ouvert à la fois */
+const pops=id=>['lmenu'].forEach(k=>$(k).classList.toggle('on',k===id&&!$(k).classList.contains('on')));
+function footLang(){const f=document.querySelector('.modern-transparent-footer');if(!f)return;
+  const w=document.createTreeWalker(f,NodeFilter.SHOW_TEXT);for(let n;(n=w.nextNode());)n.nodeValue=n.nodeValue.replace(/Design & D[ée]velop\w+/,t('foot_dev'))}
+function setLang(l){S.lang=l;sto.s('bc_lang',l);root.lang=l;
+  $$('[data-key]').forEach(e=>e.textContent=t(e.dataset.key));
+  $$('[data-tk]').forEach(e=>{e.title=t(e.dataset.tk);e.setAttribute('aria-label',e.title)});
+  $$('[data-al]').forEach(e=>e.setAttribute('aria-label',t(e.dataset.al)));
+  $$('[data-ph]').forEach(e=>e.placeholder=dec(e.dataset.ph));
+  $$('#lmenu button').forEach(b=>b.classList.toggle('on',b.dataset.l===l));
+  nbs.forEach((b,i)=>b.lastElementChild.textContent=t('nav')[i]);
+  $('rtt').innerHTML=t('tabs').map(x=>`<span>${x}</span>`).join('');
+  renderHist();footLang();pops();applyFx();
+  if(S.tab>=0){shown=null;recalc()}}
+$('langBtn').addEventListener('click',()=>{buzz(8);pops('lmenu')});
+$('lmenu').addEventListener('click',e=>{const b=e.target.closest('button');if(b){buzz();setLang(b.dataset.l)}});
+/* menu flottant (menu-flottant.js, chargé en fin de page) */
+$('mb').addEventListener('click',()=>{buzz();let n=0;const go=()=>typeof window.openCapsuleMenu==='function'?window.openCapsuleMenu():++n<40&&setTimeout(go,100);go()});
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+/* reflet du verre qui suit le pointeur */
+$$('.tools,.mb,.nav-in').forEach(b=>{
+  const aim=e=>{const r=b.getBoundingClientRect();b.style.setProperty('--mx',e.clientX-r.left+'px');b.style.setProperty('--my',e.clientY-r.top+'px')};
+  b.addEventListener('pointerenter',e=>{aim(e);b.classList.add('lit')});
+  b.addEventListener('pointerdown',e=>{aim(e);b.classList.add('lit')});
+  b.addEventListener('pointermove',aim);
+  b.addEventListener('pointerleave',()=>b.classList.remove('lit'));
+  ['pointerup','pointercancel'].forEach(n=>b.addEventListener(n,e=>e.pointerType!=='mouse'&&b.classList.remove('lit')))});
+
+/* ---------- 14. Copier, enregistrer, historique ---------- */
+const bump=b=>{b.classList.remove('bump');void b.offsetWidth;b.classList.add('bump')};
+$('bCopy').addEventListener('click',async()=>{if(!S.ok)return;const b=$('bCopy'),txt=S.last.eq;bump(b);
+  try{await navigator.clipboard.writeText(txt)}
+  catch(e){const a=document.createElement('textarea');a.value=txt;a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(_){}a.remove()}
+  buzz(OK);setBtn(b,'check','btn_copied',true);setTimeout(()=>setBtn(b,'copy','btn_copy'),1500)});
+const saveHist=()=>sto.s('bioMicroHistory',JSON.stringify(S.hist));
+$('bSave').addEventListener('click',()=>{if(!S.ok)return;const{from,to}=S.last,b=$('bSave'),h=S.hist[0];bump(b);buzz(OK);
+  if(!(h&&h.from===from&&h.to===to&&h.tab===S.tab)){S.hist.unshift({tab:S.tab,from,to});S.hist.length=Math.min(S.hist.length,30);saveHist();renderHist();$('badge').classList.add('on')}
+  setBtn(b,'check','btn_saved',true)});
+function renderHist(){$('hl').innerHTML=S.hist.length?S.hist.map((h,i)=>`<div class="hi" style="animation-delay:${Math.min(i,8)*40}ms"><div><div class="ht">${esc(t('tabs')[h.tab]||'')}</div><div class="hd">${esc(h.from)} → <b>${esc(h.to)}</b></div></div><button class="hdel" data-i="${i}" aria-label="${t('t_del')}">${IC.close}</button></div>`).join('')
+  :`<div class="hempty">${t('hist_empty')}</div>`}
+function hist(on){if(on!==$('ov').classList.contains('on'))buzz(8);$('ov').classList.toggle('on',on);if(on)$('badge').classList.remove('on')}
+$('hl').addEventListener('click',e=>{const b=e.target.closest('.hdel');if(b){buzz();S.hist.splice(+b.dataset.i,1);saveHist();renderHist()}});
+$('histBtn').addEventListener('click',()=>hist(true));
+$('hClose').addEventListener('click',()=>hist(false));
+$('ov').addEventListener('click',e=>{if(e.target===$('ov'))hist(false)});
+$('hClr').addEventListener('click',()=>{buzz(OK);S.hist=[];sto.d('bioMicroHistory');renderHist()});
+
+/* ---------- 15. Démarrage ---------- */
+applyTheme();
+try{S.hist=JSON.parse(sto.g('bioMicroHistory'))||[]}catch(e){S.hist=[]}
+
+let st={};try{st=JSON.parse(sto.g('bmi_state'))||{}}catch(e){}
+Object.entries(st).forEach(([id,v])=>{const e=id[0]!=='_'&&typeof v==='string'&&$(id);if(!e||!BC.contains(e))return;
+  if(e.tagName==='SELECT'){if([...e.options].some(o=>o.value===v))e.value=v}
+  else if(e.classList.contains('ucap')){if(fu(e.dataset.dim,v)>0)setUnit(e,v)}
+  else e.value=v});
+TABS.forEach(tb=>{const k=st._t&&st._t[tb.id];setTarget(tb,calV(tb).some(v=>v.k===k)?k:S.tgt[tb.id])});
+S.day=st._d>=0&&st._d<=2?+st._d:null;S.ensM=st._m==='later'?'later':'now';modeSet(TABS.find(z=>z.id==='ens'),S.ensM);
+setLang(sto.g('bc_lang')||((navigator.language||'fr').startsWith('fr')?'fr':'en'));
+const t0=parseInt(sto.g('bmi_tab'),10);setTab(t0>=0&&t0<TABS.length?t0:0,1);
+/* pied de page : placé dans la page, sous le contenu, et traduit */
+applyFx();
+document.addEventListener('DOMContentLoaded',()=>{const f=document.querySelector('.modern-transparent-footer');if(f){$('shell').appendChild(f);footLang()}});
+})();
+</script>
+<script src="/menu-flottant.js"></script>
+</body>
+</html>

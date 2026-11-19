@@ -1,0 +1,6 @@
+BIOMICRO : microbiologie
+===========================
+index.html   L'outil : dénombrement (UFC/mL), DO600 → cellules/mL, ajuster la DO
+             d'une culture (tout de suite, ou après croissance : volume à
+             ensemencer pour une DO visée à une heure donnée), temps de
+             génération. Saisie scientifique.

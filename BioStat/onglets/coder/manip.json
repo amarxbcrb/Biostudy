@@ -1,0 +1,751 @@
+{
+ "version": 1,
+ "colonnes": {
+  "base": "R de base",
+  "dplyr": "tidyverse (dplyr, tidyr, readr)"
+ },
+ "champs": {
+  "df": {
+   "label": "Tableau de données",
+   "type": "nom",
+   "defaut": "patients"
+  },
+  "col": {
+   "label": "Colonne",
+   "type": "nom",
+   "defaut": "age"
+  }
+ },
+ "operations": [
+  {
+   "id": "importer",
+   "titre": "Importer un fichier",
+   "resume": "Lire un fichier CSV ou Excel dans un tableau.",
+   "variantes": [
+    {
+     "label": "CSV (séparateur virgule)",
+     "champs": [
+      "df",
+      {
+       "id": "fichier",
+       "label": "Fichier",
+       "type": "texte",
+       "defaut": "donnees.csv"
+      }
+     ],
+     "base": "{df} <- read.csv({fichier})",
+     "dplyr": "{df} <- readr::read_csv({fichier})",
+     "note": "Format anglo-saxon : colonnes séparées par des virgules, décimales avec un point."
+    },
+    {
+     "label": "CSV français (point-virgule)",
+     "champs": [
+      "df",
+      {
+       "id": "fichier",
+       "label": "Fichier",
+       "type": "texte",
+       "defaut": "donnees.csv"
+      }
+     ],
+     "base": "{df} <- read.csv2({fichier})",
+     "dplyr": "{df} <- readr::read_csv2({fichier})",
+     "note": "Format d'un Excel français enregistré en CSV : colonnes séparées par des points-virgules, décimales avec une virgule."
+    },
+    {
+     "label": "Excel (.xlsx)",
+     "champs": [
+      "df",
+      {
+       "id": "fichier",
+       "label": "Fichier",
+       "type": "texte",
+       "defaut": "donnees.xlsx"
+      },
+      {
+       "id": "feuille",
+       "label": "Feuille (numéro ou nom)",
+       "type": "valeurs",
+       "defaut": "1"
+      }
+     ],
+     "base": "{df} <- readxl::read_excel({fichier}, sheet = {feuille})",
+     "dplyr": "{df} <- readxl::read_excel({fichier}, sheet = {feuille})",
+     "note": "R de base ne lit pas les fichiers Excel : les deux colonnes utilisent le package readxl (install.packages(\"readxl\") une seule fois)."
+    }
+   ],
+   "note": "Le chemin part du dossier de travail (getwd()). Sous Windows, écris les chemins avec / et non \\.",
+   "groupe": "Préparer mes données",
+   "icone": "ext",
+   "couleur": "blue"
+  },
+  {
+   "id": "renommer",
+   "titre": "Renommer une colonne",
+   "resume": "Changer le nom d'une variable.",
+   "variantes": [
+    {
+     "champs": [
+      "df",
+      {
+       "id": "old",
+       "label": "Ancien nom",
+       "type": "nom",
+       "defaut": "age"
+      },
+      {
+       "id": "new",
+       "label": "Nouveau nom",
+       "type": "nom",
+       "defaut": "age_ans"
+      }
+     ],
+     "base": "names({df})[names({df}) == {old:q}] <- {new:q}",
+     "dplyr": "{df} <- {df} |> dplyr::rename({new} = {old})"
+    }
+   ],
+   "groupe": "Préparer mes données",
+   "icone": "code",
+   "couleur": "orange"
+  },
+  {
+   "id": "supprimer-colonnes",
+   "titre": "Supprimer des colonnes",
+   "resume": "Retirer une ou plusieurs variables.",
+   "variantes": [
+    {
+     "champs": [
+      "df",
+      {
+       "id": "cols",
+       "label": "Colonnes à supprimer",
+       "type": "noms",
+       "defaut": "adresse, telephone"
+      }
+     ],
+     "base": "{df} <- {df}[, !(names({df}) %in% {cols:q}), drop = FALSE]",
+     "dplyr": "{df} <- {df} |> dplyr::select(-c({cols}))"
+    }
+   ],
+   "groupe": "Préparer mes données",
+   "icone": "x",
+   "couleur": "indigo"
+  },
+  {
+   "id": "supprimer-lignes",
+   "titre": "Supprimer des lignes",
+   "resume": "Selon une condition, avec des valeurs manquantes ou en double.",
+   "variantes": [
+    {
+     "label": "Selon une condition",
+     "champs": [
+      "df",
+      {
+       "id": "cond",
+       "label": "Supprimer les lignes où",
+       "type": "cond",
+       "defaut": "age < 18"
+      }
+     ],
+     "base": "{df} <- subset({df}, !({cond}))",
+     "dplyr": "{df} <- {df} |> dplyr::filter(!({cond}))",
+     "note": "Les lignes où la condition vaut NA sont aussi retirées, dans les deux versions."
+    },
+    {
+     "label": "Avec un NA (toutes colonnes)",
+     "champs": [
+      "df"
+     ],
+     "base": "{df} <- na.omit({df})",
+     "dplyr": "{df} <- {df} |> tidyr::drop_na()",
+     "note": "Retire toute ligne qui contient au moins une valeur manquante : vérifie combien de lignes tu perds."
+    },
+    {
+     "label": "Avec un NA dans certaines colonnes",
+     "champs": [
+      "df",
+      {
+       "id": "cols",
+       "label": "Colonnes",
+       "type": "noms",
+       "defaut": "poids, taille"
+      }
+     ],
+     "base": "{df} <- {df}[complete.cases({df}[{cols:q}]), ]",
+     "dplyr": "{df} <- {df} |> tidyr::drop_na({cols})"
+    },
+    {
+     "label": "Doublons",
+     "champs": [
+      "df"
+     ],
+     "base": "{df} <- {df}[!duplicated({df}), ]",
+     "dplyr": "{df} <- {df} |> dplyr::distinct()",
+     "note": "Une ligne est un doublon si elle est identique à une ligne précédente sur toutes les colonnes."
+    }
+   ],
+   "groupe": "Préparer mes données",
+   "icone": "x",
+   "couleur": "teal"
+  },
+  {
+   "id": "filtrer",
+   "titre": "Filtrer",
+   "resume": "Garder les lignes qui vérifient une condition.",
+   "variantes": [
+    {
+     "champs": [
+      "df",
+      {
+       "id": "res",
+       "label": "Nom du résultat",
+       "type": "nom",
+       "defaut": "adultes"
+      },
+      {
+       "id": "cond",
+       "label": "Garder les lignes où",
+       "type": "cond",
+       "defaut": "sexe == \"F\" & age >= 18"
+      }
+     ],
+     "base": "{res} <- subset({df}, {cond})",
+     "dplyr": "{res} <- {df} |> dplyr::filter({cond})",
+     "note": "Opérateurs : == égal, != différent, & et, | ou, %in% c(\"a\", \"b\") parmi une liste. Les lignes où la condition vaut NA ne sont pas gardées."
+    }
+   ],
+   "groupe": "Préparer mes données",
+   "icone": "target",
+   "couleur": "purple"
+  },
+  {
+   "id": "trier",
+   "titre": "Trier",
+   "resume": "Ordonner les lignes selon une colonne.",
+   "variantes": [
+    {
+     "champs": [
+      "df",
+      "col",
+      {
+       "id": "ordre",
+       "label": "Ordre",
+       "type": "choix",
+       "options": [
+        {
+         "label": "Croissant",
+         "val": {
+          "b": "",
+          "d": "{col}"
+         }
+        },
+        {
+         "label": "Décroissant",
+         "val": {
+          "b": ", decreasing = TRUE",
+          "d": "dplyr::desc({col})"
+         }
+        }
+       ]
+      }
+     ],
+     "base": "{df} <- {df}[order({df}${col}{ordre.b}), ]",
+     "dplyr": "{df} <- {df} |> dplyr::arrange({ordre.d})",
+     "note": "Les valeurs manquantes sont placées à la fin."
+    }
+   ],
+   "groupe": "Préparer mes données",
+   "icone": "bars",
+   "couleur": "pink"
+  },
+  {
+   "id": "creer",
+   "titre": "Créer ou modifier une variable",
+   "resume": "Calculer une nouvelle colonne (ou remplacer une colonne existante).",
+   "variantes": [
+    {
+     "champs": [
+      "df",
+      {
+       "id": "new",
+       "label": "Nom de la variable",
+       "type": "nom",
+       "defaut": "imc"
+      },
+      {
+       "id": "expr",
+       "label": "Calcul",
+       "type": "expr",
+       "defaut": "poids / (taille / 100)^2"
+      }
+     ],
+     "base": "{df}${new} <- with({df}, {expr})",
+     "dplyr": "{df} <- {df} |> dplyr::mutate({new} = {expr})",
+     "note": "Si la variable existe déjà, elle est remplacée."
+    }
+   ],
+   "groupe": "Modifier des variables",
+   "icone": "grow",
+   "couleur": "blue"
+  },
+  {
+   "id": "recoder",
+   "titre": "Recoder",
+   "resume": "En facteur, en classes avec cut(), ou selon une condition.",
+   "variantes": [
+    {
+     "label": "En facteur",
+     "champs": [
+      "df",
+      {
+       "id": "col",
+       "label": "Colonne",
+       "type": "nom",
+       "defaut": "sexe"
+      },
+      {
+       "id": "niveaux",
+       "label": "Codes actuels",
+       "type": "valeurs",
+       "defaut": "1, 2"
+      },
+      {
+       "id": "etiquettes",
+       "label": "Étiquettes",
+       "type": "valeurs",
+       "defaut": "Homme, Femme"
+      }
+     ],
+     "base": "{df}${col} <- factor({df}${col}, levels = {niveaux}, labels = {etiquettes})",
+     "dplyr": "{df} <- {df} |> dplyr::mutate({col} = factor({col}, levels = {niveaux}, labels = {etiquettes}))",
+     "controles": [
+      [
+       "meme_nombre",
+       "niveaux",
+       "etiquettes"
+      ]
+     ],
+     "note": "Le premier niveau sert de référence dans les modèles. Une valeur absente de la liste des codes devient NA."
+    },
+    {
+     "label": "En classes (cut)",
+     "champs": [
+      "df",
+      "col",
+      {
+       "id": "new",
+       "label": "Nouvelle variable",
+       "type": "nom",
+       "defaut": "classe_age"
+      },
+      {
+       "id": "bornes",
+       "label": "Bornes",
+       "type": "nombres",
+       "defaut": "0, 18, 65, Inf"
+      },
+      {
+       "id": "etiquettes",
+       "label": "Étiquettes",
+       "type": "valeurs",
+       "defaut": "moins de 18 ans, 18 à 64 ans, 65 ans et plus"
+      }
+     ],
+     "base": "{df}${new} <- cut({df}${col}, breaks = {bornes}, labels = {etiquettes}, right = FALSE)",
+     "dplyr": "{df} <- {df} |> dplyr::mutate({new} = cut({col}, breaks = {bornes}, labels = {etiquettes}, right = FALSE))",
+     "controles": [
+      [
+       "classes",
+       "bornes",
+       "etiquettes"
+      ]
+     ],
+     "note": "right = FALSE donne des classes [a ; b[ : la borne basse est incluse (18 ans est dans « 18 à 64 ans »). Une valeur hors des bornes devient NA."
+    },
+    {
+     "label": "Selon une condition (ifelse)",
+     "champs": [
+      "df",
+      {
+       "id": "new",
+       "label": "Nouvelle variable",
+       "type": "nom",
+       "defaut": "hta"
+      },
+      {
+       "id": "cond",
+       "label": "Condition",
+       "type": "cond",
+       "defaut": "pas >= 140"
+      },
+      {
+       "id": "oui",
+       "label": "Valeur si vrai",
+       "type": "valeurs",
+       "defaut": "oui"
+      },
+      {
+       "id": "non",
+       "label": "Valeur si faux",
+       "type": "valeurs",
+       "defaut": "non"
+      }
+     ],
+     "base": "{df}${new} <- ifelse(with({df}, {cond}), {oui}, {non})",
+     "dplyr": "{df} <- {df} |> dplyr::mutate({new} = dplyr::if_else({cond}, {oui}, {non}))",
+     "note": "Si la condition vaut NA, le résultat vaut NA. dplyr::if_else() exige deux valeurs du même type (deux textes ou deux nombres)."
+    }
+   ],
+   "groupe": "Modifier des variables",
+   "icone": "reset",
+   "couleur": "orange"
+  },
+  {
+   "id": "type",
+   "titre": "Changer le type",
+   "resume": "Nombre, texte, facteur, logique ou date.",
+   "variantes": [
+    {
+     "label": "Nombre, texte, facteur…",
+     "champs": [
+      "df",
+      "col",
+      {
+       "id": "fn",
+       "label": "Nouveau type",
+       "type": "choix",
+       "options": [
+        {
+         "label": "Numérique",
+         "val": {
+          "f": "as.numeric"
+         }
+        },
+        {
+         "label": "Entier",
+         "val": {
+          "f": "as.integer"
+         }
+        },
+        {
+         "label": "Texte",
+         "val": {
+          "f": "as.character"
+         }
+        },
+        {
+         "label": "Facteur",
+         "val": {
+          "f": "factor"
+         }
+        },
+        {
+         "label": "Logique",
+         "val": {
+          "f": "as.logical"
+         }
+        }
+       ]
+      }
+     ],
+     "base": "{df}${col} <- {fn.f}({df}${col})",
+     "dplyr": "{df} <- {df} |> dplyr::mutate({col} = {fn.f}({col}))",
+     "note": "Piège : as.numeric() sur un facteur renvoie les codes internes (1, 2, 3…) ; écris as.numeric(as.character(x)). Un texte avec une virgule décimale (\"1,5\") devient NA : remplace d'abord la virgule avec sub(\",\", \".\", x)."
+    },
+    {
+     "label": "Date",
+     "champs": [
+      "df",
+      {
+       "id": "col",
+       "label": "Colonne",
+       "type": "nom",
+       "defaut": "date_inclusion"
+      },
+      {
+       "id": "format",
+       "label": "Format du texte",
+       "type": "texte",
+       "defaut": "%d/%m/%Y"
+      }
+     ],
+     "base": "{df}${col} <- as.Date({df}${col}, format = {format})",
+     "dplyr": "{df} <- {df} |> dplyr::mutate({col} = as.Date({col}, format = {format}))",
+     "note": "%d jour, %m mois, %Y année sur 4 chiffres, %y sur 2 chiffres. « 25/12/2025 » → \"%d/%m/%Y\"."
+    }
+   ],
+   "groupe": "Modifier des variables",
+   "icone": "okc",
+   "couleur": "indigo"
+  },
+  {
+   "id": "manquants",
+   "titre": "Valeurs manquantes",
+   "resume": "Compter les NA, les retirer ou les ignorer dans un calcul.",
+   "variantes": [
+    {
+     "label": "Compter par colonne",
+     "champs": [
+      "df"
+     ],
+     "base": "colSums(is.na({df}))",
+     "dplyr": "{df} |> dplyr::summarise(dplyr::across(dplyr::everything(), ~ sum(is.na(.x))))"
+    },
+    {
+     "label": "Compter dans une colonne",
+     "champs": [
+      "df",
+      "col"
+     ],
+     "base": "sum(is.na({df}${col}))",
+     "dplyr": "{df} |> dplyr::summarise(manquants = sum(is.na({col})))"
+    },
+    {
+     "label": "Retirer les lignes sans valeur",
+     "champs": [
+      "df",
+      "col"
+     ],
+     "base": "{df} <- {df}[!is.na({df}${col}), ]",
+     "dplyr": "{df} <- {df} |> dplyr::filter(!is.na({col}))"
+    },
+    {
+     "label": "Ignorer dans un calcul",
+     "champs": [
+      "df",
+      "col"
+     ],
+     "base": "mean({df}${col}, na.rm = TRUE)",
+     "dplyr": "{df} |> dplyr::summarise(moyenne = mean({col}, na.rm = TRUE))",
+     "note": "Sans na.rm = TRUE, mean(), sd(), median(), sum() renvoient NA dès qu'une valeur manque."
+    }
+   ],
+   "groupe": "Modifier des variables",
+   "icone": "warn",
+   "couleur": "pink"
+  },
+  {
+   "id": "fusionner",
+   "titre": "Fusionner deux tables",
+   "resume": "Réunir deux tableaux grâce à une colonne commune (identifiant).",
+   "variantes": [
+    {
+     "champs": [
+      {
+       "id": "x",
+       "label": "Table de gauche",
+       "type": "nom",
+       "defaut": "patients"
+      },
+      {
+       "id": "y",
+       "label": "Table de droite",
+       "type": "nom",
+       "defaut": "bilans"
+      },
+      {
+       "id": "cle",
+       "label": "Colonne(s) commune(s)",
+       "type": "noms",
+       "defaut": "id"
+      },
+      {
+       "id": "res",
+       "label": "Nom du résultat",
+       "type": "nom",
+       "defaut": "complet"
+      },
+      {
+       "id": "type",
+       "label": "Lignes gardées",
+       "type": "choix",
+       "options": [
+        {
+         "label": "Présentes dans les deux",
+         "val": {
+          "b": "",
+          "d": "inner_join"
+         }
+        },
+        {
+         "label": "Toutes celles de gauche",
+         "val": {
+          "b": ", all.x = TRUE",
+          "d": "left_join"
+         }
+        },
+        {
+         "label": "Toutes celles de droite",
+         "val": {
+          "b": ", all.y = TRUE",
+          "d": "right_join"
+         }
+        },
+        {
+         "label": "Toutes",
+         "val": {
+          "b": ", all = TRUE",
+          "d": "full_join"
+         }
+        }
+       ]
+      }
+     ],
+     "base": "{res} <- merge({x}, {y}, by = {cle:q}{type.b})",
+     "dplyr": "{res} <- dplyr::{type.d}({x}, {y}, by = {cle:q})",
+     "note": "Les lignes sans correspondance reçoivent des NA. merge() trie le résultat selon la colonne commune ; dplyr garde l'ordre de la table de gauche."
+    }
+   ],
+   "groupe": "Réorganiser et résumer",
+   "icone": "table",
+   "couleur": "teal"
+  },
+  {
+   "id": "pivoter",
+   "titre": "Format long ou large",
+   "resume": "Une ligne par sujet (large) ou une ligne par mesure (long).",
+   "variantes": [
+    {
+     "label": "Large → long",
+     "champs": [
+      "df",
+      {
+       "id": "res",
+       "label": "Nom du résultat",
+       "type": "nom",
+       "defaut": "patients_long"
+      },
+      {
+       "id": "id",
+       "label": "Identifiant du sujet",
+       "type": "nom",
+       "defaut": "id"
+      },
+      {
+       "id": "cols",
+       "label": "Colonnes à empiler",
+       "type": "noms",
+       "defaut": "J0, J7, J30"
+      },
+      {
+       "id": "nom",
+       "label": "Nom de la colonne des temps",
+       "type": "nom",
+       "defaut": "temps"
+      },
+      {
+       "id": "val",
+       "label": "Nom de la colonne des valeurs",
+       "type": "nom",
+       "defaut": "valeur"
+      }
+     ],
+     "base": "{res} <- reshape({df}, direction = \"long\", varying = {cols:q}, v.names = {val:q},\n        timevar = {nom:q}, times = {cols:q}, idvar = {id:q})",
+     "dplyr": "{res} <- {df} |> tidyr::pivot_longer(cols = c({cols}), names_to = {nom:q}, values_to = {val:q})",
+     "note": "Le format long est celui qu'attendent aov() avec Error(), friedman.test() et les graphiques par temps."
+    },
+    {
+     "label": "Long → large",
+     "champs": [
+      "df",
+      {
+       "id": "res",
+       "label": "Nom du résultat",
+       "type": "nom",
+       "defaut": "patients_large"
+      },
+      {
+       "id": "id",
+       "label": "Identifiant du sujet",
+       "type": "nom",
+       "defaut": "id"
+      },
+      {
+       "id": "nom",
+       "label": "Colonne des temps",
+       "type": "nom",
+       "defaut": "temps"
+      },
+      {
+       "id": "val",
+       "label": "Colonne des valeurs",
+       "type": "nom",
+       "defaut": "valeur"
+      }
+     ],
+     "base": "{res} <- reshape({df}, direction = \"wide\", idvar = {id:q}, timevar = {nom:q}, v.names = {val:q})",
+     "dplyr": "{res} <- {df} |> tidyr::pivot_wider(id_cols = {id}, names_from = {nom}, values_from = {val})",
+     "note": "reshape() nomme les colonnes « valeur.J0 », pivot_wider() les nomme « J0 »."
+    }
+   ],
+   "groupe": "Réorganiser et résumer",
+   "icone": "scale",
+   "couleur": "purple"
+  },
+  {
+   "id": "resumer",
+   "titre": "Résumer par groupe",
+   "resume": "Moyenne, médiane, écart-type ou effectif dans chaque groupe.",
+   "variantes": [
+    {
+     "champs": [
+      "df",
+      {
+       "id": "grp",
+       "label": "Variable de groupe",
+       "type": "nom",
+       "defaut": "groupe"
+      },
+      {
+       "id": "var",
+       "label": "Variable résumée",
+       "type": "nom",
+       "defaut": "chol"
+      },
+      {
+       "id": "stat",
+       "label": "Statistique",
+       "type": "choix",
+       "options": [
+        {
+         "label": "Moyenne",
+         "val": {
+          "b": "mean",
+          "d": "moyenne = mean({var}, na.rm = TRUE)"
+         }
+        },
+        {
+         "label": "Médiane",
+         "val": {
+          "b": "median",
+          "d": "mediane = median({var}, na.rm = TRUE)"
+         }
+        },
+        {
+         "label": "Écart-type",
+         "val": {
+          "b": "sd",
+          "d": "ecart_type = sd({var}, na.rm = TRUE)"
+         }
+        },
+        {
+         "label": "Effectif",
+         "val": {
+          "b": "length",
+          "d": "n = sum(!is.na({var}))"
+         }
+        }
+       ]
+      }
+     ],
+     "base": "aggregate({var} ~ {grp}, data = {df}, FUN = {stat.b})",
+     "dplyr": "{df} |> dplyr::group_by({grp}) |> dplyr::summarise({stat.d})",
+     "note": "aggregate() avec une formule ignore les lignes qui contiennent un NA ; na.rm = TRUE donne le même résultat côté dplyr."
+    }
+   ],
+   "groupe": "Réorganiser et résumer",
+   "icone": "pulse",
+   "couleur": "blue"
+  }
+ ]
+}

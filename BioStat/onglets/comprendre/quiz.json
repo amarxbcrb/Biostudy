@@ -1,0 +1,365 @@
+{
+ "version": 1,
+ "questions": [
+  {
+   "id": "q1",
+   "enonce": "On mesure le taux d'hémoglobine de 40 patients et on veut savoir si la moyenne diffère de 13,5 g/dL, la valeur de référence.",
+   "choix": [
+    "t-test-1",
+    "t-test-welch",
+    "prop-test-1",
+    "chisq"
+   ],
+   "reponse": "t-test-1",
+   "explication": "Une seule variable quantitative comparée à une valeur théorique : test t pour un échantillon. Avec 40 patients, la règle usuelle n ≥ 30 rend le test t utilisable même si la normalité est approximative."
+  },
+  {
+   "id": "q2",
+   "enonce": "Dans un essai, 25 patients reçoivent un antihypertenseur et 25 autres un placebo. On compare la pression systolique à 3 mois ; les deux groupes ont une distribution à peu près normale mais des variances visiblement différentes.",
+   "choix": [
+    "t-test-student",
+    "t-test-welch",
+    "t-test-paired",
+    "anova-1"
+   ],
+   "reponse": "t-test-welch",
+   "explication": "Deux groupes indépendants, variable quantitative normale, variances différentes : test de Welch, qui est le choix par défaut de t.test()."
+  },
+  {
+   "id": "q3",
+   "enonce": "On mesure la fréquence cardiaque de 15 sportifs au repos puis après un effort. Les différences ne suivent pas une loi normale.",
+   "choix": [
+    "wilcox-mw",
+    "wilcox-paired",
+    "t-test-paired",
+    "friedman"
+   ],
+   "reponse": "wilcox-paired",
+   "explication": "Deux mesures sur les mêmes sujets : données appariées. Différences non normales avec un petit effectif : test des rangs signés de Wilcoxon apparié."
+  },
+  {
+   "id": "q4",
+   "enonce": "On compare le taux de guérison (oui / non) entre deux antibiotiques chez 200 patients. Tous les effectifs théoriques dépassent 20.",
+   "choix": [
+    "chisq",
+    "fisher",
+    "mcnemar",
+    "t-test-welch"
+   ],
+   "reponse": "chisq",
+   "explication": "Deux variables qualitatives, observations indépendantes, effectifs théoriques ≥ 5 (règle usuelle) : test du χ²."
+  },
+  {
+   "id": "q5",
+   "enonce": "Même question, mais l'étude porte sur 18 patients et un effectif théorique vaut 2,5.",
+   "choix": [
+    "chisq",
+    "fisher",
+    "mcnemar",
+    "binom-test"
+   ],
+   "reponse": "fisher",
+   "explication": "Un effectif théorique est inférieur à 5 : le χ² n'est pas fiable, on utilise le test exact de Fisher."
+  },
+  {
+   "id": "q6",
+   "enonce": "Chez les mêmes 80 patients, on compare le résultat (positif / négatif) d'un test rapide et d'un test de référence.",
+   "choix": [
+    "chisq",
+    "fisher",
+    "mcnemar",
+    "cor-pearson"
+   ],
+   "reponse": "mcnemar",
+   "explication": "Variable qualitative binaire mesurée deux fois sur les mêmes sujets : données appariées, test de McNemar."
+  },
+  {
+   "id": "q7",
+   "enonce": "On compare la glycémie de patients traités par 4 antidiabétiques différents (un patient = un traitement). Normalité et homogénéité des variances sont vérifiées.",
+   "choix": [
+    "anova-1",
+    "kruskal",
+    "anova-rm",
+    "t-test-welch"
+   ],
+   "reponse": "anova-1",
+   "explication": "Plus de deux groupes indépendants, conditions respectées : ANOVA à un facteur, puis TukeyHSD() pour savoir quels groupes diffèrent. Multiplier les tests t gonflerait le risque α."
+  },
+  {
+   "id": "q8",
+   "enonce": "On compare un score de qualité de vie (échelle de 0 à 10, très asymétrique) entre 3 services hospitaliers.",
+   "choix": [
+    "anova-1",
+    "kruskal",
+    "friedman",
+    "chisq"
+   ],
+   "reponse": "kruskal",
+   "explication": "Trois groupes indépendants, variable ordinale ou non normale : test de Kruskal-Wallis, suivi si besoin de comparaisons 2 à 2 corrigées (pairwise.wilcox.test)."
+  },
+  {
+   "id": "q9",
+   "enonce": "On mesure la charge virale de 12 patients à J0, J15, J30 et J60. Les conditions de l'ANOVA ne sont pas respectées.",
+   "choix": [
+    "kruskal",
+    "friedman",
+    "anova-rm",
+    "wilcox-paired"
+   ],
+   "reponse": "friedman",
+   "explication": "Plus de deux mesures répétées sur les mêmes sujets, conditions non respectées : test de Friedman."
+  },
+  {
+   "id": "q10",
+   "enonce": "On veut savoir si l'IMC et la pression systolique sont liés chez 150 adultes. Le nuage de points montre une relation linéaire.",
+   "choix": [
+    "cor-pearson",
+    "cor-spearman",
+    "chisq",
+    "t-test-welch"
+   ],
+   "reponse": "cor-pearson",
+   "explication": "Deux variables quantitatives, relation linéaire : corrélation de Pearson avec cor.test()."
+  },
+  {
+   "id": "q11",
+   "enonce": "On étudie le lien entre le rang de classement de 10 candidats par deux jurys différents.",
+   "choix": [
+    "cor-pearson",
+    "cor-spearman",
+    "mcnemar",
+    "lm-reg"
+   ],
+   "reponse": "cor-spearman",
+   "explication": "Les données sont des rangs : corrélation de Spearman (method = \"spearman\")."
+  },
+  {
+   "id": "q12",
+   "enonce": "On veut prédire la survenue d'un infarctus (oui / non) à partir de l'âge, du tabac et du cholestérol, en obtenant des odds ratios ajustés.",
+   "choix": [
+    "glm-logit",
+    "lm-reg",
+    "chisq",
+    "cox"
+   ],
+   "reponse": "glm-logit",
+   "explication": "Variable à expliquer binaire, plusieurs facteurs : régression logistique, glm(family = binomial). exp(coef()) donne les odds ratios ajustés."
+  },
+  {
+   "id": "q13",
+   "enonce": "On suit 120 patients après une greffe et on compare le délai avant rejet entre deux traitements immunosuppresseurs. Certains patients sont perdus de vue.",
+   "choix": [
+    "logrank",
+    "t-test-welch",
+    "wilcox-mw",
+    "glm-logit"
+   ],
+   "reponse": "logrank",
+   "explication": "Durée jusqu'à un événement avec des données censurées : analyse de survie. Pour comparer deux groupes : test du log-rank (survival::survdiff)."
+  },
+  {
+   "id": "q14",
+   "enonce": "Toujours sur ces greffés, on veut mesurer l'effet du traitement en tenant compte de l'âge et du donneur.",
+   "choix": [
+    "logrank",
+    "km",
+    "cox",
+    "glm-logit"
+   ],
+   "reponse": "cox",
+   "explication": "Effet de plusieurs facteurs sur une survie : modèle de Cox (survival::coxph), qui donne des hazard ratios ajustés."
+  },
+  {
+   "id": "q15",
+   "enonce": "Avant un test t de Student, on veut vérifier que la variable est normale dans un groupe de 25 patients.",
+   "choix": [
+    "shapiro",
+    "var-test",
+    "bartlett",
+    "chisq"
+   ],
+   "reponse": "shapiro",
+   "explication": "Normalité d'une variable : test de Shapiro-Wilk, à compléter par un graphique quantile-quantile (qqnorm)."
+  },
+  {
+   "id": "q16",
+   "enonce": "Sur 50 nouveau-nés, 32 sont des garçons. La proportion de garçons diffère-t-elle de 0,51 ?",
+   "choix": [
+    "prop-test-1",
+    "binom-test",
+    "chisq",
+    "t-test-1"
+   ],
+   "reponse": "prop-test-1",
+   "explication": "Une proportion comparée à une valeur théorique, avec n·p₀ ≈ 25,5 et n·(1 − p₀) ≈ 24,5, tous deux ≥ 5 (règle usuelle) : prop.test(). binom.test() serait aussi valable."
+  },
+  {
+   "id": "q17",
+   "enonce": "Au-delà d'un pH de 5,5, un sol contaminé par l'aluminium n'est plus toxique pour les plantes. Un agriculteur mesure le pH de 12 échantillons de son sol (valeurs continues, distribution normale) pour savoir si le pH moyen dépasse 5,5.",
+   "choix": [
+    "t-test-1",
+    "wilcox-1",
+    "prop-test-1",
+    "chisq-gof"
+   ],
+   "reponse": "t-test-1",
+   "explication": "Une série quantitative continue et normale comparée à une valeur théorique : test de Student de conformité. H1 « le pH est supérieur au seuil » est unilatérale : t.test(ph, mu = 5.5, alternative = \"greater\")."
+  },
+  {
+   "id": "q18",
+   "enonce": "Sur 15 sites de phytoremédiation, 11 sont dépollués et 4 encore pollués. On veut savoir si la répartition s'écarte de 50 % / 50 %.",
+   "choix": [
+    "chisq-gof",
+    "chisq",
+    "mcnemar",
+    "t-test-1"
+   ],
+   "reponse": "chisq-gof",
+   "explication": "Une variable qualitative observée sur une seule série, comparée à une répartition théorique : χ² d'ajustement, chisq.test(c(11, 4), p = c(0.5, 0.5)). Effectifs théoriques 7,5 et 7,5, tous ≥ 5."
+  },
+  {
+   "id": "q19",
+   "enonce": "On mesure la surface racinaire de plants de colza cultivés avec ou sans engrais azoté (deux groupes de plants différents). Les données sont normales et les variances égales.",
+   "choix": [
+    "t-test-student",
+    "t-test-paired",
+    "wilcox-mw",
+    "anova-1"
+   ],
+   "reponse": "t-test-student",
+   "explication": "Deux séries indépendantes, quantitatives, normales et de variances égales : test de Student, t.test(…, var.equal = TRUE). Sans var.equal = TRUE, R ferait la correction de Welch."
+  },
+  {
+   "id": "q20",
+   "enonce": "On compte les plages de lyse d'un virus sur une lignée de cellules humaines et sur une lignée de cellules de macaque (boîtes différentes).",
+   "choix": [
+    "wilcox-mw",
+    "t-test-student",
+    "wilcox-paired",
+    "chisq"
+   ],
+   "reponse": "wilcox-mw",
+   "explication": "Un nombre de plages de lyse est un dénombrement, donc une variable discrète. Deux séries indépendantes : test de Mann-Whitney Wilcoxon, wilcox.test()."
+  },
+  {
+   "id": "q21",
+   "enonce": "On relève le secteur où travaillent des diplômés (agroalimentaire, environnement, santé) selon qu'ils ont arrêté leurs études en Licence ou en Master.",
+   "choix": [
+    "chisq",
+    "mcnemar",
+    "chisq-gof",
+    "cor-spearman"
+   ],
+   "reponse": "chisq",
+   "explication": "Deux variables qualitatives sur des individus différents : χ² d'indépendance sur le tableau 2 × 3. Tous les effectifs théoriques sont ≥ 5 (le plus petit vaut 5,6)."
+  },
+  {
+   "id": "q22",
+   "enonce": "Des composteurs sont notés « productifs » ou « non productifs » à leur installation, puis les mêmes composteurs 3 mois plus tard. 72 sont passés de oui à non, 12 de non à oui.",
+   "choix": [
+    "mcnemar",
+    "chisq",
+    "fisher",
+    "wilcox-paired"
+   ],
+   "reponse": "mcnemar",
+   "explication": "Variable qualitative mesurée deux fois sur les mêmes individus : test de McNemar. Il porte sur les paires discordantes (72 et 12), et il en faut au moins 10."
+  },
+  {
+   "id": "q23",
+   "enonce": "On compare les émissions de CO₂ par habitant de 4 secteurs d'activité (logement, alimentation, mobilité, autres). Les données sont normales et les variances égales.",
+   "choix": [
+    "anova-1",
+    "kruskal",
+    "t-test-student",
+    "anova-rm"
+   ],
+   "reponse": "anova-1",
+   "explication": "Plus de 2 séries indépendantes, quantitatives, normales, variances égales : ANOVA, puis test t par paires avec correction de Bonferroni si elle est significative."
+  },
+  {
+   "id": "q24",
+   "enonce": "Même étude des émissions de CO₂ par secteur, mais le test de Bartlett montre que les variances diffèrent (les données restent normales).",
+   "choix": [
+    "anova-welch",
+    "anova-1",
+    "kruskal",
+    "bartlett"
+   ],
+   "reponse": "anova-welch",
+   "explication": "Normalité respectée mais pas l'homoscédasticité : test de Welch (ANOVA sans égalité des variances), oneway.test()."
+  },
+  {
+   "id": "q25",
+   "enonce": "On compare la masse de plantes de 3 groupes (contrôle, traitement 1, traitement 2). Les données ne suivent pas la loi normale.",
+   "choix": [
+    "kruskal",
+    "anova-1",
+    "friedman",
+    "wilcox-mw"
+   ],
+   "reponse": "kruskal",
+   "explication": "Plus de 2 séries indépendantes et conditions de l'ANOVA non respectées : Kruskal-Wallis, puis Wilcoxon (ou Dunn) par paires avec correction de Bonferroni."
+  },
+  {
+   "id": "q26",
+   "enonce": "Chez les mêmes individus, on mesure la taille et la masse. Le nuage de points est rectiligne et les deux variables sont normales. On veut savoir si elles sont liées.",
+   "choix": [
+    "cor-pearson",
+    "cor-spearman",
+    "lm-reg",
+    "t-test-paired"
+   ],
+   "reponse": "cor-pearson",
+   "explication": "Deux variables quantitatives sur les mêmes individus, lien linéaire, loi normale : corrélation de Pearson. On rapporte r et la p-value."
+  },
+  {
+   "id": "q27",
+   "enonce": "Pour des joueurs, on relève le nombre d'heures d'entraînement et le nombre de matchs gagnés. Le nuage de points montre une courbe qui monte de plus en plus vite.",
+   "choix": [
+    "cor-spearman",
+    "cor-pearson",
+    "chisq",
+    "lm-reg"
+   ],
+   "reponse": "cor-spearman",
+   "explication": "Relation non linéaire entre deux variables mesurées sur les mêmes individus : corrélation de Spearman, cor.test(…, method = \"spearman\")."
+  },
+  {
+   "id": "q28",
+   "enonce": "On veut décrire comment le prestige d'une profession varie avec le nombre d'années d'études (variable contrôlée) et tester si la pente est nulle.",
+   "choix": [
+    "lm-reg",
+    "cor-spearman",
+    "anova-1",
+    "t-test-1"
+   ],
+   "reponse": "lm-reg",
+   "explication": "Une variable contrôlée et une variable réponse : régression linéaire, lm() puis car::Anova(). H0 : la pente est nulle."
+  },
+  {
+   "id": "q29",
+   "enonce": "On mesure le rendement de blé (t/ha) de parcelles cultivées avec 3 variétés et 2 doses d'engrais, chaque combinaison sur 5 parcelles. On veut savoir si la variété, la dose et leur combinaison influencent le rendement.",
+   "choix": [
+    "anova-2",
+    "anova-1",
+    "anova-3",
+    "kruskal"
+   ],
+   "reponse": "anova-2",
+   "explication": "Deux facteurs croisés (variété et dose) et une variable quantitative : ANOVA à deux facteurs, aov(rendement ~ variete * dose). Elle teste aussi l'interaction : l'effet de la dose est-il le même pour chaque variété ?"
+  },
+  {
+   "id": "q30",
+   "enonce": "Des souris reçoivent ou non un traitement, sont nourries avec un régime normal ou gras, et sont des mâles ou des femelles (3 répétitions par combinaison). On mesure leur glycémie.",
+   "choix": [
+    "anova-3",
+    "anova-2",
+    "anova-1",
+    "friedman"
+   ],
+   "reponse": "anova-3",
+   "explication": "Trois facteurs croisés (traitement, régime, sexe) : ANOVA à trois facteurs, aov(glycemie ~ traitement * regime * sexe). Avec 3 répétitions par case, l'interaction triple peut être testée."
+  }
+ ]
+}

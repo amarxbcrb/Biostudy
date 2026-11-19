@@ -1,0 +1,12 @@
+BIOCAMPUS : documents de cours partagés
+==========================================
+index.html      Structure et styles de la page
+app.js          Toute la logique : inscription (nom, photo, université, niveau), navigation, menu « … » (tri, vue,
+                sélection, déplacer, renommer, nouveau dossier), Ajouter (fichiers, dossier ou .zip décompressé, lien, dossier vide), déplacer (glisser-déposer, appui long),
+                Mon espace, recherche, annonces, admin (couverture animée)
+UCBL.png, UCA.png, UMMTO.png   Logos des universités (nom = sigle)
+
+Les fichiers sont stockés dans Google Drive et servis par un script Google Apps
+Script (Code.gs, gardé hors du dépôt car il contient le mot de passe admin).
+Les lectures passent par le relais Cloudflare /api/campus (functions/api/campus.js)
+qui les met en cache. Admin : bouton bouclier dans la page.

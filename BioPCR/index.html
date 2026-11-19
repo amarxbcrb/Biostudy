@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="fr" data-verre="calc" data-haptic="own" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-visual">
+<meta name="theme-color" content="#f2f2f7" id="metaTheme">
+<title>BioPCR | Réaction PCR, master mix et protocole de pipetage</title>
+<meta name="description" content="BioPCR : volumes de chaque réactif d'une réaction PCR, eau exempte de nucléases à ajouter, master mix pour plusieurs réactions et protocole de pipetage.">
+<link rel="icon" type="image/png" href="/Pictures/favicon.png">
+<link rel="apple-touch-icon" href="/Pictures/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="BioStudy">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script>
+/* thème avant le premier rendu : choix mémorisé pour la période (jour / nuit) en cours, sinon celui du système */
+(()=>{const g=k=>{try{return localStorage.getItem(k)}catch(e){return null}},h=new Date().getHours(),th=g('pcrTheme');
+document.documentElement.dataset.theme=th&&g('pcrThemePeriod')===(h>=7&&h<20?'day':'night')?th:matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'})();
+</script>
+<style>
+/* ===== 1. Jetons : palette Réglages iOS (identique à BioChem) ===== */
+#bc{--serif:"Iowan Old Style","Palatino Linotype",Georgia,serif;--ease:cubic-bezier(.22,1,.36,1);--spring:cubic-bezier(.34,1.45,.64,1);
+--top:70px;--gx:14px;--navh:60px;--blur:22px;
+--grp:#fff;--fill:rgba(118,118,128,.12);--thumb:#fff;--tx:#000;--tx2:#6c6c70;--tx3:#8a8a8e;--sep:rgba(60,60,67,.18);
+--acc:var(--c-blue);--acc-tx:color-mix(in srgb,var(--acc) 78%,#000);--brand:#0064d2;
+--c-blue:#007aff;--c-indigo:#5856d6;--c-purple:#af52de;--c-pink:#ff2d55;--c-orange:#ff9500;--c-green:#34c759;--c-teal:#30b0c7;--c-red:#ff3b30;--ok:#1f8a3b;--err:#d70015;--warn:#ff9500;--h2o:#32ade6;--dna:#ff9500;
+--lg-rgb:255,255,255;--lg-a:.68;--lg-hi:#fff;--lg-sh:rgba(0,0,0,.12);--hair:rgba(0,0,0,.09);
+--fb:rgba(60,60,67,.3);--lens:rgba(120,120,128,.16);--lens-line:rgba(255,255,255,.9);--veil:rgba(0,0,0,.22);--blob:.3;
+color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",sans-serif;font-size:16px;line-height:1.4}
+[data-theme=dark] #bc{--grp:#1c1c1e;--fill:#2c2c2e;--thumb:#636366;--tx:#fff;--tx2:#a1a1a6;--tx3:#8e8e93;--sep:rgba(84,84,88,.6);
+--acc-tx:color-mix(in srgb,var(--acc) 72%,#fff);--brand:#4da3ff;
+--c-blue:#0a84ff;--c-indigo:#5e5ce6;--c-purple:#bf5af2;--c-pink:#ff375f;--c-orange:#ff9f0a;--c-green:#30d158;--c-teal:#40cbe0;--c-red:#ff453a;--ok:#30d158;--err:#ff453a;--h2o:#64d2ff;--dna:#ff9f0a;
+--lg-rgb:28,28,30;--lg-a:.66;--lg-hi:rgba(255,255,255,.34);--lg-sh:rgba(0,0,0,.5);--hair:rgba(255,255,255,.08);
+--fb:rgba(235,235,245,.26);--lens:rgba(255,255,255,.17);--lens-line:rgba(255,255,255,.26);--veil:rgba(0,0,0,.5);--blob:0}
+@media(min-width:600px){#bc{--gx:24px;--top:80px}}
+@media(min-width:900px){#bc{--gx:36px;--top:92px}}
+html{background:#f2f2f7;color-scheme:light;-webkit-text-size-adjust:100%;overflow-x:clip;overscroll-behavior:none;transition:background .4s}
+html[data-theme=dark]{background:#000;color-scheme:dark}
+body{margin:0;min-height:100dvh;overflow-x:clip;overscroll-behavior:none;-webkit-font-smoothing:antialiased}
+#bc::before{content:"";position:fixed;inset:-50%;z-index:-1;pointer-events:none;opacity:var(--blob);filter:blur(60px);animation:flow 20s ease-in-out infinite alternate;
+background:radial-gradient(circle at 20% 30%,rgba(10,132,255,.5),transparent 40%),radial-gradient(circle at 80% 70%,rgba(94,92,230,.25),transparent 40%),radial-gradient(circle at 50% 10%,rgba(142,142,147,.15),transparent 40%)}
+@keyframes flow{to{transform:translate(-4%,3%) rotate(8deg)}}
+:where(#bc) *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:where(#bc) :is(button,input,select){font:inherit;color:inherit}
+:where(#bc) button{border:0;background:none;cursor:pointer;touch-action:manipulation}
+#bc :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+#bc :is(input,select):focus-visible{outline:none}
+#bc [hidden]{display:none!important}
+.ic{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+/* ===== 2. Verre (barres, menus) : un seul style, reflet qui suit la souris ===== */
+.glass{position:relative;background:rgba(var(--lg-rgb),var(--lg-a));-webkit-backdrop-filter:blur(var(--blur)) saturate(190%);backdrop-filter:blur(var(--blur)) saturate(190%);
+box-shadow:inset 0 1px 0 var(--lg-hi),0 0 0 .5px var(--hair),0 12px 30px var(--lg-sh)}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;
+background:radial-gradient(circle 90px at var(--mx,50%) var(--my,50%),rgba(255,255,255,.28),transparent 70%)}
+.glass.lit::after{opacity:1}
+@media(prefers-reduced-transparency:reduce){.glass{background:var(--grp);-webkit-backdrop-filter:none;backdrop-filter:none}}
+
+/* ===== 3. En-tête ===== */
+header{position:fixed;top:0;left:0;right:0;z-index:20;padding-top:env(safe-area-inset-top);pointer-events:none}
+.hin{max-width:1080px;margin:auto;padding:12px var(--gx);display:flex;justify-content:space-between;align-items:center;gap:8px;animation:drop .7s var(--ease)}
+@keyframes drop{from{opacity:0;transform:translateY(-100%)}}
+.logo-c{flex:1;min-width:0;pointer-events:auto}
+.logo{font-size:clamp(1.45rem,6.4vw,1.9rem);font-weight:800;letter-spacing:-.6px;line-height:1;white-space:nowrap}
+.logo i{font-style:normal;color:var(--brand)}
+/* accent par onglet : réaction bleu, master mix violet, protocole vert */
+#bc[data-tab="1"]{--acc:var(--c-purple)}#bc[data-tab="2"]{--acc:var(--c-green)}
+#bc .nb:nth-of-type(1){--nc:var(--c-blue)}#bc .nb:nth-of-type(2){--nc:var(--c-purple)}#bc .nb:nth-of-type(3){--nc:var(--c-green)}
+.sub{font-size:.75rem;font-weight:600;color:var(--tx2);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hact{pointer-events:auto;display:flex;align-items:center;gap:8px;position:relative}
+.tools{height:48px;padding:0 4px;border-radius:999px;display:flex;align-items:center;gap:2px}
+.tb,.mb{display:grid;place-items:center;border-radius:50%;font-size:20px;transition:transform .35s var(--spring),background .3s}
+.tb{width:40px;height:40px;position:relative;z-index:1}
+.mb{width:48px;height:48px}
+.tb:active{transform:scale(.86);background:var(--fill)}
+.mb:active{transform:scale(.88)}
+@media(hover:hover){.tb:hover{background:var(--fill)}.mb:hover{transform:scale(1.06)}}
+.pop{position:absolute;top:calc(100% + 10px);right:56px;padding:6px;border-radius:26px;display:none;flex-direction:column;transform-origin:top right}
+.pop.on{display:flex;animation:pop .45s var(--spring)}
+.lmenu{min-width:176px}
+@keyframes pop{from{opacity:0;transform:scale(.86) translateY(-8px)}}
+.lmenu button{position:relative;z-index:1;min-height:44px;padding:11px 16px;border-radius:999px;text-align:left;font-size:15px;font-weight:600}
+.lmenu button:hover,.lmenu button.on{background:var(--fill);color:var(--acc-tx)}
+
+/* ===== 4. Page : saisie à gauche, résultat à droite ===== */
+.shell{min-height:100dvh;max-width:1080px;margin:auto;display:flex;flex-direction:column;
+padding:calc(var(--top) + env(safe-area-inset-top)) var(--gx) calc(var(--navh) + 96px + env(safe-area-inset-bottom))}
+.stage{flex:1 0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:26px;align-content:center;animation:rise .7s var(--ease) backwards}
+@keyframes rise{from{opacity:0;transform:translateY(24px)}}
+@media(min-width:900px){.stage{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:32px}}
+.inputs,.results{display:flex;flex-direction:column;min-width:0}
+.thead{display:flex;align-items:center;gap:10px;margin:0 4px 6px}
+.roll{height:38px;overflow:hidden}
+.roll>div{transition:transform .8s var(--spring)}
+.roll span{height:38px;display:grid;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rnb{width:30px;flex-shrink:0;font-size:27px;color:var(--acc-tx)}
+.rnb span{place-items:center}
+.rttl{flex:1;min-width:0;font-size:clamp(22px,5vw,27px);font-weight:800;letter-spacing:-.6px}
+.view{display:none}
+.view.on{display:block}
+/* en-têtes de groupe façon Réglages */
+.gh{margin:20px 16px 7px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--tx2)}
+.gf{margin:7px 16px 0;font-size:13px;color:var(--tx2);line-height:1.45}
+/* segments : la pastille se place en CSS (--i : index, --n : nombre) */
+.seg{position:relative;display:flex;padding:3px;border-radius:999px;background:var(--fill);--i:0;--n:2}
+.seg .th{position:absolute;top:3px;bottom:3px;left:3px;width:calc((100% - 6px)/var(--n));border-radius:999px;background:var(--thumb);box-shadow:0 2px 6px rgba(0,0,0,.18);
+transform:translateX(calc(var(--i)*100%));transition:transform .5s var(--spring)}
+.seg button{flex:1;min-width:0;height:34px;position:relative;z-index:1;border-radius:999px;font-size:14px;font-weight:600;color:var(--tx2);white-space:nowrap;transition:color .3s,transform .35s var(--spring)}
+.seg button:active{transform:scale(.94)}
+.seg button.on{color:var(--tx)}
+/* groupes et lignes */
+.grp{background:var(--grp);border-radius:22px;overflow:hidden}
+.vr{position:relative;display:flex;align-items:center;gap:12px;min-height:54px;padding:6px 12px 6px 16px;transition:background .25s}
+.grp>*+*::before{content:"";position:absolute;top:0;left:16px;right:0;height:.5px;background:var(--sep)}
+.vr:focus-within,.rr:focus-within{background:color-mix(in srgb,var(--grp) 94%,var(--acc))}
+.lb{flex:1;min-width:0;display:flex;align-items:baseline;gap:8px;font-size:15px;font-weight:600}
+.lb{align-items:center}.lb span{line-height:1.25;overflow-wrap:anywhere}
+.sym{min-width:16px;font-family:var(--serif);font-style:italic;font-size:19px;font-weight:700;line-height:1;color:var(--acc-tx);white-space:nowrap}
+.sym sub{font-size:.6em}
+.ctl{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.val{--fbg:transparent;
+border:1.5px solid var(--fb);background:var(--fbg);border-radius:999px;padding:0 12px;cursor:text;font-weight:600;min-width:0;height:40px;font-size:18px;text-align:right;width:96px;
+transition:border-color .2s,box-shadow .2s,background .2s}
+.val:focus,.cx:focus-within{border-color:var(--acc);background:var(--grp);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 22%,transparent)}
+.val::placeholder,.nm::placeholder{color:var(--tx3);font-weight:500}
+.val.bad{color:var(--err)}
+.sel,.uc{flex:0 0 auto;height:36px;border:0;border-radius:999px;font-size:15px;font-weight:600;white-space:nowrap}
+.uc{display:inline-grid;place-items:center;min-width:58px;padding:0 14px;background:var(--fill);color:var(--tx2)}
+.sel{width:92px;padding:0 26px 0 13px;appearance:none;-webkit-appearance:none;cursor:pointer;text-align:left;overflow:hidden;text-overflow:ellipsis;
+background:var(--fill) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a8f9b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e") no-repeat right 9px center/12px;transition:transform .3s var(--spring)}
+.sel:active{transform:scale(.97)}
+.sel:focus-visible{box-shadow:0 0 0 2px var(--acc)}
+.sel option{background:var(--grp);color:var(--tx)}
+/* réactifs */
+.mhead{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:20px 4px 7px 16px}
+.mhead .gh{margin:0}
+.mhead .seg{flex:0 1 230px}
+.rr{position:relative;padding:8px 8px 10px 16px;transition:background .25s;animation:slide .45s var(--ease) backwards}
+@keyframes slide{from{opacity:0;transform:translateY(-8px)}}
+.rh{display:flex;align-items:center;gap:8px;min-height:42px}
+.no{width:22px;height:22px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;background:var(--fill);font-size:12px;font-weight:700;color:var(--tx2);font-variant-numeric:tabular-nums}
+.rr .no{background:var(--rc,var(--fill));color:#fff}
+.rr:nth-child(6n+1){--rc:var(--c-blue)}.rr:nth-child(6n+2){--rc:var(--c-teal)}.rr:nth-child(6n+3){--rc:var(--c-green)}
+.rr:nth-child(6n+4){--rc:var(--c-orange)}.rr:nth-child(6n+5){--rc:var(--c-pink)}.rr:nth-child(6n){--rc:var(--c-indigo)}
+.nm{flex:1;min-width:0;height:40px;border:0;border-bottom:1.5px dashed transparent;background:none;font-size:16px;font-weight:600;text-overflow:ellipsis;cursor:text;transition:border-color .2s}
+.nm:hover,.nm:focus{border-bottom-color:var(--sep)}
+.rv{flex-shrink:0;min-width:64px;height:30px;padding:0 12px;border-radius:999px;display:inline-grid;place-items:center;background:color-mix(in srgb,var(--acc) 13%,transparent);
+color:var(--acc-tx);font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rv.err{background:color-mix(in srgb,var(--err) 13%,transparent);color:var(--err)}
+.del{width:36px;height:36px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;font-size:19px;color:var(--tx3);transition:transform .35s var(--spring),color .2s}
+.del:active{transform:scale(.8)}
+@media(hover:hover){.del:hover{color:var(--err)}}
+.rh .val{width:74px;height:40px;font-size:17px}
+.rh .uc{height:30px;min-width:0;padding:0 10px;font-size:13px}
+.rc{display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:6px;padding:0 4px 0 30px}
+.cf{display:flex;flex-direction:column;gap:3px;min-width:0}
+.cf small{padding-left:2px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3)}
+.cx{flex:1;min-width:0;display:flex;align-items:center;gap:4px;height:38px;padding-left:12px;border-radius:999px;border:1.5px solid var(--fb);background:transparent;cursor:text;transition:border-color .2s,box-shadow .2s,background .2s}
+.cx .val,.cx .val:focus{flex:1;width:0;height:34px;padding:0;border:0;background:none;box-shadow:none;font-size:16px;text-align:left}
+.cx .sel{width:auto;max-width:86px;height:30px;margin-right:3px;padding:0 22px 0 10px;background-color:var(--grp);background-position:right 7px center;background-size:10px;font-size:13px}
+.arr{height:36px;display:grid;place-items:center;color:var(--tx3);font-size:15px}
+.add{position:relative;width:100%;min-height:50px;display:flex;align-items:center;gap:10px;padding:0 16px;color:var(--acc-tx);font-size:16px;font-weight:600;transition:opacity .2s}
+.add .ic{font-size:20px}
+.add:active{opacity:.5}
+.empty{padding:18px 16px;text-align:center;font-size:14px;color:var(--tx2)}
+/* résultat */
+.results>.gh{margin-top:0}
+.rg{background:var(--grp);border-radius:22px;overflow:hidden;text-align:center}
+.big{min-height:92px;padding:22px 16px 6px;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:10px}
+.bl{font:italic 700 24px var(--serif);color:var(--acc-tx)}
+.bl sub{font-size:.6em}
+.num{font-size:clamp(32px,10vw,44px);font-weight:800;letter-spacing:-1px;line-height:1.1;white-space:nowrap;font-variant-numeric:tabular-nums}
+.bu{font-size:20px;font-weight:700;color:var(--acc-tx)}
+.eq{padding:0 16px 16px;font-size:14px;font-weight:500;color:var(--tx2);line-height:1.45;overflow-wrap:anywhere}
+.bar{display:flex;height:12px;margin:2px 16px 16px;border-radius:999px;overflow:hidden;background:var(--fill)}
+.bar i{height:100%;width:0;transition:width .6s var(--ease)}
+.bar i+i{box-shadow:-1.5px 0 0 var(--grp)}
+.lr{position:relative;display:flex;align-items:center;gap:10px;min-height:46px;padding:0 16px;font-size:15px;text-align:left}
+.lr::before{content:"";position:absolute;top:0;left:16px;right:0;height:.5px;background:var(--sep)}
+.lr .k{flex:1;min-width:0;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lr .k small{color:var(--tx3);font-size:13px;font-weight:500}
+.lr .v{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.lr.tot{font-weight:700}.lr.tot .v{color:var(--acc-tx)}
+.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;background:var(--c)}
+.pp{flex-shrink:0;padding:3px 9px;border-radius:999px;background:var(--fill);font-size:12px;font-weight:700;color:var(--tx2)}
+.acts{display:flex;border-top:.5px solid var(--sep)}
+.ab{flex:1;height:50px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:600;color:var(--acc-tx);transition:opacity .2s,color .2s}
+.ab+.ab{border-left:.5px solid var(--sep)}
+.ab .ic{font-size:17px}
+.ab:active{opacity:.5}
+.ab:disabled{opacity:.35;pointer-events:none}
+.ab.ok{color:var(--ok)}
+.bump{animation:bump .55s var(--spring)}
+@keyframes bump{40%{transform:scale(1.07)}}
+.tip{margin:10px 16px 0;display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--tx2);line-height:1.45}
+.tip:empty{display:none}
+.tip .ic{margin-top:2px;font-size:15px}
+.tip.err{color:var(--err);font-weight:600}
+.tip.warn .ic{color:var(--warn)}
+/* protocole */
+.st{position:relative;display:flex;gap:12px;align-items:flex-start;width:100%;padding:12px 14px 12px 12px;text-align:left;transition:background .25s}
+.ck{width:28px;height:28px;flex-shrink:0;display:grid;place-items:center;border-radius:50%;border:1.5px solid var(--tx3);font-size:13px;font-weight:700;color:var(--tx2);
+transition:background .3s,border-color .3s,transform .4s var(--spring)}
+.ck .ic{font-size:16px;color:#fff;display:none}
+.st.done .ck{background:var(--ok);border-color:var(--ok);transform:scale(1.05)}
+.st.done .ck b{display:none}.st.done .ck .ic{display:block}
+.sc{flex:1;min-width:0}
+.stt{font-size:16px;font-weight:600;transition:color .3s}
+.std{margin-top:2px;font-size:14px;color:var(--tx2);line-height:1.45}
+.std b{color:var(--acc-tx);font-weight:700}
+.st.done :is(.stt,.std){color:var(--tx3)}
+.st.done .stt{text-decoration:line-through}
+.sl2{margin-top:8px;border-radius:14px;background:var(--fill);overflow:hidden}
+.sl2 div{position:relative;display:flex;align-items:center;gap:8px;min-height:36px;padding:0 12px;font-size:14px}
+.sl2 div+div::before{content:"";position:absolute;top:0;left:12px;right:0;height:.5px;background:var(--sep)}
+.sl2 span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sl2 b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.sl2 .taq{color:var(--acc-tx);font-weight:600}
+.st .pp{margin-top:6px;display:inline-block}
+
+/* ===== 5. Barre d'onglets et résultat flottant ===== */
+.nav{position:fixed;z-index:30;bottom:max(12px,env(safe-area-inset-bottom));left:12px;right:12px;max-width:380px;height:var(--navh);margin-inline:auto;border-radius:999px;
+animation:navin .8s var(--ease) backwards .2s}
+@keyframes navin{from{opacity:0;translate:0 40px;scale:.94}}
+@keyframes navin-d{from{opacity:0;translate:0 -30px;scale:.94}}
+.nav-in{height:100%;padding:5px;border-radius:999px;display:flex;touch-action:pan-y;-webkit-user-select:none;user-select:none;cursor:grab}
+.nav-in.dragging{cursor:grabbing}
+.sl{position:absolute;top:5px;bottom:5px;left:0;width:80px;z-index:1;border-radius:999px;pointer-events:none;translate:5px 0;
+background:var(--lens);border:1px solid var(--lens-line);box-shadow:inset 0 1px 1px rgba(255,255,255,.5),0 4px 14px rgba(0,0,0,.14);
+transition:translate .6s var(--spring),width .3s var(--ease),scale .3s var(--spring)}
+.sl.interacting{scale:1.06 1.12}
+.dragging .sl{transition:scale .25s var(--spring)}
+.nb{flex:1;position:relative;z-index:2;border-radius:999px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+font-size:.66rem;font-weight:500;color:var(--tx2);white-space:nowrap;transition:color .3s,transform .45s var(--spring)}
+.nb:active{transform:scale(.92)}
+.nb .ic{font-size:20px}
+.nb.on{color:var(--acc-tx);font-weight:600}
+.nb .ic{color:var(--nc);opacity:.75;transition:opacity .3s}.nb.on .ic{opacity:1}
+.nb.on .ic{animation:ipop .35s var(--ease)}
+@keyframes ipop{from{transform:scale(.85)}}
+.mini{position:fixed;z-index:29;left:12px;right:12px;max-width:380px;margin-inline:auto;bottom:calc(max(12px,env(safe-area-inset-bottom)) + var(--navh) + 10px);
+min-height:46px;padding:8px 18px;border-radius:999px;display:flex;align-items:baseline;justify-content:center;gap:8px;font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;
+opacity:0;translate:0 16px;pointer-events:none;transition:opacity .3s,translate .45s var(--spring)}
+.mini.on{opacity:1;translate:0;pointer-events:auto}
+#bc.kb .mini{bottom:auto}
+#bc.kb .nav{visibility:hidden}
+.mini span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini .ml{font:italic 700 17px var(--serif);color:var(--acc-tx)}
+.mini .ml sub{font-size:.6em}
+.mini .mu{font-size:16px;color:var(--acc-tx)}
+
+/* ===== 6. Pied de page (footer-global.js) : dans le flux, sous le contenu ===== */
+#bc .shell>footer{position:relative!important;z-index:1!important;margin-top:24px!important;padding:24px 0 0!important}
+[data-theme=light] #bc .shell>footer a{background:var(--grp)!important;color:#000!important;border:1px solid rgba(0,0,0,.1)!important}
+[data-theme=light] #bc .shell>footer svg{filter:brightness(0)!important}
+[data-theme=light] #bc .shell>footer :is(span,p){color:#000!important}
+
+/* ===== 7. Adaptations ===== */
+@media(max-width:599px){.sub{display:none}
+#bc .shell>footer{width:100vw!important;max-width:100vw!important;margin-left:calc(50% - 50vw)!important;padding-inline:6px!important}
+#bc .shell>footer div{flex-wrap:nowrap!important;gap:4px!important;justify-content:center!important}
+#bc .shell>footer a{padding-inline:8px!important;font-size:11px!important;white-space:nowrap!important;flex-shrink:1!important}}
+@media(max-width:389px){.tools{height:44px}.tb{width:34px;height:34px;font-size:18px}.mb{width:44px;height:44px}.nb{font-size:.62rem}
+.rc{padding-left:0}.cx .sel{max-width:74px}.mhead .seg{flex-basis:200px}.seg button{font-size:13px}.val{width:76px}}
+@media(max-height:480px) and (orientation:landscape) and (min-aspect-ratio:3/2) and (max-width:1023px){#bc{--navh:52px;--top:62px}.stage{grid-template-columns:1fr 1fr}.nb{flex-direction:row;gap:6px}}
+/* PC ≥ 1024 × 600 : barre en haut, saisie à gauche, résultat à droite */
+@media(min-width:1024px) and (min-height:600px){
+#bc{--top:84px;--gx:32px}
+.hin{max-width:none;padding:16px 32px}
+.logo{font-size:1.8rem}.sub{font-size:.85rem}
+.tools{height:52px}.tb{width:44px;height:44px}.mb{width:52px;height:52px}.pop{right:62px}
+.nav{top:calc(env(safe-area-inset-top) + 14px);bottom:auto;left:0;right:0;width:min(520px,calc(100vw - 640px));max-width:none;height:56px;animation-name:navin-d}
+.nb{flex-direction:row;gap:8px;font-size:.78rem}
+.mini{display:none}
+.shell{max-width:none;margin:0;padding:calc(var(--top) + env(safe-area-inset-top)) var(--gx) 24px}
+.stage{width:100%;max-width:1400px;margin:0 auto;padding-top:24px;grid-template-columns:minmax(0,1.5fr) minmax(340px,1fr);align-content:start;gap:40px}
+.results{position:sticky;top:calc(var(--top) + 24px);align-self:start;padding-top:64px}
+.vr{min-height:60px}
+.val{width:120px}
+.big{min-height:150px;padding-top:34px}
+.num{font-size:clamp(44px,4.4vw,64px)}
+.rr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);align-items:center;column-gap:14px;padding:6px 8px 6px 16px}
+.rr.direct{grid-template-columns:1fr}
+.rc{padding:0;align-items:center}
+.cf{flex-direction:row;align-items:center;gap:6px}
+.cf small{display:none}
+#bc .shell>footer{margin-top:32px!important}}
+@media(min-width:1280px) and (min-height:600px){
+.rr:not(.direct){display:grid;grid-template-columns:22px minmax(90px,1fr) minmax(150px,190px) 16px minmax(150px,190px) 74px 36px;align-items:center;column-gap:10px;padding:8px 8px 8px 16px}
+.rr:not(.direct) :is(.rh,.rc){display:contents}
+.rr:not(.direct) .rv{order:5}.rr:not(.direct) .del{order:6}
+.rcols{display:grid!important}}
+.rcols{display:none;grid-template-columns:22px minmax(90px,1fr) minmax(150px,190px) 16px minmax(150px,190px) 74px 36px;column-gap:10px;margin:0 8px 6px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3)}
+.rcols span:nth-child(4){text-align:center}
+.rcols:empty{display:none!important}
+@media(min-width:1024px) and (min-height:600px) and (max-width:1279px){.sub{display:none}.nb{flex-direction:column;gap:2px;font-size:11.5px}.nb .ic{font-size:18px}
+.rr{grid-template-columns:1fr}.rc{padding-left:30px}}
+@media(prefers-reduced-motion:reduce){#bc *,#bc ::before,#bc ::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+<link rel="stylesheet" href="/verre.css">
+</head>
+<body>
+<div id="bc">
+
+<header><div class="hin">
+  <div class="logo-c"><div class="logo">Bio<i>PCR</i></div><div class="sub" data-key="subtitle"></div></div>
+  <div class="hact">
+    <div class="tools glass">
+      <button class="tb" id="langBtn" data-tk="t_lang" data-ic="lang" aria-haspopup="true"></button>
+      <button class="tb" id="themeBtn" data-tk="t_theme"></button>
+    </div>
+    <div class="pop lmenu glass" id="lmenu"><button data-l="fr">FR · Français</button><button data-l="en">EN · English</button></div>
+    <button class="mb glass" id="mb" type="button" data-menu data-tk="t_menu" data-ic="menu"></button>
+  </div>
+</div></header>
+
+<div class="shell" id="shell">
+  <main class="stage" id="card">
+    <section class="inputs">
+      <div class="thead" aria-hidden="true"><div class="roll rnb"><div id="rn"></div></div><div class="roll rttl"><div id="rtt"></div></div></div>
+
+      <!-- Réaction : un tube -->
+      <section class="view" id="L0">
+        <p class="gh" data-key="g_tube"></p>
+        <div class="grp">
+          <div class="vr"><div class="lb"><span class="sym">V</span><span data-key="v_tot"></span></div><div class="ctl"><input id="vt" class="val" type="text" inputmode="decimal" autocomplete="off" data-al="v_tot" data-ph="25"><span class="uc">µL</span></div></div>
+          <div class="vr"><div class="lb"><span class="sym">V<sub>ADN</sub></span><span data-key="v_dna"></span></div><div class="ctl"><input id="vd" class="val" type="text" inputmode="decimal" autocomplete="off" data-al="v_dna" data-ph="2"><span class="uc">µL</span></div></div>
+        </div>
+        <div class="mhead"><p class="gh" data-key="g_reag"></p><div class="seg" id="modeSeg"><i class="th"></i><button type="button" data-key="m_dil"></button><button type="button" data-key="m_dir"></button></div></div>
+        <div class="rcols" id="rcols" aria-hidden="true"></div>
+        <div class="grp" id="rl"></div>
+        <p class="gf" id="mhint"></p>
+      </section>
+
+      <!-- Master mix -->
+      <section class="view" id="L1">
+        <p class="gh" data-key="g_samp"></p>
+        <div class="grp">
+          <div class="vr"><div class="lb"><span class="sym">n</span><span data-key="v_n"></span></div><div class="ctl"><input id="ns" class="val" type="text" inputmode="decimal" autocomplete="off" data-al="v_n" data-ph="8"><span class="uc" data-key="u_tubes"></span></div></div>
+          <div class="vr"><div class="lb"><span class="sym">+</span><span data-key="v_ex"></span></div><div class="ctl"><input id="ex" class="val" type="text" inputmode="decimal" autocomplete="off" data-al="v_ex" data-ph="1"><select id="exu" class="sel" data-al="a_unit"><option value="t"></option><option value="%">%</option></select></div></div>
+        </div>
+        <p class="gf" data-key="mix_hint"></p>
+        <p class="gh" data-key="g_tubeR"></p>
+        <div class="grp" id="mixPer"></div>
+      </section>
+
+      <!-- Protocole -->
+      <section class="view" id="L2">
+        <p class="gh" data-key="g_steps"></p>
+        <div class="grp" id="steps"></div>
+        <p class="gf" data-key="proto_hint"></p>
+      </section>
+    </section>
+
+    <section class="results" id="resBox">
+      <!-- Réaction -->
+      <div class="view" id="R0">
+        <p class="gh" data-key="r_water"></p>
+        <div class="rg">
+          <div class="big" aria-live="polite"><span class="bl">H<sub>2</sub>O</span><span class="num" id="wN">-</span><span class="bu">µL</span></div>
+          <div class="eq" id="wEq"></div>
+          <div class="bar" aria-hidden="true"><i id="bR" style="background:var(--acc)"></i><i id="bD" style="background:var(--dna)"></i><i id="bW" style="background:var(--h2o)"></i></div>
+          <div id="leg"></div>
+          <div class="acts"><button class="ab" id="cp0"></button><button class="ab" id="rst"></button></div>
+        </div>
+        <div class="tip" id="tip0"></div>
+      </div>
+      <!-- Master mix -->
+      <div class="view" id="R1">
+        <p class="gh" data-key="r_mix"></p>
+        <div class="rg">
+          <div class="big" aria-live="polite"><span class="bl">Mix</span><span class="num" id="mN">-</span><span class="bu">µL</span></div>
+          <div class="eq" id="mEq"></div>
+          <div id="mixTab"></div>
+          <div class="acts"><button class="ab" id="cp1"></button><button class="ab" id="go2"></button></div>
+        </div>
+        <div class="tip" id="tip1"></div>
+      </div>
+      <!-- Protocole -->
+      <div class="view" id="R2">
+        <p class="gh" data-key="r_prog"></p>
+        <div class="rg">
+          <div class="big" aria-live="polite"><span class="num" id="pN">0/6</span></div>
+          <div class="bar" aria-hidden="true"><i id="bP" style="background:var(--ok)"></i></div>
+          <div id="pSum"></div>
+          <div class="acts"><button class="ab" id="pRst"></button></div>
+        </div>
+        <div class="tip" id="tip2"></div>
+      </div>
+    </section>
+  </main>
+  <script src="/footer-global.js"></script>
+</div>
+
+<nav class="nav" id="navWrap" aria-label="Navigation"><div class="nav-in glass" id="nav"><span class="sl" id="sl"></span></div></nav>
+<button class="mini glass" id="mini" type="button"><span class="ml" id="ml"></span><span id="miniN"></span><span class="mu" id="miniU"></span></button>
+</div>
+
+<script src="/liquid-glass.js"></script>
+<script>
+(()=>{'use strict';
+/* ---------- 1. Outils ---------- */
+const $=id=>document.getElementById(id),BC=$('bc'),root=document.documentElement;
+const $$=(s,c=BC)=>[...c.querySelectorAll(s)];
+const sto={g(k){try{return localStorage.getItem(k)}catch(e){return null}},s(k,v){try{localStorage.setItem(k,v)}catch(e){}},d(k){try{localStorage.removeItem(k)}catch(e){}}};
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1;
+/* retour haptique : vibration courte (Android), sinon interrupteur natif caché (iPhone, iOS 18+) */
+function buzz(p=14){try{if(navigator.vibrate){navigator.vibrate(p);return}if(!IOS)return;
+  const l=document.createElement('label'),i=document.createElement('input');i.type='checkbox';i.setAttribute('switch','');
+  l.dataset.hap='';l.style.display='none';l.appendChild(i);document.head.appendChild(l);l.click();l.remove()}catch(e){}}
+const OK=[12,60,18];
+
+/* ---------- 2. Icônes : Lucide (ISC) ---------- */
+const IC=Object.fromEntries(Object.entries({
+  tube:'<path d="M21 7 6.82 21.18a2.83 2.83 0 0 1-3.99-.01a2.83 2.83 0 0 1 0-4L17 3"/><path d="m16 2 6 6"/><path d="M12 16H4"/>',
+  flask:'<path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/><path d="M6.453 15h11.094"/><path d="M8.5 2h7"/>',
+  steps:'<path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/>',
+  plus:'<circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/>',
+  minus:'<circle cx="12" cy="12" r="10"/><path d="M8 12h8"/>',
+  reset:'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+  next:'<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+  lang:'<path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+  moon:'<path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/>',
+  dl:'<path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/>',
+  menu:'<path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/>',
+  copy:'<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+  warn:'<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>'
+}).map(([k,d])=>[k,`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`]));
+
+/* ---------- 3. Textes ---------- */
+const T={
+fr:{subtitle:"Réaction, master mix et protocole",nav:["Réaction","Master mix","Protocole"],tabs:["Réaction PCR","Master mix","Protocole"],
+g_tube:"Réaction (un tube)",v_tot:"Volume réactionnel final",v_dna:"Volume d'ADN matrice",g_reag:"Réactifs",m_dil:"Dilution",m_dir:"Volume",
+h_dil:"Pour chaque réactif, indiquez la concentration de la solution mère (Cᵢ) et la concentration finale voulue dans la réaction (C_f), ou la quantité par réaction (U, pmol, ng). Volume à prélever par réaction : Vᵢ = C_f · V_f / Cᵢ, ou Vᵢ = quantité / Cᵢ.",h_dir:"Saisissez directement le volume de chaque réactif pour une réaction.",
+reag:"Réactif",stock:"C mère",final:"C finale",add:"Ajouter un réactif",newR:"Nouveau réactif",empty:"Aucun réactif : ajoutez-en un.",a_name:"Nom du réactif",a_del:"Supprimer",a_unit:"Unité",a_val:"Valeur",
+g_samp:"Nombre de réactions",v_n:"Échantillons et témoins",v_ex:"Surplus",u_tubes:"réactions",u_nb:"nb",mix_hint:"Comptez une réaction par échantillon et par témoin (le témoin négatif reçoit de l'eau exempte de nucléases à la place de l'ADN matrice). Le surplus (réactions supplémentaires, en nombre ou en %) compense les pertes de pipetage : sans lui, le dernier tube risque de recevoir moins de master mix (au labo, on parle parfois de « tube rab »). Le master mix est calculé pour : échantillons et témoins + surplus.",
+g_tubeR:"Récapitulatif",g_steps:"Étapes",proto_hint:"Touchez une étape pour la cocher.",
+r_water:"Eau exempte de nucléases par réaction",r_mix:"Master mix à préparer (volume total)",r_prog:"Progression",
+lg_r:"Réactifs",lg_d:"ADN",lg_w:"Eau exempte de nucléases",water:"Eau exempte de nucléases",dna:"ADN matrice à ajouter par tube",mixPT:"Master mix à distribuer par tube",tubesT:"Réactions comptées dans le master mix",tot:"Total",
+eq_w:"{t} − {d} (ADN) − {r} (réactifs)",eq_m:"{n} réactions × {v} µL de master mix",
+btn_copy:"Copier",btn_copied:"Copié",btn_reset:"Par défaut",btn_proto:"Protocole",btn_uncheck:"Tout décocher",
+reset_q:"Remplacer la recette par la recette par défaut ?",
+wait:"En attente de saisie",tip_wait:"Saisissez le volume réactionnel et les réactifs : le volume d'eau se calcule aussitôt.",
+e_bad:"Format non valide",tip_bad:"« {r} » : valeur non reconnue. Écrivez par exemple 10 ; 1,5 ; 2e-3.",
+e_neg:"Valeur non admissible",tip_neg:"Les volumes et les concentrations doivent être positifs : corrigez la valeur négative.",
+e_zero:"Calcul impossible",tip_zero:"« {r} » : la concentration de la solution mère est nulle. Indiquez la concentration inscrite sur le tube.",
+e_over:"Solution mère trop diluée",tip_over:"« {r} » : la concentration finale dépasse celle de la solution mère (C_f > Cᵢ). Vérifiez les unités, ou utilisez une solution mère plus concentrée.",
+e_full:"Tube trop rempli",tip_full:"Les réactifs et l'ADN dépassent le volume réactionnel de {v} µL. Diminuez un réactif ou le volume d'ADN, ou augmentez le volume réactionnel.",
+e_vt:"Volume non valide",tip_vt:"Le volume réactionnel doit être supérieur à 0 µL.",
+e_ns:"Nombre non valide",tip_ns:"Indiquez un nombre entier de réactions (au moins 1).",
+tip_ok:"L'eau exempte de nucléases complète chaque réaction jusqu'à {v} µL.",tip_low:"{r} : {v} µL par réaction. Un volume aussi faible est difficile à prélever avec justesse : l'erreur relative de la micropipette augmente et la quantité déposée peut varier d'un tube à l'autre. Préparez un master mix : ce réactif y est prélevé une seule fois pour toutes les réactions, dans un volume multiplié par le nombre de réactions.",
+tip_mix:"Préparez le master mix dans un tube de {t} et gardez-le sur glace. Ajoutez l'ADN polymérase en dernier.",
+tip_fix:"Corrigez d'abord la réaction (onglet Réaction).",tip_proto:"Travaillez sur glace, avec des cônes à filtre, en changeant de cône à chaque réactif.",
+s1t:"Décongeler",s1d:"Décongeler les réactifs sur glace, les homogénéiser puis centrifuger brièvement. Laisser l'ADN polymérase au congélateur jusqu'au moment de l'ajouter.",
+s2t:"Préparer le master mix",s2d:"Dans un tube stérile, pour <b>{n}</b> réactions, ajouter dans cet ordre (ADN polymérase en dernier) :",
+s3t:"Homogénéiser",s3d:"Homogénéiser doucement par pipetage (ou bref passage au vortex si le fabricant l'autorise), puis centrifuger quelques secondes.",
+s4t:"Distribuer le master mix",s4d:"Distribuer <b>{v} µL</b> de master mix dans chaque tube PCR (échantillons et témoins).",
+s5t:"Ajouter l'ADN matrice",s5d:"Ajouter <b>{v} µL</b> d'ADN matrice dans chaque tube d'échantillon. Témoin négatif : <b>{v} µL</b> d'eau exempte de nucléases à la place de l'ADN.",
+s6t:"Lancer la PCR",s6d:"Fermer les tubes, centrifuger brièvement et placer dans le thermocycleur.",
+last:"(en dernier)",t_lang:"Langue",t_theme:"Changer le thème",t_menu:"Menu",
+foot_dev:"Design & Développement",
+cp_r:"Réaction PCR · {v} µL par réaction",cp_m:"Master mix PCR · {n} réactions",
+R:["Tampon PCR","MgCl₂","dNTP","Amorce sens (F)","Amorce antisens (R)","Taq ADN polymérase"]},
+en:{subtitle:"Reaction, master mix and protocol",nav:["Reaction","Master mix","Protocol"],tabs:["PCR reaction","Master mix","Protocol"],
+g_tube:"Reaction (one tube)",v_tot:"Final reaction volume",v_dna:"Template DNA volume",g_reag:"Reagents",m_dil:"Dilution",m_dir:"Volume",
+h_dil:"For each reagent, enter the stock concentration (Cᵢ) and the final concentration required in the reaction (C_f), or the amount per reaction (U, pmol, ng). Volume to pipette per reaction: Vᵢ = C_f · V_f / Cᵢ, or Vᵢ = amount / Cᵢ.",h_dir:"Enter the volume of each reagent for one reaction.",
+reag:"Reagent",stock:"Stock C",final:"Final C",add:"Add a reagent",newR:"New reagent",empty:"No reagents: add one.",a_name:"Reagent name",a_del:"Delete",a_unit:"Unit",a_val:"Value",
+g_samp:"Number of reactions",v_n:"Samples and controls",v_ex:"Extra",u_tubes:"reactions",u_nb:"no.",mix_hint:"Count one reaction per sample and per control (the negative control receives nuclease-free water instead of template DNA). Extra reactions, as a number or a percentage, compensate for pipetting losses so that the last tube still receives its full volume of master mix. The master mix is calculated for: samples and controls + extra reactions.",
+g_tubeR:"Summary",g_steps:"Steps",proto_hint:"Tap a step to check it off.",
+r_water:"Nuclease-free water per reaction",r_mix:"Master mix to prepare (total volume)",r_prog:"Progress",
+lg_r:"Reagents",lg_d:"DNA",lg_w:"Nuclease-free water",water:"Nuclease-free water",dna:"Template DNA to add per tube",mixPT:"Master mix to dispense per tube",tubesT:"Reactions included in the master mix",tot:"Total",
+eq_w:"{t} − {d} (DNA) − {r} (reagents)",eq_m:"{n} reactions × {v} µL of master mix",
+btn_copy:"Copy",btn_copied:"Copied",btn_reset:"Default",btn_proto:"Protocol",btn_uncheck:"Uncheck all",
+reset_q:"Replace the recipe with the default recipe?",
+wait:"Awaiting input",tip_wait:"Enter the reaction volume and the reagents: the water volume is calculated instantly.",
+e_bad:"Invalid format",tip_bad:"“{r}”: value not recognised. Write for example 10; 1.5; 2e-3.",
+e_neg:"Inadmissible value",tip_neg:"Volumes and concentrations must be positive: correct the negative value.",
+e_zero:"Calculation impossible",tip_zero:"“{r}”: the stock concentration is zero. Enter the concentration printed on the tube.",
+e_over:"Stock too dilute",tip_over:"“{r}”: the final concentration exceeds the stock concentration (C_f > Cᵢ). Check the units, or use a more concentrated stock.",
+e_full:"Tube overfilled",tip_full:"The reagents and DNA exceed the reaction volume by {v} µL. Reduce a reagent or the DNA volume, or increase the reaction volume.",
+e_vt:"Invalid volume",tip_vt:"The reaction volume must be greater than 0 µL.",
+e_ns:"Invalid number",tip_ns:"Enter a whole number of reactions (at least 1).",
+tip_ok:"Nuclease-free water brings each reaction to {v} µL.",tip_low:"{r}: {v} µL per reaction. Such a small volume is hard to pipette accurately: the relative error of the pipette increases and the amount delivered can vary between tubes. Prepare a master mix: this reagent is then pipetted once for all reactions, in a volume multiplied by the number of reactions.",
+tip_mix:"Prepare the master mix in a {t} tube and keep it on ice. Add the DNA polymerase last.",
+tip_fix:"Fix the reaction first (Reaction tab).",tip_proto:"Work on ice, with filter tips, changing tips for every reagent.",
+s1t:"Thaw",s1d:"Thaw the reagents on ice, mix them and spin down briefly. Keep the DNA polymerase in the freezer until you add it.",
+s2t:"Prepare the master mix",s2d:"In a sterile tube, for <b>{n}</b> reactions, add in this order (DNA polymerase last):",
+s3t:"Mix",s3d:"Mix gently by pipetting (or a brief vortex if the manufacturer allows it), then spin down for a few seconds.",
+s4t:"Dispense the master mix",s4d:"Dispense <b>{v} µL</b> of master mix into each PCR tube (samples and controls).",
+s5t:"Add the template DNA",s5d:"Add <b>{v} µL</b> of template DNA to each sample tube. Negative control: <b>{v} µL</b> of nuclease-free water instead of DNA.",
+s6t:"Run the PCR",s6d:"Close the tubes, spin down briefly and place them in the thermocycler.",
+last:"(last)",t_lang:"Language",t_theme:"Toggle theme",t_menu:"Menu",
+foot_dev:"Design & Development",
+cp_r:"PCR reaction · {v} µL per reaction",cp_m:"PCR master mix · {n} reactions",
+R:["PCR buffer","MgCl₂","dNTP","Forward primer (F)","Reverse primer (R)","Taq DNA polymerase"]}};
+const S={lang:'fr',dark:root.dataset.theme==='dark',tab:-1,mode:'dil',R:[],done:new Set(),res:null};
+const t=k=>T[S.lang][k],tr=(k,o)=>t(k).replace(/\{(\w)\}/g,(_,x)=>o[x]);
+
+/* ---------- 4. Unités ----------
+   Stock : concentration. Facteur vers une base par famille : mol → µM (= pmol/µL), masse → ng/µL, X, %, enzyme → U/µL.
+   Final : même famille, soit une concentration dans le tube (V = Cf × Vtot / Cs), soit une quantité par tube (V = n / Cs). */
+const CONC={M:['mol',1e6],mM:['mol',1e3],'µM':['mol',1],nM:['mol',1e-3],'mg/mL':['mass',1e3],'ng/µL':['mass',1],X:['x',1],'%':['pct',1],'U/µL':['enz',1]};
+const AMT={pmol:['mol',1],nmol:['mol',1e3],ng:['mass',1],'µg':['mass',1e3],U:['enz',1]};
+const finU=us=>{const k=CONC[us][0];return[...Object.keys(CONC).filter(u=>CONC[u][0]===k&&k!=='enz'),...Object.keys(AMT).filter(u=>AMT[u][0]===k)]};
+const DEF=[['10','X','1','X','2.5'],['25','mM','1.5','mM','1.5'],['10','mM','0.2','mM','0.5'],['10','µM','0.4','µM','1'],['10','µM','0.4','µM','1'],['5','U/µL','1','U','0.2']];
+const defR=()=>DEF.map((d,i)=>({name:t('R')[i],stock:dec(d[0]),us:d[1],final:dec(d[2]),uf:d[3],vol:dec(d[4])}));
+const isTaq=r=>/taq|polym|pfu|phusion|q5|enzym|kod|vent/i.test(r.name);
+
+/* ---------- 5. Nombres : lecture souple, affichage à 4 chiffres significatifs ---------- */
+const dec=s=>S.lang==='fr'?s.replace('.',','):s;
+const grp=s=>{const p=s.split('.');p[0]=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,' ');return p.join('.')};
+function fmt(n){if(!Number.isFinite(n))return'-';if(Math.abs(n)<1e-12)return'0';const c=Number(n.toPrecision(4));
+  return Math.abs(c)<1e-3||Math.abs(c)>=1e7?dec(c.toExponential(3).replace(/\.?0+e/,'e')):dec(grp(String(c)))}
+function num(raw){const c=String(raw==null?'':raw).replace(/\s+/g,'').replace(/,/g,'.').replace(/[−–]/g,'-').replace(/[×x*]10\^?/i,'e');
+  if(!c)return{empty:1};
+  if(!/^[+-]?(\d+(\.\d*)?|\.\d+)(e[+-]?\d+)?$/i.test(c))return{bad:1};
+  const v=Number(c);return Number.isFinite(v)?{v}:{bad:1}}
+const pip=v=>v<=2?'P2':v<=10?'P10':v<=20?'P20':v<=200?'P200':v<=1000?'P1000':`P1000 × ${Math.ceil(v/1000)}`;
+const tubeSize=v=>dec(v<=200?'0.2 mL':v<=1400?'1.5 mL':v<=1900?'2 mL':'5 mL');
+
+/* ---------- 6. Construction : barre d'onglets, titres ---------- */
+const TABS=['tube','flask','steps'];
+$('nav').insertAdjacentHTML('beforeend',TABS.map((ic,i)=>`<button class="nb" data-tab="${i}">${IC[ic]}<span></span></button>`).join(''));
+$('rn').innerHTML=TABS.map(ic=>`<span>${IC[ic]}</span>`).join('');
+$$('[data-ic]').forEach(e=>{e.insertAdjacentHTML('afterbegin',IC[e.dataset.ic]);e.removeAttribute('data-ic')});
+const nbs=$$('.nb');
+const segSet=(seg,i)=>{seg.style.setProperty('--i',i);seg.querySelectorAll('button').forEach((b,j)=>{b.classList.toggle('on',j===i);b.setAttribute('aria-pressed',j===i)})};
+
+/* ---------- 7. Réactifs : une ligne par réactif (nom, volume calculé, stock → final) ---------- */
+const opts=(list,s)=>list.map(u=>`<option${u===s?' selected':''}>${u}</option>`).join('');
+const inp=(f,v,cls='val')=>`<input class="${cls}" data-f="${f}" type="text" inputmode="${f==='name'?'text':'decimal'}" autocomplete="off" spellcheck="false" value="${esc(v)}" aria-label="${t(f==='name'?'a_name':'a_val')}">`;
+function rowHTML(r,i){const dir=S.mode==='dir',head=`<span class="no">${i+1}</span>${inp('name',r.name,'nm')}`;
+  if(dir)return`<div class="rr direct${isTaq(r)?' taq':''}" data-i="${i}"><div class="rh">${head}${inp('vol',r.vol)}<span class="uc">µL</span><button class="del" type="button" aria-label="${t('a_del')}">${IC.minus}</button></div></div>`;
+  return`<div class="rr${isTaq(r)?' taq':''}" data-i="${i}"><div class="rh">${head}<span class="rv" id="rv${i}">-</span><button class="del" type="button" aria-label="${t('a_del')}">${IC.minus}</button></div>
+<div class="rc"><label class="cf"><small>${t('stock')}</small><span class="cx">${inp('stock',r.stock)}<select class="sel" data-f="us" aria-label="${t('a_unit')}">${opts(Object.keys(CONC),r.us)}</select></span></label>
+<span class="arr">→</span><label class="cf"><small>${t('final')}</small><span class="cx">${inp('final',r.final)}<select class="sel" data-f="uf" aria-label="${t('a_unit')}">${opts(finU(r.us),r.uf)}</select></span></label></div></div>`}
+function renderR(anim){const l=$('rl');
+  l.innerHTML=(S.R.length?S.R.map(rowHTML).join(''):`<div class="empty">${t('empty')}</div>`)+`<button class="add" id="addR" type="button">${IC.plus}<span>${t('add')}</span></button>`;
+  if(!anim)$$('.rr',l).forEach(e=>e.style.animation='none');
+  $('rcols').innerHTML=S.mode==='dir'||!S.R.length?'':['',t('reag'),t('stock'),'',t('final'),'Vol.',''].map(x=>`<span>${x}</span>`).join('');
+  $('mhint').textContent=t(S.mode==='dir'?'h_dir':'h_dil')}
+
+/* ---------- 8. Calcul ---------- */
+/* volume d'un réactif par tube (µL) */
+function rVol(r,vt){
+  if(S.mode==='dir'){const p=num(r.vol);if(p.empty)return{empty:1};if(p.bad)return{err:'bad'};if(p.v<0)return{err:'neg'};return{v:p.v}}
+  const s=num(r.stock),f=num(r.final);
+  if(s.bad||f.bad)return{err:'bad'};if(s.empty||f.empty)return{empty:1};if(s.v<0||f.v<0)return{err:'neg'};
+  if(s.v===0)return{err:'zero'};
+  const cs=s.v*CONC[r.us][1];
+  if(AMT[r.uf])return{v:f.v*AMT[r.uf][1]/cs};
+  const cf=f.v*CONC[r.uf][1];if(cf>cs*(1+1e-12))return{err:'over'};
+  return{v:cf*vt/cs}}
+function calc(){
+  const a=num($('vt').value),d=num($('vd').value),o={vols:[],err:'',who:'',sum:0};
+  o.vt=a.v;o.vd=d.empty?0:d.v;
+  if(a.empty)o.wait=1;else if(a.bad||!(a.v>0))o.err='vt';
+  else if(d.bad)o.err='bad',o.who=t('v_dna');else if(o.vd<0)o.err='neg';
+  S.R.forEach(r=>{const x=a.v>0?rVol(r,a.v):{empty:1};o.vols.push(x);
+    if(x.err&&!o.err){o.err=x.err;o.who=r.name}else if(x.empty&&!a.empty)o.wait=1;else if('v' in x)o.sum+=x.v});
+  if(!o.err&&!o.wait){o.water=o.vt-o.vd-o.sum;if(o.water<-1e-9)o.err='full';else o.water=Math.max(0,o.water)}
+  o.ok=!o.err&&!o.wait;
+  /* master mix */
+  const n=num($('ns').value),e=num($('ex').value),pc=$('exu').value==='%';
+  o.n=n.v;o.ex=e.empty?0:e.v;
+  if(n.empty)o.mwait=1;else if(n.bad||!(n.v>=1)||!Number.isInteger(n.v))o.merr='ns';
+  else if(e.bad)o.merr='bad';else if(o.ex<0)o.merr='neg';
+  o.N=pc?o.n*(1+o.ex/100):o.n+o.ex;o.mpt=o.ok?o.vt-o.vd:NaN;o.mix=o.N*o.mpt;
+  o.mok=o.ok&&!o.merr&&!o.mwait;
+  return o}
+
+/* ---------- 9. Affichage ---------- */
+let shown={};
+function setNum(id,v){const n=$(id),old=shown[id];shown[id]=v;
+  if(v==null||!Number.isFinite(v)){n.textContent='-';return}
+  if(RM||!(old>0&&v>0)||old===v){n.textContent=fmt(v);return}
+  const a=Math.log(old),b=Math.log(v),t0=performance.now();
+  (function f(now){if(shown[id]!==v)return;const p=Math.min(1,(now-t0)/380);n.textContent=fmt(p<1?Math.exp(a+(b-a)*(1-(1-p)**3)):v);if(p<1)requestAnimationFrame(f)})(t0)}
+const tipHTML=(el,txt,kind)=>{el.className='tip'+(kind?' '+kind:'');el.innerHTML=txt?`${IC[kind==='err'?'warn':kind==='warn'?'warn':'info']}<span>${esc(txt)}</span>`:''};
+const lrow=(k,v,extra='')=>`<div class="lr${extra}"><span class="k">${k}</span><span class="v">${v}</span></div>`;
+function render(){const o=calc();S.res=o;
+  /* lignes de réactifs */
+  S.R.forEach((r,i)=>{const x=o.vols[i],el=$('rv'+i);
+    if(el){el.classList.toggle('err',!!x.err);el.textContent=x.err?'!':'v' in x?`${fmt(x.v)} µL`:'-'}
+    const row=$$('.rr')[i];if(row)row.querySelectorAll('.val').forEach(f=>f.classList.toggle('bad',!!num(f.value).bad))});
+  $('vt').classList.toggle('bad',!!num($('vt').value).bad);$('vd').classList.toggle('bad',!!num($('vd').value).bad);
+  /* réaction */
+  const errMsg=k=>({full:[t('e_full'),tr('tip_full',{v:fmt(-o.water)})],vt:[t('e_vt'),t('tip_vt')]}[k]||[t('e_'+k),tr('tip_'+k,{r:o.who})]);
+  if(o.ok){setNum('wN',o.water);$('wEq').textContent=tr('eq_w',{t:`${fmt(o.vt)} µL`,d:fmt(o.vd),r:fmt(o.sum)});
+    const low=S.R.map((r,i)=>[r,o.vols[i].v]).find(([,v])=>v>0&&v<.5);
+    tipHTML($('tip0'),low?tr('tip_low',{r:low[0].name,v:fmt(low[1])}):tr('tip_ok',{v:fmt(o.vt)}),low?'warn':'')}
+  else{setNum('wN',null);const[e,tp]=o.err?errMsg(o.err):[t('wait'),t('tip_wait')];$('wEq').textContent=e;tipHTML($('tip0'),tp,o.err?'err':'')}
+  const base=Math.max(o.vt||0,o.sum+(o.vd||0))||1,pc=x=>Math.max(0,x||0)/base*100+'%';
+  $('bR').style.width=pc(o.sum);$('bD').style.width=pc(o.vd);$('bW').style.width=pc(o.ok?o.water:0);
+  $('leg').innerHTML=[['acc','lg_r',o.sum],['dna','lg_d',o.vd],['h2o','lg_w',o.ok?o.water:null]].map(([c,k,v])=>
+    `<div class="lr"><i class="dot" style="--c:var(--${c})"></i><span class="k">${t(k)}</span><span class="v">${v==null||!Number.isFinite(v)?'-':fmt(v)+' µL'}</span></div>`).join('');
+  $('cp0').disabled=!o.ok;
+  /* master mix */
+  const mm=o.mok;
+  $('mixPer').innerHTML=lrow(t('mixPT'),o.ok?`${fmt(o.mpt)} µL`:'-')+lrow(t('dna'),o.ok?`${fmt(o.vd)} µL`:'-')+lrow(t('tubesT'),o.mwait||o.merr?'-':fmt(o.N));
+  if(mm){setNum('mN',o.mix);$('mEq').textContent=tr('eq_m',{n:fmt(o.N),v:fmt(o.mpt)});
+    $('mixTab').innerHTML=mixRows(o).map(([k,v,u])=>`<div class="lr"><span class="k">${esc(k)}${u?` <small>${esc(u)}</small>`:''}</span><span class="pp">${pip(v)}</span><span class="v">${fmt(v)} µL</span></div>`).join('')
+      +lrow(t('tot'),`${fmt(o.mix)} µL`,' tot');
+    tipHTML($('tip1'),tr('tip_mix',{t:tubeSize(o.mix)}),'')}
+  else{setNum('mN',null);$('mixTab').innerHTML='';
+    if(!o.ok){$('mEq').textContent=o.err?errMsg(o.err)[0]:t('wait');tipHTML($('tip1'),o.err?t('tip_fix'):t('tip_wait'),o.err?'err':'')}
+    else if(o.merr){$('mEq').textContent=t(o.merr==='ns'?'e_ns':'e_'+o.merr);tipHTML($('tip1'),o.merr==='ns'?t('tip_ns'):tr('tip_'+o.merr,{r:t('v_ex')}),'err')}
+    else{$('mEq').textContent=t('wait');tipHTML($('tip1'),'','')}}
+  $('cp1').disabled=!mm;
+  renderSteps();mini();save()}
+/* lignes du mix : eau d'abord, enzyme en dernier */
+function mixRows(o){const rows=[];if(o.water>0)rows.push([t('water'),o.water*o.N,'',false]);
+  S.R.map((r,i)=>[r,o.vols[i].v]).sort((a,b)=>isTaq(a[0])-isTaq(b[0])).forEach(([r,v])=>{if(v>0)rows.push([r.name,v*o.N,S.mode==='dil'?`${fmt(num(r.final).v)} ${r.uf}`:'',isTaq(r)])});
+  return rows}
+
+/* ---------- 10. Protocole ---------- */
+function renderSteps(){const o=S.res,mm=o.mok,v=x=>mm?fmt(x):'…';
+  const list=mm?`<div class="sl2">${mixRows(o).map(([k,x,,tq])=>`<div${tq?' class="taq"':''}><span>${esc(k)}${tq?' '+t('last'):''}</span><b>${fmt(x)} µL</b></div>`).join('')}</div>`:'';
+  const st=[[t('s1t'),t('s1d')],[t('s2t'),tr('s2d',{n:v(o.N)}),list],[t('s3t'),t('s3d')],
+    [t('s4t'),tr('s4d',{v:v(o.mpt)}),mm?`<span class="pp">${pip(o.mpt)}</span>`:''],[t('s5t'),tr('s5d',{v:v(o.vd)}),mm?`<span class="pp">${pip(o.vd)}</span>`:''],[t('s6t'),t('s6d')]];
+  $('steps').innerHTML=st.map(([a,b,c=''],i)=>`<button type="button" class="st${S.done.has(i)?' done':''}" data-s="${i}" aria-pressed="${S.done.has(i)}"><span class="ck"><b>${i+1}</b>${IC.check}</span><span class="sc"><span class="stt">${a}</span><div class="std">${b}</div>${c}</span></button>`).join('');
+  const k=S.done.size;$('pN').textContent=`${k}/${st.length}`;$('bP').style.width=k/st.length*100+'%';
+  $('pSum').innerHTML=lrow(t('tubesT'),mm?fmt(o.N):'-')+lrow(t('mixPT'),mm?`${fmt(o.mpt)} µL`:'-')+lrow(t('dna'),mm?`${fmt(o.vd)} µL`:'-');
+  $('pRst').disabled=!k;tipHTML($('tip2'),mm?t('tip_proto'):t('tip_fix'),mm?'':'err')}
+$('steps').addEventListener('click',e=>{const b=e.target.closest('.st');if(!b)return;const i=+b.dataset.s;
+  S.done.has(i)?S.done.delete(i):S.done.add(i);buzz(S.done.size===6?OK:14);renderSteps();mini()});
+$('pRst').addEventListener('click',()=>{buzz();S.done.clear();renderSteps();mini()});
+
+/* résultat flottant (mobile) : visible quand la carte résultat est hors écran */
+let resSeen=true;
+function mini(){const o=S.res;if(!o)return;let l='',n='',u='',ok=false;
+  if(S.tab===0&&o.ok){l='H<sub>2</sub>O =';n=fmt(o.water);u='µL';ok=true}
+  else if(S.tab===1&&o.mok){l='Mix =';n=fmt(o.mix);u='µL';ok=true}
+  else if(S.tab===2){n=`${S.done.size}/6`;ok=true}
+  $('ml').innerHTML=l;$('miniN').textContent=n;$('miniU').textContent=u;$('mini').classList.toggle('on',ok&&!resSeen)}
+if('IntersectionObserver' in window)new IntersectionObserver(es=>{resSeen=es.some(e=>e.isIntersecting);mini()},{threshold:.3}).observe($('resBox'));
+/* clavier ouvert (mobile) : le résultat flottant se place juste au-dessus du clavier, la barre d'onglets s'efface */
+if(window.visualViewport){const vv=visualViewport,m=$('mini');
+  const kb=()=>{const a=document.activeElement,open=innerHeight-vv.height>120&&!!a&&a.matches('input');
+    BC.classList.toggle('kb',open);m.style.top=open?Math.round(vv.offsetTop+vv.height-m.offsetHeight-8)+'px':''};
+  vv.addEventListener('resize',kb);vv.addEventListener('scroll',kb);
+  addEventListener('focusin',()=>setTimeout(kb,350));addEventListener('focusout',()=>setTimeout(kb,120))}
+$('mini').addEventListener('click',()=>{buzz(8);$('resBox').scrollIntoView({behavior:RM?'auto':'smooth',block:'center'})});
+
+/* ---------- 11. Onglets : sortie 200 ms, entrée en cascade, zoom ressort du résultat ---------- */
+let anims=[],tabTok=0;
+function play(el,kf,o,done){const a=el.animate(kf,o);anims.push(a);a.onfinish=()=>{anims=anims.filter(x=>x!==a);a.cancel();done&&done()}}
+function setTab(i,dir){
+  const old=S.tab;if(i===old)return;
+  const my=++tabTok,prev=old>=0?[$('L'+old),$('R'+old)]:null,next=[$('L'+i),$('R'+i)];
+  dir=dir||(i>old?1:-1);S.tab=i;BC.dataset.tab=i;sto.s('pcr_tab',i);
+  navCtl.select(i);nbs.forEach((b,k)=>b.classList.toggle('on',k===i));
+  $('rn').style.transform=$('rtt').style.transform=`translateY(${-i*100/TABS.length}%)`;
+  if(prev){buzz();scrollTo(0,0)}
+  anims.splice(0).forEach(a=>{a.onfinish=null;a.cancel()});
+  $$('.view').forEach(v=>!next.includes(v)&&!(prev&&prev.includes(v))&&v.classList.remove('on'));
+  const enter=()=>{if(my!==tabTok)return;
+    if(prev)prev.forEach(v=>v.classList.remove('on'));next.forEach(v=>v.classList.add('on'));shown={};render();
+    if(RM||!prev)return;
+    $$('.gh,.gf,.grp,.mhead',next[0]).forEach((e,k)=>play(e,[{opacity:0,transform:`translateX(${dir*38}px) scale(.97)`},{opacity:1,transform:'none'}],{duration:600,delay:k*45,easing:'cubic-bezier(.22,1,.36,1)',fill:'backwards'}));
+    play($('resBox'),[{transform:'scale(.97)',opacity:.6},{transform:'none',opacity:1}],{duration:650,easing:'cubic-bezier(.34,1.45,.64,1)'})};
+  if(RM||!prev||!prev[0].classList.contains('on'))enter();
+  else play($('card'),[{opacity:1,transform:'none'},{opacity:0,transform:`translateX(${-dir*44}px) scale(.98)`}],{duration:200,easing:'cubic-bezier(.4,0,1,1)',fill:'forwards'},enter)}
+/* barre : lentille qui suit le doigt (liquid-glass.js) ; sans le moteur, simple pastille */
+const sl=$('sl'),navCtl=window.LiquidGlass?LiquidGlass.tabs({wrap:$('navWrap'),inner:$('nav'),indicator:sl,items:nbs,onSelect:i=>setTab(i),glass:false})
+  :{select(i){sl.style.translate=nbs[i].offsetLeft+'px 0';sl.style.width=nbs[i].offsetWidth+'px'}};
+if(!window.LiquidGlass){nbs.forEach((b,i)=>b.addEventListener('click',()=>setTab(i)));addEventListener('resize',()=>navCtl.select(S.tab))}
+$('go2').addEventListener('click',()=>setTab(2,1));
+/* balayage horizontal sur la carte */
+(()=>{let x0,y0,t0,ok=false;const c=$('card');
+  c.addEventListener('touchstart',e=>{ok=!e.target.closest('input,select,button,.rc');const p=e.touches[0];x0=p.clientX;y0=p.clientY;t0=Date.now()},{passive:true});
+  c.addEventListener('touchend',e=>{if(!ok)return;const p=e.changedTouches[0],dx=p.clientX-x0,dy=p.clientY-y0,sp=Math.abs(dx)/(Date.now()-t0);
+    if(Math.abs(dx)>(sp>.5?35:80)&&Math.abs(dx)>Math.abs(dy)*1.6){const n=S.tab+(dx<0?1:-1);if(n>=0&&n<TABS.length)setTab(n,dx<0?1:-1)}},{passive:true})})();
+
+/* ---------- 12. Saisie, mode, mémorisation ---------- */
+const TOP=['vt','vd','ns','ex','exu'];
+function save(){const o={v:2,mode:S.mode,R:S.R};TOP.forEach(k=>o[k]=$(k).value);sto.s('pcr_state',JSON.stringify(o))}
+BC.addEventListener('input',e=>{const el=e.target;
+  if(el.matches('.val')){const re=/[^0-9.,eE+\-−]/g;if(re.test(el.value))el.value=el.value.replace(re,'')}
+  const row=el.closest('.rr');
+  if(row&&el.dataset.f){const r=S.R[+row.dataset.i];r[el.dataset.f]=el.value;if(el.dataset.f==='name')row.classList.toggle('taq',isTaq(r))}
+  if(row||TOP.includes(el.id))render()});
+BC.addEventListener('change',e=>{const el=e.target;if(!el.matches('select'))return;buzz();
+  const row=el.closest('.rr');
+  if(row){const i=+row.dataset.i,r=S.R[i];r[el.dataset.f]=el.value;
+    if(el.dataset.f==='us'){const L=finU(r.us);if(!L.includes(r.uf))r.uf=L.includes(r.us)?r.us:L[0];row.querySelector('[data-f=uf]').innerHTML=opts(L,r.uf)}}
+  render()});
+BC.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches('input'))e.target.blur()});
+$('rl').addEventListener('click',e=>{
+  if(e.target.closest('#addR')){buzz();S.R.push({name:t('newR'),stock:'10',us:'mM',final:'1',uf:'mM',vol:'1'});renderR();render();
+    const rows=$$('.rr'),r=rows[rows.length-1];r.style.animation='';const nm=r.querySelector('.nm');nm.focus();nm.select();return}
+  const d=e.target.closest('.del');if(!d)return;const row=d.closest('.rr'),i=+row.dataset.i;buzz();
+  const go=()=>{S.R.splice(i,1);renderR();render()};
+  if(RM)go();else row.animate([{opacity:1,transform:'none'},{opacity:0,transform:'translateX(-24px)'}],{duration:220,easing:'cubic-bezier(.4,0,1,1)'}).onfinish=go});
+/* passage Dilution → Volume : les volumes calculés deviennent les volumes saisis */
+function setMode(m,init){if(m===S.mode&&!init)return;
+  if(!init){buzz();if(m==='dir'&&S.res&&S.res.vt>0)S.R.forEach((r,i)=>{const x=S.res.vols[i];if('v' in x)r.vol=dec(String(Number(x.v.toPrecision(4))))})}
+  S.mode=m;segSet($('modeSeg'),m==='dir'?1:0);renderR(!init);if(!init)render()}
+$('modeSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setMode(b===$('modeSeg').lastElementChild?'dir':'dil')});
+$('rst').addEventListener('click',()=>{if(!confirm(t('reset_q')))return;buzz(OK);S.R=defR();$('vt').value='25';$('vd').value='2';setMode('dil');renderR(true);render()});
+
+/* ---------- 13. Thème, langue, installation, menu ---------- */
+const period=()=>{const h=new Date().getHours();return h>=7&&h<20?'day':'night'};
+function applyTheme(){root.dataset.theme=S.dark?'dark':'light';document.body.classList.toggle('theme-light',!S.dark);document.body.classList.toggle('theme-dark',S.dark);$('themeBtn').innerHTML=IC[S.dark?'sun':'moon'];$('metaTheme').content=S.dark?'#000000':'#f2f2f7'}
+$('themeBtn').addEventListener('click',()=>{buzz();S.dark=!S.dark;sto.s('pcrTheme',S.dark?'dark':'light');sto.s('pcrThemePeriod',period());applyTheme()});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{if(sto.g('pcrTheme')&&sto.g('pcrThemePeriod')===period())return;S.dark=e.matches;applyTheme()});
+const pops=id=>['lmenu'].forEach(k=>$(k).classList.toggle('on',k===id&&!$(k).classList.contains('on')));
+document.addEventListener('click',e=>{if(e.target.closest('[data-hap]'))return;if(!e.target.closest('.hact'))pops()});
+addEventListener('keydown',e=>{if(e.key==='Escape')pops()});
+function footLang(){const f=document.querySelector('.modern-transparent-footer');if(!f)return;
+  const w=document.createTreeWalker(f,NodeFilter.SHOW_TEXT);for(let n;(n=w.nextNode());)n.nodeValue=n.nodeValue.replace(/Design & D[ée]velop\w+/,t('foot_dev'))}
+function setLang(l){S.lang=l;sto.s('bc_lang',l);root.lang=l;
+  $$('[data-key]').forEach(e=>e.textContent=t(e.dataset.key));
+  $$('[data-tk]').forEach(e=>{e.title=t(e.dataset.tk);e.setAttribute('aria-label',e.title)});
+  $$('[data-al]').forEach(e=>e.setAttribute('aria-label',t(e.dataset.al)));
+  $$('[data-ph]').forEach(e=>e.placeholder=dec(e.dataset.ph));
+  $('exu').options[0].textContent=t('u_nb');
+  $$('#lmenu button').forEach(b=>b.classList.toggle('on',b.dataset.l===l));
+  nbs.forEach((b,i)=>b.lastElementChild.textContent=t('nav')[i]);
+  $('rtt').innerHTML=t('tabs').map(x=>`<span>${x}</span>`).join('');
+  
+  setBtn($('cp0'),'copy','btn_copy');setBtn($('cp1'),'copy','btn_copy');setBtn($('rst'),'reset','btn_reset');setBtn($('go2'),'next','btn_proto');setBtn($('pRst'),'reset','btn_uncheck');
+  footLang();pops();if(S.tab>=0){renderR();render()}}
+$('langBtn').addEventListener('click',()=>{buzz(8);pops('lmenu')});
+$('lmenu').addEventListener('click',e=>{const b=e.target.closest('button');if(b){buzz();setLang(b.dataset.l)}});
+$('mb').addEventListener('click',()=>{buzz();let n=0;const go=()=>typeof window.openCapsuleMenu==='function'?window.openCapsuleMenu():++n<40&&setTimeout(go,100);go()});
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+/* reflet du verre qui suit le pointeur */
+$$('.tools,.mb,.nav-in').forEach(b=>{
+  const aim=e=>{const r=b.getBoundingClientRect();b.style.setProperty('--mx',e.clientX-r.left+'px');b.style.setProperty('--my',e.clientY-r.top+'px')};
+  b.addEventListener('pointerenter',e=>{aim(e);b.classList.add('lit')});
+  b.addEventListener('pointerdown',e=>{aim(e);b.classList.add('lit')});
+  b.addEventListener('pointermove',aim);
+  b.addEventListener('pointerleave',()=>b.classList.remove('lit'));
+  ['pointerup','pointercancel'].forEach(n=>b.addEventListener(n,e=>e.pointerType!=='mouse'&&b.classList.remove('lit')))});
+
+/* ---------- 14. Copier ---------- */
+const setBtn=(b,icon,key,ok)=>{b.classList.toggle('ok',!!ok);b.innerHTML=`${IC[icon]}<span>${t(key)}</span>`};
+const bump=b=>{b.classList.remove('bump');void b.offsetWidth;b.classList.add('bump')};
+async function copy(b,txt){bump(b);
+  try{await navigator.clipboard.writeText(txt)}
+  catch(e){const a=document.createElement('textarea');a.value=txt;a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(_){}a.remove()}
+  buzz(OK);setBtn(b,'check','btn_copied',true);setTimeout(()=>setBtn(b,'copy','btn_copy'),1500)}
+const line=(k,v)=>`${k}\t${fmt(v)} µL`;
+$('cp0').addEventListener('click',()=>{const o=S.res;if(!o.ok)return;
+  const L=[tr('cp_r',{v:fmt(o.vt)}),line(t('water'),o.water),...S.R.map((r,i)=>line(r.name+(S.mode==='dil'?` (${fmt(num(r.stock).v)} ${r.us} → ${fmt(num(r.final).v)} ${r.uf})`:''),o.vols[i].v)),line(t('dna'),o.vd)];
+  copy($('cp0'),L.join('\n'))});
+$('cp1').addEventListener('click',()=>{const o=S.res;if(!o.mok)return;
+  const L=[tr('cp_m',{n:fmt(o.N)}),...mixRows(o).map(([k,v,u])=>line(k+(u?` (${u})`:''),v)),line(t('tot'),o.mix),'',line(t('mixPT'),o.mpt),line(t('dna'),o.vd)];
+  copy($('cp1'),L.join('\n'))});
+
+/* ---------- 15. Démarrage (reprend aussi l'ancien format « pcr_calc_state ») ---------- */
+applyTheme();
+S.lang=sto.g('bc_lang')||((navigator.language||'fr').startsWith('fr')?'fr':'en');
+let st=null;try{st=JSON.parse(sto.g('pcr_state'))}catch(e){}
+if(!st){try{const o=JSON.parse(sto.g('pcr_calc_state'));
+  if(o&&Array.isArray(o.reagentsData))st={mode:o.isDirectMode?'dir':'dil',vt:o.rxn_vol,vd:o.dna_vol,ns:o.nb_samples,ex:o.nb_rab,exu:'t',
+    R:o.reagentsData.map(r=>({name:r.name,stock:String(r.stock??''),us:r.unitStock==='U'?'U/µL':r.unitStock,final:String(r.final??''),uf:r.unitFinal,vol:String(r.vol??'')}))}}catch(e){}}
+if(st&&Array.isArray(st.R))S.R=st.R.filter(r=>r&&typeof r==='object').map(r=>{const us=r.us in CONC?r.us:'µM',L=finU(us);
+  return{name:String(r.name||''),stock:String(r.stock??''),us,final:String(r.final??''),uf:L.includes(r.uf)?r.uf:L.includes(us)?us:L[0],vol:String(r.vol??'')}});
+else S.R=defR();
+const D0={vt:'25',vd:'2',ns:'8',ex:'1',exu:'t'};
+TOP.forEach(k=>{const v=st&&typeof st[k]==='string'?st[k]:D0[k];if(k!=='exu'||['t','%'].includes(v))$(k).value=v});
+setMode(st&&st.mode==='dir'?'dir':'dil',true);
+setLang(S.lang);
+const t0=parseInt(sto.g('pcr_tab'),10);setTab(t0>=0&&t0<TABS.length?t0:0,1);
+document.addEventListener('DOMContentLoaded',()=>{const f=document.querySelector('.modern-transparent-footer');if(f){$('shell').appendChild(f);footLang()}});
+})();
+</script>
+<script src="/menu-flottant.js"></script>
+</body>
+</html>

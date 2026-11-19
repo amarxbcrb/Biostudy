@@ -1,0 +1,7 @@
+PICTURES : logo et icônes
+============================
+logo-mark.png         Logo de l'en-tête de l'accueil
+favicon.png           Icône de l'onglet du navigateur
+apple-touch-icon.png  Icône sur l'écran d'accueil de l'iPhone
+icon-192.png, icon-512.png, maskable-512.png   Icônes de l'application installée
+Pour changer le logo sans toucher au code : studio → onglet Site.

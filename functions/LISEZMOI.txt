@@ -1,0 +1,8 @@
+FUNCTIONS : code serveur (Cloudflare Pages Functions)
+========================================================
+_middleware.js          Avant certaines pages (liste dans _routes.json à la racine) :
+                        page « en maintenance » pour un outil bloqué depuis le studio,
+                        et logo / favicon remplacés depuis le studio.
+api/campus.js           Relais vers Google Apps Script pour BioCampus, avec cache.
+api/vitrine/[[route]].js  API du studio : contenus mis en avant, fichiers envoyés,
+                        réglages du site. Stockage : espace KV « VITRINE ».

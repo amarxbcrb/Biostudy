@@ -1,0 +1,6 @@
+BIOPCR : préparation de PCR
+==============================
+index.html   L'outil : volume de chaque réactif d'une réaction, eau à compléter,
+             master mix pour N tubes (avec excès), protocole à cocher.
+sw.js        Ancien service worker propre à l'outil, gardé seulement pour
+             désinstaller l'ancienne version chez les visiteurs.

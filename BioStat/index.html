@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-visual">
+<meta name="theme-color" content="#f2f2f7" id="metaTheme">
+<title>BioStat | Biostatistique avec R pas à pas : choisir le test, coder, comprendre</title>
+<meta name="description" content="BioStat accompagne les étudiants qui débutent avec R : choisir le bon test et savoir pourquoi, écrire le code à coller dans RStudio, mettre en forme les graphiques et comprendre chaque test avec des visualisations interactives.">
+<link rel="canonical" href="https://www.biostudy.xyz/BioStat/">
+<link rel="icon" type="image/png" href="/Pictures/favicon.png">
+<link rel="apple-touch-icon" href="/Pictures/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="BioStudy">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script>
+/* /BioStat sans « / » final : les chemins relatifs (data/, js/, onglets/) ne marcheraient pas */
+if (/\/BioStat$/i.test(location.pathname)) location.replace(location.pathname + '/' + location.search + location.hash);
+/* thème avant le premier rendu : choix mémorisé pour la période (jour / nuit) en cours, sinon celui du système */
+(()=>{const g=k=>{try{return localStorage.getItem(k)}catch(e){return null}},h=new Date().getHours(),th=g('bioStatTheme');
+document.documentElement.dataset.theme=th&&g('bioStatThemePeriod')===(h>=7&&h<20?'day':'night')?th:matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'})();
+</script>
+<link rel="stylesheet" href="css/style.css">
+<script type="module" src="js/app.js"></script>
+</head>
+<body>
+<div id="bc">
+
+<header><div class="hin">
+  <div class="logo-c"><div class="logo">Bio<i>Stat</i></div><div class="sub">Biostatistique avec R, pas à pas</div></div>
+  <div class="hact">
+    <div class="tools glass"><button class="tb" id="themeBtn" type="button" aria-label="Changer le thème" title="Changer le thème"></button></div>
+    <button class="mb glass" id="mb" type="button" data-menu aria-label="Menu des outils" title="Menu des outils" data-ic="menu"></button>
+  </div>
+</div></header>
+
+<div class="shell" id="shell">
+  <main id="vue" tabindex="-1"></main>
+  <script src="/footer-global.js"></script>
+</div>
+
+<!-- Barre du bas : les onglets (un par dossier de onglets/, ajoutés par js/app.js) et le bouton rond de recherche -->
+<div class="dock" id="dock">
+  <nav class="nav" id="navWrap" aria-label="Navigation"><div class="nav-in glass" id="nav"><span class="sl" id="sl"></span></div></nav>
+  <button class="sbtn glass" id="sBtn" type="button" aria-label="Rechercher dans BioStat" title="Rechercher" aria-expanded="false" aria-controls="srch" data-ic="search"></button>
+</div>
+
+<div class="voile" id="voile" hidden></div>
+<div class="srch" id="srch" role="search" hidden>
+  <div class="sbar glass"><span data-ic="search"></span><input id="rq" type="search" enterkeyhint="search" placeholder="Rechercher dans BioStat" autocomplete="off" aria-label="Rechercher dans tout BioStat" aria-controls="rr"><button type="button" id="rqx">Annuler</button></div>
+  <div class="grp sres" id="rr" hidden></div>
+</div>
+
+</div>
+<script src="/liquid-glass.js"></script>
+<script src="/menu-flottant.js"></script>
+</body>
+</html>

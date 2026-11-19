@@ -1,0 +1,9 @@
+BIOPREP : préparer solutions et milieux
+==========================================
+index.html   L'outil, en parcours guidé (« Que voulez-vous faire ? ») :
+             solution à partir d'une poudre, dilution, milieu de culture ou recette
+             (LB, MacConkey, PBS, TAE…), protocole importé avec une IA, conversion.
+             Gels d'électrophorèse : agarose (TAE/TBE, toutes concentrations, colorant)
+             et SDS-PAGE (gels de séparation et de concentration), avec étapes.
+             Check-list au labo à plusieurs, fiche PDF, précautions.
+             Tests intégrés : ouvrir BioPrep/?tests

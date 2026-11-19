@@ -1,0 +1,348 @@
+{
+ "version": 1,
+ "aide": [
+  "fill = couleur de remplissage (barres, boîtes, aires) ; colour = couleur des points, des lignes et des contours. Remplace fill par colour dans le code si tu colores des points.",
+  "Les couleurs se donnent dans l'ordre des niveaux du facteur (ordre alphabétique par défaut). levels(donnees$groupe) affiche cet ordre.",
+  "Toutes les fonctions scale_…() viennent de ggplot2 : library(ggplot2) suffit, aucun autre package à installer."
+ ],
+ "familles": [
+  {
+   "id": "defaut",
+   "titre": "ggplot2 par défaut",
+   "sous": "couleurs utilisées si tu n'indiques rien",
+   "palettes": [
+    {
+     "nom": "2 groupes",
+     "couleurs": [
+      "#F8766D",
+      "#00BFC4"
+     ],
+     "code": "scale_fill_hue()"
+    },
+    {
+     "nom": "3 groupes",
+     "couleurs": [
+      "#F8766D",
+      "#00BA38",
+      "#619CFF"
+     ],
+     "code": "scale_fill_hue()"
+    },
+    {
+     "nom": "4 groupes",
+     "couleurs": [
+      "#F8766D",
+      "#7CAE00",
+      "#00BFC4",
+      "#C77CFF"
+     ],
+     "code": "scale_fill_hue()"
+    },
+    {
+     "nom": "5 groupes",
+     "couleurs": [
+      "#F8766D",
+      "#A3A500",
+      "#00BF7D",
+      "#00B0F6",
+      "#E76BF3"
+     ],
+     "code": "scale_fill_hue()"
+    },
+    {
+     "nom": "6 groupes",
+     "couleurs": [
+      "#F8766D",
+      "#B79F00",
+      "#00BA38",
+      "#00BFC4",
+      "#619CFF",
+      "#F564E3"
+     ],
+     "code": "scale_fill_hue()"
+    }
+   ]
+  },
+  {
+   "id": "dalto",
+   "titre": "Lisibles par tous",
+   "sous": "adaptées au daltonisme et à l'impression",
+   "palettes": [
+    {
+     "nom": "Okabe-Ito",
+     "couleurs": [
+      "#000000",
+      "#E69F00",
+      "#56B4E9",
+      "#009E73",
+      "#F0E442",
+      "#0072B2",
+      "#D55E00",
+      "#CC79A7",
+      "#999999"
+     ],
+     "code": "scale_fill_manual(values = palette.colors(palette = \"Okabe-Ito\"))"
+    },
+    {
+     "nom": "viridis",
+     "couleurs": [
+      "#440154",
+      "#3C508B",
+      "#21918C",
+      "#5BC863",
+      "#FDE725"
+     ],
+     "code": "scale_fill_viridis_d()"
+    }
+   ]
+  },
+  {
+   "id": "brewer",
+   "titre": "ColorBrewer",
+   "sous": "palettes prêtes à l'emploi, par leur nom",
+   "palettes": [
+    {
+     "nom": "Set1",
+     "couleurs": [
+      "#E41A1C",
+      "#377EB8",
+      "#4DAF4A",
+      "#984EA3",
+      "#FF7F00",
+      "#FFFF33",
+      "#A65628",
+      "#F781BF",
+      "#999999"
+     ],
+     "code": "scale_fill_brewer(palette = \"Set1\")"
+    },
+    {
+     "nom": "Set2",
+     "couleurs": [
+      "#66C2A5",
+      "#FC8D62",
+      "#8DA0CB",
+      "#E78AC3",
+      "#A6D854",
+      "#FFD92F",
+      "#E5C494",
+      "#B3B3B3"
+     ],
+     "code": "scale_fill_brewer(palette = \"Set2\")"
+    },
+    {
+     "nom": "Dark2",
+     "couleurs": [
+      "#1B9E77",
+      "#D95F02",
+      "#7570B3",
+      "#E7298A",
+      "#66A61E",
+      "#E6AB02",
+      "#A6761D",
+      "#666666"
+     ],
+     "code": "scale_fill_brewer(palette = \"Dark2\")"
+    },
+    {
+     "nom": "Paired",
+     "couleurs": [
+      "#A6CEE3",
+      "#1F78B4",
+      "#B2DF8A",
+      "#33A02C",
+      "#FB9A99",
+      "#E31A1C",
+      "#FDBF6F",
+      "#FF7F00",
+      "#CAB2D6",
+      "#6A3D9A",
+      "#FFFF99",
+      "#B15928"
+     ],
+     "code": "scale_fill_brewer(palette = \"Paired\")"
+    },
+    {
+     "nom": "Pastel1",
+     "couleurs": [
+      "#FBB4AE",
+      "#B3CDE3",
+      "#CCEBC5",
+      "#DECBE4",
+      "#FED9A6",
+      "#FFFFCC",
+      "#E5D8BD",
+      "#FDDAEC",
+      "#F2F2F2"
+     ],
+     "code": "scale_fill_brewer(palette = \"Pastel1\")"
+    },
+    {
+     "nom": "Blues (dégradé)",
+     "couleurs": [
+      "#EFF3FF",
+      "#BDD7E7",
+      "#6BAED6",
+      "#3182BD",
+      "#08519C"
+     ],
+     "code": "scale_fill_brewer(palette = \"Blues\")"
+    }
+   ]
+  },
+  {
+   "id": "gris",
+   "titre": "Niveaux de gris",
+   "sous": "pour une impression en noir et blanc",
+   "palettes": [
+    {
+     "nom": "4 groupes",
+     "couleurs": [
+      "#333333",
+      "#818181",
+      "#ABABAB",
+      "#CCCCCC"
+     ],
+     "code": "scale_fill_grey()"
+    }
+   ]
+  }
+ ],
+ "degrades": [
+  {
+   "nom": "Blanc → bleu",
+   "bas": "#DEEBF7",
+   "haut": "#08519C",
+   "code": "scale_fill_gradient(low = \"#DEEBF7\", high = \"#08519C\")"
+  },
+  {
+   "nom": "Bleu → blanc → rouge",
+   "bas": "#2166AC",
+   "milieu": "#F7F7F7",
+   "haut": "#B2182B",
+   "code": "scale_fill_gradient2(low = \"#2166AC\", mid = \"#F7F7F7\", high = \"#B2182B\", midpoint = 0)"
+  },
+  {
+   "nom": "viridis continu",
+   "bas": "#440154",
+   "milieu": "#21918C",
+   "haut": "#FDE725",
+   "code": "scale_fill_viridis_c()"
+  }
+ ],
+ "nommees": [
+  [
+   "black",
+   "#000000"
+  ],
+  [
+   "grey30",
+   "#4D4D4D"
+  ],
+  [
+   "grey60",
+   "#999999"
+  ],
+  [
+   "white",
+   "#FFFFFF"
+  ],
+  [
+   "red",
+   "#FF0000"
+  ],
+  [
+   "firebrick",
+   "#B22222"
+  ],
+  [
+   "tomato",
+   "#FF6347"
+  ],
+  [
+   "salmon",
+   "#FA8072"
+  ],
+  [
+   "orange",
+   "#FFA500"
+  ],
+  [
+   "darkorange",
+   "#FF8C00"
+  ],
+  [
+   "gold",
+   "#FFD700"
+  ],
+  [
+   "khaki",
+   "#F0E68C"
+  ],
+  [
+   "forestgreen",
+   "#228B22"
+  ],
+  [
+   "seagreen",
+   "#2E8B57"
+  ],
+  [
+   "limegreen",
+   "#32CD32"
+  ],
+  [
+   "darkolivegreen",
+   "#556B2F"
+  ],
+  [
+   "steelblue",
+   "#4682B4"
+  ],
+  [
+   "dodgerblue",
+   "#1E90FF"
+  ],
+  [
+   "skyblue",
+   "#87CEEB"
+  ],
+  [
+   "navy",
+   "#000080"
+  ],
+  [
+   "purple",
+   "#A020F0"
+  ],
+  [
+   "orchid",
+   "#DA70D6"
+  ],
+  [
+   "pink",
+   "#FFC0CB"
+  ],
+  [
+   "brown",
+   "#A52A2A"
+  ],
+  [
+   "tan",
+   "#D2B48C"
+  ],
+  [
+   "turquoise",
+   "#40E0D0"
+  ],
+  [
+   "coral",
+   "#FF7F50"
+  ],
+  [
+   "plum",
+   "#DDA0DD"
+  ]
+ ],
+ "exemple": "library(ggplot2)\n# iris est fourni avec R : 3 espèces, donc 3 couleurs\nggplot(iris, aes(x = Species, y = Sepal.Length, fill = Species)) +\n  geom_boxplot() +\n  scale_fill_manual(values = c(\"#E69F00\", \"#56B4E9\", \"#009E73\"))"
+}

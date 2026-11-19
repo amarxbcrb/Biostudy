@@ -1,0 +1,113 @@
+{
+ "version": 1,
+ "pieges": [
+  {
+   "id": "p-value",
+   "titre": "Le sens de la p-value",
+   "mots_cles": [
+    "p-value",
+    "probabilité",
+    "H0",
+    "significatif"
+   ],
+   "faux": "p = 0,03 signifie qu'il y a 3 % de chances que H0 soit vraie.",
+   "juste": "La p-value est la probabilité d'observer un résultat au moins aussi extrême que celui obtenu, si H0 est vraie. Ce n'est ni la probabilité que H0 soit vraie, ni celle que le résultat soit dû au hasard.",
+   "exemple": "Test t, p = 0,03 : si les deux traitements avaient le même effet, on observerait un écart au moins aussi grand dans 3 % des études."
+  },
+  {
+   "id": "non-rejet",
+   "titre": "Ne pas rejeter H0 ne prouve pas H0",
+   "mots_cles": [
+    "non significatif",
+    "équivalence",
+    "H0",
+    "absence de preuve"
+   ],
+   "faux": "p = 0,40 : les deux traitements sont équivalents.",
+   "juste": "Un résultat non significatif veut seulement dire qu'on n'a pas mis en évidence de différence. L'étude manque peut-être de puissance. Pour montrer une équivalence, il faut un essai conçu pour cela.",
+   "exemple": "Regarde l'IC : s'il va de −5 à +12 mmHg, une différence cliniquement importante reste possible."
+  },
+  {
+   "id": "alpha-beta",
+   "titre": "Les risques α et β",
+   "mots_cles": [
+    "risque alpha",
+    "risque beta",
+    "erreur de type I",
+    "erreur de type II",
+    "faux positif"
+   ],
+   "faux": "Le risque α est la probabilité de se tromper.",
+   "juste": "α (erreur de type I) : probabilité de rejeter H0 alors qu'elle est vraie, souvent fixée à 5 %. β (erreur de type II) : probabilité de ne pas rejeter H0 alors qu'elle est fausse. Diminuer α sans changer l'effectif augmente β.",
+   "exemple": "α : conclure qu'un médicament marche alors qu'il est inefficace. β : passer à côté d'un médicament efficace."
+  },
+  {
+   "id": "puissance",
+   "titre": "La puissance",
+   "mots_cles": [
+    "puissance",
+    "nombre de sujets",
+    "effectif",
+    "taille d'échantillon",
+    "beta"
+   ],
+   "faux": "Une étude non significative montre que l'effet n'existe pas.",
+   "juste": "La puissance (1 − β) est la probabilité de détecter un effet qui existe vraiment. Elle augmente avec l'effectif, avec la taille de l'effet et quand la variabilité diminue. Le nombre de sujets se calcule avant l'étude.",
+   "code": "# Nombre de sujets par groupe pour détecter 5 mmHg d'écart\n# (écart-type 10, α = 5 %, puissance 80 %)\npower.t.test(delta = 5, sd = 10, sig.level = 0.05, power = 0.8)"
+  },
+  {
+   "id": "bonferroni",
+   "titre": "Les comparaisons multiples",
+   "mots_cles": [
+    "bonferroni",
+    "holm",
+    "comparaisons multiples",
+    "p.adjust",
+    "inflation du risque"
+   ],
+   "faux": "Avec 5 groupes, je fais tous les tests t 2 à 2 au seuil de 5 %.",
+   "juste": "Avec 10 comparaisons au seuil de 5 %, le risque d'au moins un faux positif dépasse largement 5 % (jusqu'à 1 − 0,95¹⁰ ≈ 40 % si les tests sont indépendants). On corrige : Bonferroni (seuil α / k, ou p × k), Holm (moins conservateur), ou une méthode adaptée comme TukeyHSD() après une ANOVA.",
+   "code": "p <- c(0.012, 0.030, 0.045)\np.adjust(p, method = \"bonferroni\")\np.adjust(p, method = \"holm\")"
+  },
+  {
+   "id": "unilateral",
+   "titre": "Unilatéral ou bilatéral",
+   "mots_cles": [
+    "unilatéral",
+    "bilatéral",
+    "alternative",
+    "greater",
+    "less"
+   ],
+   "faux": "Mon test bilatéral donne p = 0,08 ; en unilatéral j'aurai p = 0,04, donc je change.",
+   "juste": "Le sens du test se décide avant de voir les données, d'après la question posée. Par défaut, R fait un test bilatéral (alternative = \"two.sided\"). Choisir l'unilatéral après coup pour obtenir p < 0,05 fausse le risque α.",
+   "code": "essai <- data.frame(\n  chol = c(2.31, 2.05, 2.48, 2.12, 2.60, 2.27, 2.39, 2.18, 2.52, 2.33,\n           2.02, 1.95, 2.21, 1.88, 2.30, 2.10, 1.79, 2.15, 2.05, 1.97),\n  groupe = rep(c(\"placebo\", \"traitement\"), each = 10))\n# Unilatéral, décidé à l'avance : le cholestérol est plus bas sous traitement\n# (alternative = \"greater\" : moyenne placebo > moyenne traitement,\n#  car placebo est le premier niveau, dans l'ordre alphabétique)\nt.test(chol ~ groupe, data = essai, alternative = \"greater\")"
+  },
+  {
+   "id": "clinique",
+   "titre": "Significatif ou cliniquement pertinent",
+   "mots_cles": [
+    "pertinence clinique",
+    "taille d'effet",
+    "intervalle de confiance",
+    "grand effectif"
+   ],
+   "faux": "p < 0,001, donc le traitement est très efficace.",
+   "juste": "Avec un très grand effectif, une différence minime devient significative. La p-value ne mesure pas l'importance de l'effet : regarde l'estimation et son IC, et compare-les à la plus petite différence utile pour le patient.",
+   "exemple": "10 000 patients par groupe, différence de 0,8 mmHg, p < 0,001 : statistiquement significatif, cliniquement négligeable."
+  },
+  {
+   "id": "causalite",
+   "titre": "Corrélation n'est pas causalité",
+   "mots_cles": [
+    "causalité",
+    "corrélation",
+    "facteur de confusion",
+    "observationnel"
+   ],
+   "faux": "La consommation de café est corrélée au cancer du poumon, donc le café donne le cancer.",
+   "juste": "Une association peut venir d'un facteur de confusion (ici le tabac, lié au café et au cancer). Seul un essai randomisé ou une analyse ajustée solide permet d'approcher la causalité.",
+   "exemple": "Pour tenir compte d'un facteur de confusion, on l'ajoute dans le modèle : glm(cancer ~ cafe + tabac, family = binomial)."
+  }
+ ]
+}

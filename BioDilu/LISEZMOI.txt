@@ -1,0 +1,5 @@
+BIODILU : calculs de dilution
+================================
+index.html   L'outil : C1V1 = C2V2, dilution au 1/n, dilutions en série, UFC/mL,
+             gamme de concentrations, avec pipettes, embouts et étapes animées.
+             Tests intégrés (12 exercices) : ouvrir BioDilu/?tests

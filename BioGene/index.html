@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="fr" data-verre="lib" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-visual">
+<meta name="theme-color" content="#f2f2f7" id="metaTheme">
+<title>BioGene - by AMAR</title>
+<meta name="description" content="BioGene : séquences d'ADN/ARN, code génétique cherchable, carte de plasmide (PNG/SVG) et calculs de clonage.">
+<link rel="icon" type="image/png" href="/Pictures/favicon.png">
+<link rel="apple-touch-icon" href="/Pictures/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="BioStudy">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script>
+/* thème avant le premier rendu : choix mémorisé pour la période (jour / nuit), sinon celui du système */
+(()=>{const g=k=>{try{return localStorage.getItem(k)}catch(e){return null}},h=new Date().getHours(),th=g('bioGeneTheme');
+document.documentElement.dataset.theme=th&&g('bioGeneThemePeriod')===(h>=7&&h<20?'day':'night')?th:matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'})();
+</script>
+<style>
+/* ===== 1. Jetons : palette Réglages iOS (identiques à BioChem) ===== */
+#bg{--serif:"Iowan Old Style","Palatino Linotype",Georgia,serif;--ease:cubic-bezier(.22,1,.36,1);--spring:cubic-bezier(.34,1.45,.64,1);
+--top:70px;--gx:14px;--navh:60px;--blur:22px;
+--grp:#fff;--fill:rgba(118,118,128,.12);--thumb:#fff;--tx:#000;--tx2:#6c6c70;--tx3:#8a8a8e;--sep:rgba(60,60,67,.18);
+--acc:var(--c-blue);--acc-tx:color-mix(in srgb,var(--acc) 78%,#000);--brand:#0064d2;
+--c-blue:#007aff;--c-indigo:#5856d6;--c-purple:#af52de;--c-pink:#ff2d55;--c-orange:#ff9500;--c-green:#34c759;--c-teal:#30b0c7;--c-cyan:#32ade6;--c-mint:#00c7be;--c-brown:#a2845e;--c-red:#ff3b30;
+--ok:#1f8a3b;--err:#d70015;--warn:#ff9500;
+--lg-rgb:255,255,255;--lg-a:.68;--lg-hi:#fff;--lg-sh:rgba(0,0,0,.12);--hair:rgba(0,0,0,.09);
+--fb:rgba(60,60,67,.3);--lens:rgba(120,120,128,.16);--lens-line:rgba(255,255,255,.9);--veil:rgba(0,0,0,.22);--blob:.3;
+--mono:ui-monospace,"SF Mono","JetBrains Mono","Roboto Mono",Menlo,Consolas,monospace;
+color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",sans-serif;font-size:16px;line-height:1.4}
+[data-theme=dark] #bg{--grp:#1c1c1e;--fill:#2c2c2e;--thumb:#636366;--tx:#fff;--tx2:#a1a1a6;--tx3:#8e8e93;--sep:rgba(84,84,88,.6);
+--acc-tx:color-mix(in srgb,var(--acc) 72%,#fff);--brand:#4da3ff;
+--c-blue:#0a84ff;--c-indigo:#5e5ce6;--c-purple:#bf5af2;--c-pink:#ff375f;--c-orange:#ff9f0a;--c-green:#30d158;--c-teal:#40cbe0;--c-cyan:#64d2ff;--c-mint:#63e6e2;--c-brown:#ac8e68;--c-red:#ff453a;
+--ok:#30d158;--err:#ff453a;
+--lg-rgb:28,28,30;--lg-a:.66;--lg-hi:rgba(255,255,255,.34);--lg-sh:rgba(0,0,0,.5);--hair:rgba(255,255,255,.08);
+--fb:rgba(235,235,245,.26);--lens:rgba(255,255,255,.17);--lens-line:rgba(255,255,255,.26);--veil:rgba(0,0,0,.5);--blob:0}
+/* accent par onglet : Séquence bleu, Code génétique indigo, Plasmide violet, Clonage orange */
+#bg[data-tab="0"]{--acc:var(--c-blue)}#bg[data-tab="1"]{--acc:var(--c-indigo)}#bg[data-tab="2"]{--acc:var(--c-purple)}#bg[data-tab="3"]{--acc:var(--c-orange)}
+#bg .nb:nth-of-type(1){--nc:var(--c-blue)}#bg .nb:nth-of-type(2){--nc:var(--c-indigo)}#bg .nb:nth-of-type(3){--nc:var(--c-purple)}#bg .nb:nth-of-type(4){--nc:var(--c-orange)}
+@media(min-width:600px){#bg{--gx:24px;--top:80px}}
+@media(min-width:900px){#bg{--gx:36px;--top:92px}}
+html{background:#f2f2f7;color-scheme:light;-webkit-text-size-adjust:100%;overflow-x:clip;overscroll-behavior:none;transition:background .4s}
+html[data-theme=dark]{background:#000;color-scheme:dark}
+body{margin:0;min-height:100dvh;overflow-x:clip;overscroll-behavior:none;-webkit-font-smoothing:antialiased}
+#bg::before{content:"";position:fixed;inset:-50%;z-index:-1;pointer-events:none;opacity:var(--blob);filter:blur(60px);animation:flow 20s ease-in-out infinite alternate;
+background:radial-gradient(circle at 20% 30%,rgba(10,132,255,.5),transparent 40%),radial-gradient(circle at 80% 70%,rgba(94,92,230,.25),transparent 40%),radial-gradient(circle at 50% 10%,rgba(48,176,199,.18),transparent 40%)}
+@keyframes flow{to{transform:translate(-4%,3%) rotate(8deg)}}
+:where(#bg) *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:where(#bg) :is(button,input,select,textarea){font:inherit;color:inherit}
+:where(#bg) button{border:0;background:none;cursor:pointer;touch-action:manipulation}
+#bg :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+#bg :is(input,textarea):focus-visible{outline:none}
+#bg [hidden]{display:none!important}
+.ic{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+/* ===== 2. Verre ===== */
+.glass{position:relative;background:rgba(var(--lg-rgb),var(--lg-a));-webkit-backdrop-filter:blur(var(--blur)) saturate(190%);backdrop-filter:blur(var(--blur)) saturate(190%);
+box-shadow:inset 0 1px 0 var(--lg-hi),0 0 0 .5px var(--hair),0 12px 30px var(--lg-sh)}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;
+background:radial-gradient(circle 90px at var(--mx,50%) var(--my,50%),rgba(255,255,255,.28),transparent 70%)}
+.glass.lit::after{opacity:1}
+@media(prefers-reduced-transparency:reduce){.glass{background:var(--grp);-webkit-backdrop-filter:none;backdrop-filter:none}}
+
+/* ===== 3. En-tête ===== */
+header{position:fixed;top:0;left:0;right:0;z-index:20;padding-top:env(safe-area-inset-top);pointer-events:none}
+.hin{max-width:1080px;margin:auto;padding:12px var(--gx);display:flex;justify-content:space-between;align-items:center;gap:8px;animation:drop .7s var(--ease)}
+@keyframes drop{from{opacity:0;transform:translateY(-100%)}}
+.logo-c{flex:1;min-width:0;pointer-events:auto}
+.logo{font-size:clamp(1.45rem,6.4vw,1.9rem);font-weight:800;letter-spacing:-.6px;line-height:1;white-space:nowrap}
+.logo i{font-style:normal;color:var(--brand)}
+.sub{font-size:.75rem;font-weight:600;color:var(--tx2);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hact{pointer-events:auto;display:flex;align-items:center;gap:10px;position:relative}
+.hbtn{width:46px;height:46px;display:grid;place-items:center;border-radius:50%;color:var(--tx);transition:transform .35s var(--spring)}
+.hbtn svg{width:22px;height:22px}
+.hbtn:active{transform:scale(.88)}
+@media(hover:hover){.hbtn:hover{transform:scale(1.06)}}
+@media(max-width:380px){.hbtn{width:42px;height:42px}.hbtn svg{width:20px;height:20px}}
+
+/* ===== 4. Page ===== */
+.shell{min-height:100dvh;max-width:1080px;margin:auto;display:flex;flex-direction:column;
+padding:calc(var(--top) + env(safe-area-inset-top)) var(--gx) calc(var(--navh) + 40px + env(safe-area-inset-bottom))}
+.stage{flex:1 0 auto;animation:rise .6s var(--ease) backwards}
+@keyframes rise{from{opacity:0;transform:translateY(20px)}}
+.thead{display:flex;align-items:center;gap:10px;margin:0 4px 16px}
+.rnb{width:34px;height:34px;flex-shrink:0;border-radius:11px;display:grid;place-items:center;color:#fff;background:var(--acc);box-shadow:0 4px 12px color-mix(in srgb,var(--acc) 40%,transparent)}
+.rnb svg{width:21px;height:21px}
+.rttl{flex:1;min-width:0;font-size:clamp(22px,5.4vw,28px);font-weight:800;letter-spacing:-.6px}
+.rsub{margin:-8px 4px 18px;color:var(--tx2);font-size:14.5px;max-width:62ch}
+.view{display:none}
+.view.on{display:block;animation:rise .45s var(--ease) backwards}
+@media(min-width:900px){.wrap2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:26px;align-items:start}}
+
+/* groupes façon Réglages */
+.gh{margin:22px 16px 7px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--tx2)}
+.gh:first-child{margin-top:4px}
+.grp{background:var(--grp);border-radius:22px;overflow:hidden}
+.grp+.grp{margin-top:14px}
+.row{display:flex;align-items:center;gap:12px;min-height:54px;padding:10px 16px;position:relative}
+.row+.row::before{content:"";position:absolute;top:0;left:16px;right:0;height:.5px;background:var(--sep)}
+.row .lab{flex:1;min-width:0;font-size:15.5px;font-weight:500}
+.row .lab small{display:block;color:var(--tx2);font-weight:400;font-size:12.5px;margin-top:1px}
+
+/* champs : capsule bordée, fond transparent */
+.fld{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.inp{min-width:0;width:112px;height:40px;padding:0 12px;border-radius:999px;border:1.5px solid var(--fb);background:transparent;color:var(--tx);
+font-size:16px;font-weight:600;text-align:right;transition:border-color .2s}
+.inp:focus{border-color:var(--acc)}
+.inp.wide{text-align:left;width:100%}
+.inp::placeholder{color:var(--tx3);font-weight:500}
+.uc{height:40px;padding:0 12px;border-radius:999px;background:var(--fill);color:var(--tx);font-size:14px;font-weight:600;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.uc .ch{opacity:.5}.uc svg{width:14px;height:14px}
+.uc.flat{pointer-events:none}
+textarea.area{width:100%;min-height:118px;padding:14px 16px;border-radius:18px;border:1.5px solid var(--fb);background:transparent;color:var(--tx);
+font-family:var(--mono);font-size:15px;line-height:1.7;letter-spacing:.5px;resize:vertical;transition:border-color .2s}
+textarea.area:focus{border-color:var(--acc)}
+textarea.area::placeholder{font-family:-apple-system,sans-serif;letter-spacing:0;color:var(--tx3)}
+
+/* segment */
+.seg{position:relative;display:flex;padding:3px;border-radius:999px;background:var(--fill);--i:0;--n:2}
+.seg .th{position:absolute;top:3px;bottom:3px;left:3px;width:calc((100% - 6px)/var(--n));border-radius:999px;background:var(--thumb);box-shadow:0 2px 6px rgba(0,0,0,.18);
+transform:translateX(calc(var(--i)*100%));transition:transform .5s var(--spring)}
+.seg button{flex:1;min-width:0;height:34px;position:relative;z-index:1;border-radius:999px;font-size:14px;font-weight:600;color:var(--tx2);white-space:nowrap;transition:color .3s,transform .35s var(--spring)}
+.seg button:active{transform:scale(.94)}
+.seg button.on{color:var(--tx)}
+.segwrap{margin:0 2px 2px}
+
+/* boutons */
+.btn{height:46px;padding:0 20px;border-radius:999px;background:var(--acc);color:#fff;font-size:15.5px;font-weight:650;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+box-shadow:0 6px 16px color-mix(in srgb,var(--acc) 34%,transparent);transition:transform .3s var(--spring),filter .2s}
+.btn:active{transform:scale(.96)}
+.btn.sec{background:var(--fill);color:var(--acc-tx);box-shadow:none}
+.btn.gho{background:transparent;color:var(--acc-tx);box-shadow:inset 0 0 0 1.5px var(--fb)}
+.btn svg{width:18px;height:18px}
+.btnrow{display:flex;flex-wrap:wrap;gap:10px;margin:16px 2px 0}
+
+/* cartes de résultat */
+.out{background:var(--grp);border-radius:22px;padding:16px 18px;margin-top:14px}
+.out .ot{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--tx2);margin-bottom:9px}
+.out .ot .tag{margin-left:auto;font-size:11px;font-weight:700;color:var(--acc-tx);background:color-mix(in srgb,var(--acc) 16%,transparent);padding:3px 9px;border-radius:999px;letter-spacing:.2px;text-transform:none}
+.out .ot .cp{margin-left:auto;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:var(--tx2);background:var(--fill)}
+.out .ot .cp:active{transform:scale(.9)}
+.seqout{font-family:var(--mono);font-size:14.5px;line-height:1.85;letter-spacing:.6px;word-break:break-all;color:var(--tx)}
+.seqout .e{color:var(--tx3)}
+.stats{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 13px;border-radius:999px;background:var(--fill);font-size:14px;font-weight:600}
+.chip b{color:var(--acc-tx)}
+.chip.c{background:color-mix(in srgb,var(--acc) 15%,transparent);color:var(--acc-tx)}
+.note{margin:14px 4px 0;padding:12px 15px;border-radius:16px;background:color-mix(in srgb,var(--acc) 9%,var(--grp));color:var(--tx2);font-size:13.5px;line-height:1.5}
+.note.warn{background:color-mix(in srgb,var(--warn) 14%,var(--grp));color:var(--tx)}
+.note b{color:var(--tx)}
+.empty{padding:40px 16px;text-align:center;color:var(--tx3);font-size:15px}
+/* Clonage : liste de rapports (type NEB) + étapes du protocole */
+.rlist{display:flex;flex-direction:column;gap:2px}
+.rrow{display:flex;align-items:center;gap:12px;padding:11px 4px;border-bottom:.5px solid var(--sep)}
+.rrow:last-child{border-bottom:0}
+.rrow.cust{background:color-mix(in srgb,var(--acc) 8%,transparent);border-radius:12px;padding-inline:12px;border-bottom:0}
+.rr-r{font-size:14px;font-weight:600;color:var(--tx2);min-width:52px}
+.rr-m{flex:1;font-size:17px;font-weight:700;color:var(--acc-tx)}
+.rrow .cp{width:30px;height:30px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;color:var(--tx2);background:var(--fill)}
+.rrow .cp:active{transform:scale(.9)}
+.step{width:100%;display:flex;align-items:flex-start;gap:13px;padding:14px 16px;text-align:left;position:relative;background:none}
+.step+.step::before{content:"";position:absolute;top:0;left:52px;right:0;height:.5px;background:var(--sep)}
+.stck{width:26px;height:26px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;border:2px solid var(--fb);color:transparent;transition:background .2s,border-color .2s,color .2s;margin-top:1px}
+.stck svg{width:15px;height:15px}
+.step.done .stck{background:var(--acc);border-color:var(--acc);color:#fff}
+.stx{min-width:0}.stx b{font-size:15.5px;font-weight:650;display:block}
+.step.done .stx b{color:var(--tx2)}
+.stx small{display:block;color:var(--tx2);font-size:13px;line-height:1.45;margin-top:3px}
+
+/* code génétique */
+.aa-card{background:var(--grp);border-radius:22px;padding:18px;margin-top:14px}
+.aa-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+.aa-h .big{font-size:30px;font-weight:800;letter-spacing:-.5px}
+.aa-h .one{font-family:var(--serif);font-style:italic;font-size:22px;color:var(--acc-tx)}
+.aa-h .cls{margin-left:auto;font-size:12.5px;font-weight:600;color:#fff;padding:4px 11px;border-radius:999px}
+.aa-codons{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.cdn{font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:1px;height:38px;padding:0 13px;border-radius:12px;display:grid;place-items:center;
+background:var(--fill);color:var(--tx)}
+.cdn.start{box-shadow:inset 0 0 0 2px var(--c-green)}
+.cdn.stop{background:color-mix(in srgb,var(--c-red) 20%,transparent);color:var(--c-red)}
+.table{margin-top:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.trow{background:var(--grp);border-radius:14px;padding:11px 13px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:transform .25s var(--spring)}
+.trow:active{transform:scale(.97)}
+.trow .dot{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:15px;flex-shrink:0}
+.trow .tn{min-width:0}.trow .tn b{font-size:15px;font-weight:650}.trow .tn span{display:block;font-size:12px;color:var(--tx2);font-family:var(--mono);letter-spacing:.5px;margin-top:1px}
+
+/* CRISPR */
+.guide{background:var(--grp);border-radius:16px;padding:13px 15px;margin-top:10px;display:flex;flex-direction:column;gap:7px}
+.guide .gl{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.guide .pos{font-size:12px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.3px}
+.guide .st{font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px}
+.guide .st.plus{background:color-mix(in srgb,var(--c-blue) 18%,transparent);color:var(--c-blue)}
+.guide .st.minus{background:color-mix(in srgb,var(--c-purple) 18%,transparent);color:var(--c-purple)}
+.guide .sp{font-family:var(--mono);font-size:15px;letter-spacing:1px;word-break:break-all;font-weight:650}
+.guide .sp .pam{color:var(--acc-tx);background:color-mix(in srgb,var(--acc) 15%,transparent);border-radius:5px;padding:1px 2px}
+.guide .gm{display:flex;gap:7px;flex-wrap:wrap}
+.guide .cp{margin-left:auto}
+
+/* Plasmide */
+.pmcol{min-width:0}
+.pmap{display:grid;place-items:center;background:var(--grp);border-radius:22px;padding:12px;margin-top:14px;overflow:hidden}
+.pmap svg{width:100%;max-width:600px;height:auto}
+@media(min-width:900px){.pmcol{position:sticky;top:calc(var(--top) + 76px)}}
+/* carte d'un élément : nom / type+couleur / position */
+.fcard{background:var(--grp);border-radius:18px;padding:12px 13px;margin-top:10px;display:flex;flex-direction:column;gap:9px}
+.fc1{display:flex;align-items:center;gap:10px}
+.fdot{width:13px;height:13px;border-radius:50%;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+.fcard .fn{flex:1;min-width:0;height:40px;border-radius:12px;border:1.5px solid var(--fb);background:transparent;color:var(--tx);padding:0 12px;font-size:15px;font-weight:600}
+.fcard .fn:focus{border-color:var(--acc);outline:none}
+.fcard .num{flex:0 0 auto;width:82px;text-align:right}
+.fcard .del{width:38px;height:38px;flex-shrink:0;border-radius:50%;background:var(--fill);color:var(--err);display:grid;place-items:center}
+.fcard .del:active{transform:scale(.9)}
+.fc2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fc2 .fdd{width:100%;justify-content:flex-start;overflow:hidden}
+.fc2 .fdd .fddl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fc2 .fdd .ch{margin-left:auto}
+.fc3{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.flab{color:var(--tx2);font-size:13px;font-weight:500}
+.uc .ch{width:14px;height:14px;opacity:.5}
+
+/* popup d'unité (clampé dans l'écran : jamais coupé) */
+.pop2{position:fixed;z-index:60;min-width:150px;max-width:min(88vw,260px);max-height:62vh;overflow:auto;padding:7px;border-radius:20px;display:none;flex-direction:column;gap:2px;-webkit-overflow-scrolling:touch}
+.pop2.on{display:flex;animation:pop .4s var(--spring)}
+@keyframes pop{from{opacity:0;transform:scale(.9)}}
+.pop2 .ph{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--tx2);padding:6px 12px 3px}
+.pop2 button{min-height:42px;padding:9px 14px;border-radius:14px;text-align:left;font-size:15px;font-weight:600;display:flex;align-items:center;gap:10px}
+.pop2 button:hover,.pop2 button.on{background:var(--fill);color:var(--acc-tx)}
+.pop2 .swx{width:15px;height:15px;border-radius:50%;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+.pop2 button.on::after{content:"";margin-left:auto;width:16px;height:16px;flex-shrink:0;
+background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E") center/contain no-repeat;
+mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E") center/contain no-repeat}
+.ov2{position:fixed;inset:0;z-index:55;background:transparent;display:none}
+.ov2.on{display:block}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:calc(var(--navh) + 24px + env(safe-area-inset-bottom));transform:translate(-50%,20px);z-index:80;
+padding:11px 18px;border-radius:999px;font-size:14.5px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .3s,transform .4s var(--spring)}
+.toast.on{opacity:1;transform:translateX(-50%)}
+
+/* pied de page (footer-global.js) : déplacé dans .shell, au-dessus de la barre (sinon z-index 1000 recouvre la nav) */
+#bg .shell>footer{position:relative!important;z-index:1!important;margin-top:40px!important;padding:24px 0 0!important}
+[data-theme=light] #bg .shell>footer a{background:var(--grp)!important;color:#000!important;border:1px solid rgba(0,0,0,.1)!important}
+[data-theme=light] #bg .shell>footer svg{filter:brightness(0)!important}
+[data-theme=light] #bg .shell>footer :is(span,p){color:#000!important}
+
+/* ===== barre d'onglets (même moteur/animation que BioChem) ===== */
+.nav{position:fixed;z-index:30;bottom:max(12px,env(safe-area-inset-bottom));left:12px;right:12px;max-width:520px;height:var(--navh);margin-inline:auto;border-radius:999px;
+animation:navin .8s var(--ease) backwards .2s}
+@keyframes navin{from{opacity:0;translate:0 40px;scale:.94}}
+@keyframes navin-d{from{opacity:0;translate:0 -30px;scale:.94}}
+.nav-in{height:100%;padding:5px;border-radius:999px;display:flex;touch-action:pan-y;-webkit-user-select:none;user-select:none;cursor:grab}
+.nav-in.dragging{cursor:grabbing}
+.sl{position:absolute;top:5px;bottom:5px;left:0;width:80px;z-index:1;border-radius:999px;pointer-events:none;translate:5px 0;
+background:var(--lens);border:1px solid var(--lens-line);box-shadow:inset 0 1px 1px rgba(255,255,255,.5),0 4px 14px rgba(0,0,0,.14);
+transition:translate .6s var(--spring),width .3s var(--ease),scale .3s var(--spring)}
+.sl.interacting{scale:1.06 1.12}
+.dragging .sl{transition:scale .25s var(--spring)}
+.nb{flex:1;min-width:0;position:relative;z-index:2;border-radius:999px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+font-size:10.5px;font-weight:500;color:var(--tx2);white-space:nowrap;transition:color .3s,transform .45s var(--spring)}
+.nb:active{transform:scale(.92)}
+.nb svg{width:22px;height:22px;color:var(--nc);opacity:.75;transition:opacity .3s}
+.nb.on{color:var(--acc-tx);font-weight:600}
+.nb.on svg{opacity:1;animation:ipop .35s var(--ease)}
+@keyframes ipop{from{transform:scale(.85)}}
+.nb span{letter-spacing:-.1px}
+#bg.kb .nav{visibility:hidden}
+@media(min-width:900px){.nav{top:calc(env(safe-area-inset-top) + 16px);bottom:auto;left:0;right:0;width:min(640px,calc(100vw - 420px));height:56px;animation-name:navin-d}
+.shell{padding-top:calc(var(--top) + 64px + env(safe-area-inset-top))}
+.nb{flex-direction:row;gap:8px;font-size:12.5px}.nb svg{width:20px;height:20px}}
+@media(max-width:380px){.nb{font-size:9.5px}.nb svg{width:20px;height:20px}}
+@media(orientation:landscape) and (min-aspect-ratio:3/2){.nav{top:auto;bottom:max(12px,env(safe-area-inset-bottom));left:12px;right:12px;width:auto;max-width:520px;height:var(--navh);animation-name:navin}}
+</style>
+<link rel="stylesheet" href="/verre.css">
+</head>
+<body>
+<div id="bg" data-tab="0">
+
+<header><div class="hin">
+  <div class="logo-c"><div class="logo">Bio<i>Gene</i></div><div class="sub">Séquences, code génétique, plasmides, clonage</div></div>
+  <div class="hact">
+    <button class="hbtn glass" id="themeBtn" type="button" aria-label="Thème"></button>
+    <button class="hbtn glass" id="mb" type="button" data-menu aria-label="Menu"></button>
+  </div>
+</div></header>
+
+<div class="shell" id="shell">
+  <main class="stage" id="stage"></main>
+  <script src="/footer-global.js"></script>
+</div>
+
+<nav class="nav" id="navWrap" aria-label="Navigation"><div class="nav-in glass" id="nav"><span class="sl" id="sl"></span></div></nav>
+
+<div class="ov2" id="ov2"></div>
+<div class="pop2 glass" id="pop2"></div>
+<div class="toast glass" id="toast"></div>
+</div>
+
+<script src="/liquid-glass.js"></script>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id),BG=$('bg'),root=document.documentElement;
+const sto={g(k){try{return localStorage.getItem(k)}catch(e){return null}},s(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const buzz=p=>{try{window.bsBuzz?window.bsBuzz(p):navigator.vibrate&&navigator.vibrate(p||12)}catch(e){}};
+
+/* ---------- Icônes Lucide ---------- */
+const IC={
+  dna:'<path d="M2 15c6.667-6 13.333 0 20-6"/><path d="M9 22c1.798-1.998 2.518-3.995 2.807-5.993"/><path d="M15 2c-1.798 1.998-2.518 3.995-2.807 5.993"/><path d="m17 6-2.5-2.5"/><path d="m14 8-1-1"/><path d="m7 18 2.5 2.5"/><path d="m3.5 14.5.5.5"/><path d="m20 9 .5.5"/><path d="m6.5 12.5 1 1"/><path d="m16.5 10.5 1 1"/><path d="m10 16 1.5 1.5"/>',
+  grid:'<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
+  scissors:'<circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/>',
+  circle:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/>',
+  flask:'<path d="M10 2v7.31"/><path d="M14 2v7.31"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.52 16h12.96"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+  moon:'<path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/>',
+  menu:'<path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/>',
+  copy:'<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
+  dl:'<path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/>',
+  plus:'<path d="M5 12h14"/><path d="M12 5v14"/>',
+  x:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  search:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  swap:'<path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/>',
+  chev:'<path d="m6 9 6 6 6-6"/>',
+  check:'<polyline points="20 6 9 17 4 12"/>',
+  cut:'<circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/>'};
+const svg=(p,c='ic')=>`<svg class="${c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+
+/* ================= DONNÉES : code génétique standard (NCBI table 1) ================= */
+/* fr : nom français ; o : code à 1 lettre ; cls : classe (couleur) */
+const AA={
+  F:{fr:'Phénylalanine',cls:'np'}, L:{fr:'Leucine',cls:'np'}, I:{fr:'Isoleucine',cls:'np'}, M:{fr:'Méthionine',cls:'np'},
+  V:{fr:'Valine',cls:'np'}, P:{fr:'Proline',cls:'np'}, A:{fr:'Alanine',cls:'np'}, W:{fr:'Tryptophane',cls:'np'}, G:{fr:'Glycine',cls:'np'},
+  S:{fr:'Sérine',cls:'pol'}, T:{fr:'Thréonine',cls:'pol'}, C:{fr:'Cystéine',cls:'pol'}, Y:{fr:'Tyrosine',cls:'pol'}, N:{fr:'Asparagine',cls:'pol'}, Q:{fr:'Glutamine',cls:'pol'},
+  D:{fr:'Aspartate',cls:'neg'}, E:{fr:'Glutamate',cls:'neg'},
+  K:{fr:'Lysine',cls:'pos'}, R:{fr:'Arginine',cls:'pos'}, H:{fr:'Histidine',cls:'pos'},
+  '*':{fr:'Stop (codon non-sens)',cls:'stop'}};
+const A3={F:'Phe',L:'Leu',I:'Ile',M:'Met',V:'Val',P:'Pro',A:'Ala',W:'Trp',G:'Gly',S:'Ser',T:'Thr',C:'Cys',Y:'Tyr',N:'Asn',Q:'Gln',D:'Asp',E:'Glu',K:'Lys',R:'Arg',H:'His','*':'***'};
+const CLSCOL={np:'#8E8E93',pol:'#30b0c7',pos:'#0a84ff',neg:'#ff375f',stop:'#ff3b30'};
+const CLSFR={np:'Apolaire',pol:'Polaire',pos:'Basique (+)',neg:'Acide (−)',stop:'Stop'};
+/* table codon -> aa (ADN, T) */
+const CODE={
+ TTT:'F',TTC:'F',TTA:'L',TTG:'L',CTT:'L',CTC:'L',CTA:'L',CTG:'L',
+ ATT:'I',ATC:'I',ATA:'I',ATG:'M',GTT:'V',GTC:'V',GTA:'V',GTG:'V',
+ TCT:'S',TCC:'S',TCA:'S',TCG:'S',CCT:'P',CCC:'P',CCA:'P',CCG:'P',
+ ACT:'T',ACC:'T',ACA:'T',ACG:'T',GCT:'A',GCC:'A',GCA:'A',GCG:'A',
+ TAT:'Y',TAC:'Y',TAA:'*',TAG:'*',CAT:'H',CAC:'H',CAA:'Q',CAG:'Q',
+ AAT:'N',AAC:'N',AAA:'K',AAG:'K',GAT:'D',GAC:'D',GAA:'E',GAG:'E',
+ TGT:'C',TGC:'C',TGA:'*',TGG:'W',CGT:'R',CGC:'R',CGA:'R',CGG:'R',
+ AGT:'S',AGC:'S',AGA:'R',AGG:'R',GGT:'G',GGC:'G',GGA:'G',GGG:'G'};
+const AA2CODONS={};Object.keys(CODE).forEach(c=>{(AA2CODONS[CODE[c]]=AA2CODONS[CODE[c]]||[]).push(c)});
+const STARTS=['ATG'];
+/* complément IUPAC (ADN) */
+const COMP={A:'T',T:'A',G:'C',C:'G',U:'A',R:'Y',Y:'R',S:'S',W:'W',K:'M',M:'K',B:'V',V:'B',D:'H',H:'D',N:'N','-':'-',' ':' ','\n':'\n'};
+
+/* ---------- utilitaires séquence ---------- */
+const clean=s=>s.toUpperCase().replace(/[^ACGTUNRYSWKMBDHV]/g,'');
+const comp=s=>s.split('').map(c=>COMP[c]||'N').join('');
+const rev=s=>s.split('').reverse().join('');
+const toRNA=s=>s.replace(/T/g,'U');
+const toDNA=s=>s.replace(/U/g,'T');
+function gc(s){const m=(s.match(/[GC]/g)||[]).length,n=(s.match(/[ACGTU]/g)||[]).length;return n?m/n*100:0}
+function tm(s){/* Wallace (<14 nt) ou formule GC% */const n=s.length;if(!n)return 0;const a=(s.match(/[AT]/g)||[]).length,g=(s.match(/[GC]/g)||[]).length;
+  return n<14?2*a+4*g:64.9+41*(g-16.4)/n}
+function translate(s){s=toDNA(s);let p='';for(let i=0;i+3<=s.length;i+=3){const c=s.substr(i,3);p+=/^[ACGT]{3}$/.test(c)?CODE[c]:'X'}return p}
+/* masse moléculaire approx (ADN simple brin, bases moyennes) */
+function wSS(s){const w={A:313.21,C:289.18,G:329.21,T:304.2,U:306.17};let m=79;for(const c of s)m+=w[c]||308.9;return m}
+const nf=(x,d=2)=>{if(!isFinite(x))return '-';const a=Math.abs(x);if(a!==0&&(a<1e-4||a>=1e6))return x.toExponential(2).replace('e','×10^').replace('+','');return (+x.toFixed(d)).toLocaleString('fr-FR',{maximumFractionDigits:d})};
+
+/* ================= état + rendu ================= */
+let tab=+(sto.g('bioGene_tab')||0);if(tab<0||tab>3)tab=0;
+const TABS=[
+ {t:'Séquence',i:'dna'},{t:'Code génétique',i:'grid'},{t:'Plasmide',i:'circle'},{t:'Clonage',i:'flask'}];
+
+/* ---- toast + copie ---- */
+let tt;function toast(m){const e=$('toast');e.textContent=m;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),1600)}
+function copy(txt){navigator.clipboard&&navigator.clipboard.writeText(txt).then(()=>toast('Copié'),()=>toast('Copie impossible'))||toast('Copie impossible')}
+BG.addEventListener('click',e=>{const c=e.target.closest('[data-copy]');if(c){buzz();copy(c.dataset.copy)}});
+
+/* ---- popup d'unité clampé ---- */
+let popCb=null;
+function openPop(anchor,title,items,cur,cb){
+  const p=$('pop2'),ov=$('ov2');popCb=cb;
+  p.innerHTML=(title?`<div class="ph">${esc(title)}</div>`:'')+items.map(it=>`<button type="button" data-v="${esc(it.v)}" class="${it.v===cur?'on':''}">${it.sw?`<span class="swx" style="background:${esc(it.sw)}"></span>`:''}${esc(it.l)}</button>`).join('');
+  p.classList.add('on');ov.classList.add('on');
+  const r=anchor.getBoundingClientRect(),pw=p.offsetWidth,ph=p.offsetHeight,vw=innerWidth,vh=innerHeight,M=8;
+  let left=r.left,top=r.bottom+6;
+  if(left+pw>vw-M)left=vw-M-pw;if(left<M)left=M;
+  if(top+ph>vh-M)top=r.top-6-ph;if(top<M)top=M;
+  p.style.left=left+'px';p.style.top=top+'px';
+}
+function closePop(){$('pop2').classList.remove('on');$('ov2').classList.remove('on');popCb=null}
+$('ov2').addEventListener('click',closePop);
+$('pop2').addEventListener('click',e=>{const b=e.target.closest('button[data-v]');if(!b)return;buzz();const v=b.dataset.v,cb=popCb;closePop();cb&&cb(v)});
+addEventListener('resize',closePop);
+
+/* =================================================================
+   VUES
+   ================================================================= */
+const V={};
+
+/* ---------- 0. Séquence ---------- */
+const SEQOPS=[
+ {v:'revcomp',l:'Inverse complémentaire',o:"5' → 3'"},
+ {v:'comp',l:'Brin complémentaire',o:"3' → 5'"},
+ {v:'rev',l:'Brin inverse',o:"3' → 5'"},
+ {v:'trans',l:'Transcription / transcrit',o:"5' → 3'"},
+ {v:'prot',l:'Traduction (protéine)',o:'acides aminés'}];
+const seqState={raw:sto.g('bioGene_seq')||'',frame:1,op:sto.g('bioGene_seqop')||'revcomp'};
+V[0]=()=>{
+  return head(0,'Transformer une séquence','Collez un brin d\'ADN ou d\'ARN, puis choisissez l\'opération à effectuer.')+
+  `<div class="segwrap"><div class="seg" id="seqMode" style="--n:2;--i:${/U/.test(seqState.raw.toUpperCase())?1:0}"><span class="th"></span>
+     <button data-v="dna" class="${/U/.test(seqState.raw.toUpperCase())?'':'on'}">ADN</button><button data-v="rna" class="${/U/.test(seqState.raw.toUpperCase())?'on':''}">ARN</button></div></div>
+   <textarea class="area" id="seqIn" placeholder="5'  ...  3'   (ex : ATGGCATTGCAACGTGA)">${esc(seqState.raw)}</textarea>
+   <div class="grp" style="margin-top:14px"><div class="row"><span class="lab">Opération</span>
+     <button class="uc" id="opBtn" type="button">${esc((SEQOPS.find(o=>o.v===seqState.op)||SEQOPS[0]).l)} ${svg(IC.chev,'ch')}</button></div></div>
+   <div id="seqOut"></div>`;
+};
+V[0].bind=()=>{
+  const ta=$('seqIn');
+  ta.addEventListener('input',()=>{seqState.raw=ta.value;sto.s('bioGene_seq',ta.value);renderSeq()});
+  $('opBtn').onclick=()=>{buzz();openPop($('opBtn'),'Opération',SEQOPS.map(o=>({v:o.v,l:o.l})),seqState.op,v=>{seqState.op=v;sto.s('bioGene_seqop',v);render()})};
+  renderSeq();
+};
+function renderSeq(){
+  const box=$('seqOut');if(!box)return;
+  const s=clean(seqState.raw);
+  if(!s){box.innerHTML='<div class="empty">Collez une séquence puis choisissez une opération.</div>';return}
+  const gcv=gc(s),tmv=tm(s),isR=/U/.test(seqState.raw.toUpperCase()),op=seqState.op;
+  const compo=`<div class="out"><div class="ot">Composition</div><div class="stats">
+      <span class="chip">Longueur <b>${s.length} nt</b></span>
+      <span class="chip c">GC <b>${nf(gcv,1)} %</b></span>
+      <span class="chip">Tm ≈ <b>${nf(tmv,1)} °C</b></span>
+      <span class="chip">Masse ≈ <b>${nf(wSS(s)/1000,2)} kg/mol</b></span>
+    </div></div>`;
+  const card=(t,seq,orient)=>`<div class="out"><div class="ot">${esc(t)}${orient?`<span class="tag">${orient}</span>`:''}<button class="cp" data-copy="${esc(seq)}" aria-label="Copier">${svg(IC.copy)}</button></div><div class="seqout">${chunk(seq)}</div></div>`;
+  let res='';
+  if(op==='comp')res=card('Brin complémentaire',comp(s),"3' → 5'");
+  else if(op==='rev')res=card('Brin inverse',rev(s),"3' → 5'");
+  else if(op==='revcomp')res=card('Inverse complémentaire',rev(comp(s)),"5' → 3'");
+  else if(op==='trans')res=card(isR?'Transcrit inverse (ADN)':'Transcription (ARN)',isR?toDNA(s):toRNA(s),"5' → 3'");
+  else if(op==='prot'){const frames=[1,2,3,-1,-2,-3],prot=translate(frameSeq(s,seqState.frame));
+    res=`<div class="out"><div class="ot">Traduction (protéine)<span class="tag">cadre ${seqState.frame>0?'+':''}${seqState.frame}</span>${prot?`<button class="cp" data-copy="${esc(prot)}" aria-label="Copier">${svg(IC.copy)}</button>`:''}</div>
+      <div class="segwrap" style="margin-bottom:10px"><div class="seg" id="frSeg" style="--n:6;--i:${frames.indexOf(seqState.frame)}"><span class="th"></span>
+        ${frames.map(f=>`<button data-f="${f}" class="${f===seqState.frame?'on':''}">${f>0?'+':''}${f}</button>`).join('')}</div></div>
+      <div class="seqout">${prot?aacol(prot):'<span class="e">—</span>'}</div>
+      ${/\*/.test(prot)?'<div class="note">Un ou plusieurs <b>codons stop</b> (∗) sont présents dans ce cadre de lecture.</div>':''}</div>`;}
+  box.innerHTML=res+compo;
+  $('frSeg')&&$('frSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{buzz();seqState.frame=+b.dataset.f;renderSeq()});
+}
+function frameSeq(s,f){let x=f<0?comp(rev(s)):s;const off=Math.abs(f)-1;return x.slice(off)}
+function chunk(s){return s.replace(/(.{10})/g,'$1 ').trim()||'<span class="e">—</span>'}
+function aacol(p){return p.split('').map(a=>a==='*'?'<span style="color:var(--c-red)">∗</span>':a==='X'?'<span class="e">X</span>':a).join('')}
+
+/* ---------- 1. Code génétique ---------- */
+const genState={q:sto.g('bioGene_gq')||''};
+V[1]=()=>head(1,'Chercher dans le code génétique','Tapez un acide aminé (lysine, Lys, K) ou un codon (AAA) : tous les codons synonymes s\'affichent. La table complète est en dessous.')+
+  `<div class="grp"><div class="row"><span style="color:var(--tx2);display:grid;place-items:center">${svg(IC.search)}</span>
+     <input class="inp wide" id="genQ" placeholder="lysine · Lys · K · AAA" value="${esc(genState.q)}" autocomplete="off"></div></div>
+   <div id="genOut"></div>
+   <div class="gh">Table complète (20 acides aminés + stop)</div><div class="table" id="genTable"></div>`;
+V[1].bind=()=>{
+  const q=$('genQ');q.addEventListener('input',()=>{genState.q=q.value;sto.s('bioGene_gq',q.value);renderGen()});
+  renderGen();
+  $('genTable').innerHTML=Object.keys(AA).map(a=>{const col=CLSCOL[AA[a].cls];
+    return `<div class="trow" data-aa="${a}"><div class="dot" style="background:${col}">${a==='*'?'∗':a}</div>
+      <div class="tn"><b>${esc(AA[a].fr)}</b><span>${AA2CODONS[a].join(' · ')}</span></div></div>`}).join('');
+  $('genTable').querySelectorAll('.trow').forEach(r=>r.onclick=()=>{buzz();$('genQ').value=AA[r.dataset.aa].fr;genState.q=AA[r.dataset.aa].fr;sto.s('bioGene_gq',genState.q);renderGen();$('genOut').scrollIntoView({behavior:'smooth',block:'nearest'})});
+};
+function renderGen(){
+  const box=$('genOut');if(!box)return;
+  const raw=genState.q.trim();if(!raw){box.innerHTML='';return}
+  const q=raw.toUpperCase().replace(/[ÉÈÊ]/g,'E');
+  let hits=[];
+  /* codon exact */
+  const cq=q.replace(/U/g,'T').replace(/[^ACGT]/g,'');
+  if(/^[ACGT]{3}$/.test(cq)){hits.push({aa:CODE[cq],hl:cq})}
+  else{
+    Object.keys(AA).forEach(a=>{
+      const nom=AA[a].fr.toUpperCase().replace(/[ÉÈÊ]/g,'E');
+      if(a===q||A3[a].toUpperCase()===q||nom===q||nom.includes(q)&&q.length>=3)hits.push({aa:a});
+    });
+    /* alias courants */
+    if('STOP'.includes(q)&&q.length>=3&&!hits.some(h=>h.aa==='*'))hits.push({aa:'*'});
+  }
+  hits=hits.filter((h,i,a)=>a.findIndex(x=>x.aa===h.aa)===i);
+  if(!hits.length){box.innerHTML='<div class="out"><div class="empty">Aucun acide aminé ni codon trouvé. Essayez « lysine », « K » ou « AAA ».</div></div>';return}
+  box.innerHTML=hits.slice(0,6).map(h=>{
+    const a=h.aa,col=CLSCOL[AA[a].cls];
+    return `<div class="aa-card"><div class="aa-h"><span class="big">${esc(AA[a].fr)}</span>
+       <span class="one">${a==='*'?'Stop':a+' · '+A3[a]}</span>
+       <span class="cls" style="background:${col}">${CLSFR[AA[a].cls]}</span></div>
+       <div style="color:var(--tx2);font-size:14px">${AA2CODONS[a].length} codon${AA2CODONS[a].length>1?'s':''}${a!=='*'?' synonyme'+(AA2CODONS[a].length>1?'s':''):''}</div>
+       <div class="aa-codons">${AA2CODONS[a].map(c=>`<span class="cdn ${STARTS.includes(c)?'start':''} ${a==='*'?'stop':''}">${c}${STARTS.includes(c)?' ▸':''}</span>`).join('')}</div>
+       ${STARTS.includes(AA2CODONS[a][0])&&a==='M'?'<div class="note"><b>ATG</b> est le codon d\'initiation (Méthionine).</div>':''}</div>`;
+  }).join('');
+}
+
+/* ---------- 3. Plasmide ---------- */
+const FTYPES=[
+ {v:'ori',l:'Origine de réplication',c:'#34c759'},{v:'res',l:'Résistance (antibiotique)',c:'#ff3b30'},{v:'prom',l:'Promoteur',c:'#ff9500'},
+ {v:'gene',l:'Gène / insert',c:'#0a84ff'},{v:'tag',l:'Étiquette (tag)',c:'#af52de'},{v:'mcs',l:'Site de clonage (MCS)',c:'#30b0c7'},
+ {v:'term',l:'Terminateur',c:'#8e8e93'},{v:'enzyme',l:'Site de restriction',c:'#1d1d1f'},{v:'other',l:'Autre',c:'#5856d6'}];
+const PCOLORS=[{v:'',l:'Auto (selon le type)'},{v:'#0a84ff',l:'Bleu'},{v:'#30d158',l:'Vert'},{v:'#ff3b30',l:'Rouge'},{v:'#ff9500',l:'Orange'},{v:'#af52de',l:'Violet'},{v:'#30b0c7',l:'Sarcelle'},{v:'#ff2d55',l:'Rose'},{v:'#a2845e',l:'Brun'},{v:'#5856d6',l:'Indigo'},{v:'#8e8e93',l:'Gris'},{v:'#1d1d1f',l:'Noir'}];
+const ENZYMES=['EcoRI','BamHI','HindIII','NotI','XhoI','SalI','NdeI','XbaI','KpnI','SacI','PstI','SmaI','NcoI','EcoRV','BglII','SpeI','NheI','ApaI'];
+const ftOf=v=>FTYPES.find(x=>x.v===v)||FTYPES[0];
+const isPoint=f=>f.t==='enzyme';
+function featColor(f,exp){if(f.c)return f.c;if(f.t==='enzyme')return exp?'#1d1d1f':(root.dataset.theme==='dark'?'#f2f2f7':'#1d1d1f');return ftOf(f.t).c}
+let plState=JSON.parse(sto.g('bioGene_plasmid')||'null')||{name:'pMonPlasmide',size:5000,feats:[
+  {n:'ori',t:'ori',s:120,e:820,str:1},{n:'AmpR',t:'res',s:1100,e:1960,str:-1},{n:'Promoteur',t:'prom',s:2300,e:2560,str:1},{n:'Mon insert',t:'gene',s:2600,e:3800,str:1},{n:'EcoRI',t:'enzyme',s:2590,str:1}]};
+const savePl=()=>sto.s('bioGene_plasmid',JSON.stringify(plState));
+V[2]=()=>head(2,'Dessiner une carte de plasmide','Nom, taille et éléments (origine, résistance, promoteur, insert, sites de restriction). Carte circulaire ou linéaire, exportable en PNG ou SVG.')+
+  `<div class="wrap2"><div>
+     <div class="grp">
+       <div class="row"><span class="lab">Nom du plasmide</span><div class="fld"><input class="inp" id="plName" style="width:150px;text-align:left" value="${esc(plState.name)}"></div></div>
+       <div class="row"><span class="lab">Taille totale</span><div class="fld"><input class="inp num" id="plSize" type="text" inputmode="numeric" value="${plState.size}"><span class="uc flat">pb</span></div></div>
+     </div>
+     <div class="gh">Éléments</div><div id="featBox"></div>
+     <div class="btnrow"><button class="btn sec" id="addFeat">${svg(IC.plus)} Élément</button><button class="btn gho" id="addEnz">${svg(IC.scissors)} Enzyme</button><button class="btn gho" id="addInsert">${svg(IC.plus)} Insérer un fragment</button></div>
+   </div>
+   <div class="pmcol">
+     <div class="segwrap"><div class="seg" id="plView" style="--n:2;--i:${plState.linear?1:0}"><span class="th"></span><button data-v="circ" class="${plState.linear?'':'on'}">Circulaire</button><button data-v="lin" class="${plState.linear?'on':''}">Linéaire</button></div></div>
+     <div class="pmap" id="pmap"></div>
+     <div class="btnrow"><button class="btn" id="dlPng">${svg(IC.dl)} PNG</button><button class="btn gho" id="dlSvg">${svg(IC.dl)} SVG</button></div>
+   </div></div>`;
+V[2].bind=()=>{
+  const sync=()=>{plState.name=$('plName').value;plState.size=Math.max(1,parseInt($('plSize').value.replace(/\D/g,''))||1);savePl();drawPlasmid()};
+  $('plName').addEventListener('input',sync);$('plSize').addEventListener('input',sync);
+  $('addFeat').onclick=()=>{buzz();plState.feats.push({n:'Nouvel élément',t:'gene',s:1,e:Math.min(plState.size,500),str:1});savePl();renderFeats();drawPlasmid()};
+  $('addEnz').onclick=()=>{buzz();plState.feats.push({n:'EcoRI',t:'enzyme',s:Math.round(plState.size/2),str:1});savePl();renderFeats();drawPlasmid()};
+  $('addInsert').onclick=()=>{buzz();const L=1000,pos=plState.size;plState.feats.push({n:'Insert',t:'gene',s:pos+1,e:pos+L,str:1});plState.size=pos+L;savePl();render();toast('Fragment de '+L+' pb inséré · taille → '+plState.size+' pb')};
+  $('plView').querySelectorAll('button').forEach(b=>b.onclick=()=>{buzz();plState.linear=b.dataset.v==='lin';savePl();render()});
+  $('dlPng').onclick=()=>{buzz();exportMap('png')};$('dlSvg').onclick=()=>{buzz();exportMap('svg')};
+  renderFeats();drawPlasmid();
+};
+function renderFeats(){
+  const box=$('featBox');if(!box)return;
+  if(!plState.feats.length){box.innerHTML='<div class="empty" style="padding:22px">Aucun élément. Ajoutez-en un ci-dessous.</div>'}
+  else box.innerHTML=plState.feats.map((f,i)=>{const col=featColor(f),ft=ftOf(f.t),pt=isPoint(f);
+    return `<div class="fcard"><div class="fc1"><span class="fdot" style="background:${col}"></span>
+        <input class="fn" data-i="${i}" data-k="n" value="${esc(f.n)}" placeholder="Nom">
+        <button class="del" data-del="${i}" aria-label="Supprimer">${svg(IC.x)}</button></div>
+      <div class="fc2">
+        <button class="uc fdd" data-type="${i}" type="button"><span class="swx" style="background:${ft.c}"></span><span class="fddl">${esc(ft.l)}</span>${svg(IC.chev,'ch')}</button>
+        <button class="uc fdd" data-color="${i}" type="button"><span class="swx" style="background:${col}"></span>${f.c?'Couleur':'Auto'}${svg(IC.chev,'ch')}</button></div>
+      <div class="fc3">${pt
+        ?`<span class="flab">position</span><input class="fn num" data-i="${i}" data-k="s" inputmode="numeric" value="${f.s}"><span class="flab">pb</span><button class="uc" data-enz="${i}" type="button" style="margin-left:auto">Enzyme ${svg(IC.chev,'ch')}</button>`
+        :`<span class="flab">de</span><input class="fn num" data-i="${i}" data-k="s" inputmode="numeric" value="${f.s}"><span class="flab">à</span><input class="fn num" data-i="${i}" data-k="e" inputmode="numeric" value="${f.e||0}"><button class="uc" data-strand="${i}" type="button" style="margin-left:auto">${f.str>0?'→ sens':'← anti'}</button>`}</div>
+    </div>`}).join('');
+  box.querySelectorAll('input[data-k]').forEach(inp=>inp.addEventListener('input',()=>{
+    const f=plState.feats[+inp.dataset.i],k=inp.dataset.k;
+    if(k==='n')f.n=inp.value;else f[k]=parseInt(inp.value.replace(/\D/g,''))||0;savePl();drawPlasmid()}));
+  box.querySelectorAll('[data-type]').forEach(b=>b.onclick=()=>{buzz();const f=plState.feats[+b.dataset.type];
+    openPop(b,'Type d\'élément',FTYPES.map(t=>({v:t.v,l:t.l,sw:t.c})),f.t,v=>{f.t=v;if(v==='enzyme'&&f.e!=null)delete f.e;if(v==='enzyme'&&f.str==null)f.str=1;savePl();renderFeats();drawPlasmid()})});
+  box.querySelectorAll('[data-color]').forEach(b=>b.onclick=()=>{buzz();const f=plState.feats[+b.dataset.color];
+    openPop(b,'Couleur',PCOLORS.map(c=>({v:c.v,l:c.l,sw:c.v||ftOf(f.t).c})),f.c||'',v=>{if(v)f.c=v;else delete f.c;savePl();renderFeats();drawPlasmid()})});
+  box.querySelectorAll('[data-enz]').forEach(b=>b.onclick=()=>{buzz();const f=plState.feats[+b.dataset.enz];
+    openPop(b,'Enzyme',ENZYMES.map(e=>({v:e,l:e})),f.n,v=>{f.n=v;savePl();renderFeats();drawPlasmid()})});
+  box.querySelectorAll('[data-strand]').forEach(b=>b.onclick=()=>{buzz();const f=plState.feats[+b.dataset.strand];f.str=-f.str;savePl();renderFeats();drawPlasmid()});
+  box.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{buzz();plState.feats.splice(+b.dataset.del,1);savePl();renderFeats();drawPlasmid()});
+}
+const plEnz=()=>plState.feats.filter(isPoint);
+const plArcs=()=>plState.feats.filter(f=>!isPoint(f));
+function mapDims(){if(plState.linear)return{W:560,H:240,listShown:false};
+  const listShown=plEnz().length>1;return{W:listShown?680:440,H:440,listShown}}
+function plCols(forExport){const dark=root.dataset.theme==='dark'&&!forExport;
+  return{bg:forExport?'#ffffff':(dark?'#1c1c1e':'#ffffff'),txc:forExport?'#111':(dark?'#fff':'#111'),ring:forExport?'#d2d2d7':(dark?'#48484a':'#d2d2d7'),sub:forExport?'#777':'#8e8e93'}}
+const SVGH='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %W %H" font-family="-apple-system,Segoe UI,Roboto,sans-serif">';
+const T2=n=>(+n).toFixed(1);
+function plasmidSVG(forExport){return plState.linear?plasmidLinear(forExport):plasmidCircular(forExport)}
+function plasmidCircular(forExport){
+  const {W,H,listShown}=mapDims(),{bg,txc,ring,sub}=plCols(forExport);
+  const cx=220,cy=220,R=140,th=17,size=plState.size||1;
+  const a2=bp=>((bp%size+size)%size/size)*2*Math.PI-Math.PI/2,pol=(r,a)=>[cx+r*Math.cos(a),cy+r*Math.sin(a)];
+  let s=SVGH.replace('%W',W).replace('%H',H);
+  s+=`<rect width="${W}" height="${H}" fill="${bg}" rx="18"/>`;
+  s+=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${ring}" stroke-width="${th}"/>`;
+  /* règle de positions numérotées (0, size/8, ...) */
+  for(let k=0;k<8;k++){const pos=Math.round(size*k/8),ang=a2(pos),[t1x,t1y]=pol(R-th/2-1,ang),[t2x,t2y]=pol(R-th/2-6,ang),[nx,ny]=pol(R-th/2-16,ang);
+    s+=`<line x1="${T2(t1x)}" y1="${T2(t1y)}" x2="${T2(t2x)}" y2="${T2(t2y)}" stroke="${ring}" stroke-width="1.2"/>`;
+    s+=`<text x="${T2(nx)}" y="${T2(ny+3)}" text-anchor="middle" font-size="9.5" fill="${sub}">${pos}</text>`}
+  s+=`<text x="${cx}" y="${cy-8}" text-anchor="middle" font-size="22" font-weight="800" fill="${txc}">${esc(plState.name||'plasmide')}</text>`;
+  s+=`<text x="${cx}" y="${cy+16}" text-anchor="middle" font-size="15" font-weight="600" fill="${sub}">${size.toLocaleString('fr-FR')} pb</text>`;
+  /* éléments en arc, avec flèche de sens */
+  plArcs().forEach(f=>{
+    const col=featColor(f,forExport);let a=f.s,b=f.e||f.s;if(b<a)b+=size;
+    let aa=a2(a),ab=a2(b);if(ab-aa<0)ab+=2*Math.PI;if(ab-aa<0.02)ab=aa+0.02;
+    const large=(ab-aa)>Math.PI?1:0,[x1,y1]=pol(R,aa),[x2,y2]=pol(R,ab);
+    s+=`<path d="M ${T2(x1)} ${T2(y1)} A ${R} ${R} 0 ${large} 1 ${T2(x2)} ${T2(y2)}" fill="none" stroke="${col}" stroke-width="${th}" stroke-linecap="butt"/>`;
+    const tip=f.str>0?ab:aa,base=f.str>0?ab-0.05:aa+0.05,[tx,ty]=pol(R,tip),[b1x,b1y]=pol(R-th/2,base),[b2x,b2y]=pol(R+th/2,base);
+    s+=`<path d="M ${T2(tx)} ${T2(ty)} L ${T2(b1x)} ${T2(b1y)} L ${T2(b2x)} ${T2(b2y)} Z" fill="${col}"/>`;
+    const mid=(aa+ab)/2,[lx,ly]=pol(R+th/2+16,mid),[ex,ey]=pol(R+th/2+3,mid);
+    const anchor=Math.cos(mid)<-.3?'end':Math.cos(mid)>.3?'start':'middle';
+    s+=`<line x1="${T2(ex)}" y1="${T2(ey)}" x2="${T2(lx)}" y2="${T2(ly)}" stroke="${col}" stroke-width="1.5"/>`;
+    s+=`<text x="${T2(lx)}" y="${T2(ly+4)}" text-anchor="${anchor}" font-size="13" font-weight="700" fill="${txc}">${esc(f.n)}</text>`;
+  });
+  /* sites de restriction */
+  const enz=plEnz();
+  if(!listShown){ /* 0 ou 1 : repère + nom et position sur la carte */
+    enz.forEach(f=>{const mc=featColor(f,forExport),ang=a2(f.s),[i1x,i1y]=pol(R-th/2-1,ang),[o1x,o1y]=pol(R+th/2+16,ang);
+      s+=`<line x1="${T2(i1x)}" y1="${T2(i1y)}" x2="${T2(o1x)}" y2="${T2(o1y)}" stroke="${mc}" stroke-width="2.4"/>`;
+      const [lx,ly]=pol(R+th/2+21,ang),anchor=Math.cos(ang)<-.3?'end':Math.cos(ang)>.3?'start':'middle';
+      s+=`<text x="${T2(lx)}" y="${T2(ly+4)}" text-anchor="${anchor}" font-size="12.5" font-weight="700" fill="${txc}">${esc(f.n)} <tspan fill="${sub}" font-weight="600">(${f.s})</tspan></text>`});
+  } else { /* plusieurs : repères colorés sur la carte + liste à droite (comme un plasmide annoté) */
+    enz.forEach(f=>{const mc=featColor(f,forExport),ang=a2(f.s),[i1x,i1y]=pol(R-th/2-1,ang),[o1x,o1y]=pol(R+th/2+9,ang);
+      s+=`<line x1="${T2(i1x)}" y1="${T2(i1y)}" x2="${T2(o1x)}" y2="${T2(o1y)}" stroke="${mc}" stroke-width="2.4"/>`;
+      s+=`<circle cx="${T2(o1x)}" cy="${T2(o1y)}" r="3" fill="${mc}"/>`});
+    let ly=72,lx=452;
+    s+=`<text x="${lx}" y="${ly}" font-size="13.5" font-weight="800" fill="${txc}">Sites de restriction</text>`;ly+=10;
+    s+=`<line x1="${lx}" y1="${ly}" x2="${W-18}" y2="${ly}" stroke="${ring}" stroke-width="1"/>`;ly+=20;
+    enz.slice().sort((a,b)=>a.s-b.s).forEach(f=>{const mc=featColor(f,forExport);
+      s+=`<circle cx="${lx+5}" cy="${ly-4}" r="4.5" fill="${mc}"/>`;
+      s+=`<text x="${lx+18}" y="${ly}" font-size="13" font-weight="700" fill="${txc}">${esc(f.n)}</text>`;
+      s+=`<text x="${W-18}" y="${ly}" text-anchor="end" font-size="13" font-weight="600" fill="${sub}">${f.s}</text>`;ly+=23;});
+  }
+  return s+'</svg>';
+}
+function plasmidLinear(forExport){
+  const {W,H}=mapDims(),{bg,txc,ring,sub}=plCols(forExport);
+  const size=plState.size||1,L=46,Rx=W-24,axisY=140,x=bp=>L+(Math.max(0,Math.min(size,bp))/size)*(Rx-L);
+  let s=SVGH.replace('%W',W).replace('%H',H);
+  s+=`<rect width="${W}" height="${H}" fill="${bg}" rx="18"/>`;
+  s+=`<text x="${L}" y="30" font-size="19" font-weight="800" fill="${txc}">${esc(plState.name||'plasmide')}</text>`;
+  s+=`<text x="${L}" y="49" font-size="13" font-weight="600" fill="${sub}">${size.toLocaleString('fr-FR')} pb · carte linéaire</text>`;
+  s+=`<line x1="${L}" y1="${axisY}" x2="${Rx}" y2="${axisY}" stroke="${ring}" stroke-width="3"/>`;
+  /* règle */
+  for(let k=0;k<=8;k++){const pos=Math.round(size*k/8),X=x(pos);
+    s+=`<line x1="${T2(X)}" y1="${axisY}" x2="${T2(X)}" y2="${axisY+6}" stroke="${ring}" stroke-width="1.2"/>`;
+    s+=`<text x="${T2(X)}" y="${axisY+19}" text-anchor="middle" font-size="9.5" fill="${sub}">${pos}</text>`}
+  /* éléments = boîtes + flèche de sens, libellé en dessous (2 rangées alternées) */
+  let row=0;
+  plArcs().forEach(f=>{const col=featColor(f,forExport);let a=f.s,b=Math.min(size,(f.e||f.s)<f.s?size:(f.e||f.s));
+    const x1=x(a),x2=Math.max(x1+6,x(b)),bw=x2-x1,ah=Math.min(8,bw/2);
+    s+=`<rect x="${T2(x1)}" y="${axisY-11}" width="${T2(bw)}" height="22" rx="4" fill="${col}"/>`;
+    const ax=f.str>0?x2:x1,ay0=axisY-11,ay1=axisY+11,am=axisY,ad=f.str>0?-ah:ah;
+    s+=`<path d="M ${T2(ax)} ${ay0} L ${T2(ax-ad)} ${am} L ${T2(ax)} ${ay1} Z" fill="${bg}" opacity="${bw>14?1:0}"/>`;
+    const ly=row?axisY+40:axisY-18;row=1-row;
+    s+=`<text x="${T2((x1+x2)/2)}" y="${ly}" text-anchor="middle" font-size="12" font-weight="700" fill="${txc}">${esc(f.n)}</text>`});
+  /* sites de restriction = sucettes au-dessus */
+  plEnz().slice().sort((a,b)=>a.s-b.s).forEach(f=>{const mc=featColor(f,forExport),X=x(f.s);
+    s+=`<line x1="${T2(X)}" y1="${axisY-11}" x2="${T2(X)}" y2="80" stroke="${mc}" stroke-width="2"/><circle cx="${T2(X)}" cy="78" r="3.5" fill="${mc}"/>`;
+    s+=`<text x="${T2(X)}" y="70" text-anchor="middle" font-size="11" font-weight="700" fill="${txc}">${esc(f.n)} <tspan fill="${sub}">${f.s}</tspan></text>`});
+  return s+'</svg>';
+}
+function drawPlasmid(){const m=$('pmap');if(m)m.innerHTML=plasmidSVG(false)}
+function exportMap(kind){
+  const svgTxt=plasmidSVG(true),name=(plState.name||'plasmide').replace(/[^\w\-]+/g,'_');
+  if(kind==='svg'){dl(new Blob([svgTxt],{type:'image/svg+xml'}),name+'.svg');toast('SVG téléchargé');return}
+  const {W,H}=mapDims(),img=new Image(),blob=new Blob([svgTxt],{type:'image/svg+xml'}),url=URL.createObjectURL(blob);
+  img.onload=()=>{const sc=2,cv=document.createElement('canvas');cv.width=W*sc;cv.height=H*sc;const ctx=cv.getContext('2d');
+    ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);ctx.drawImage(img,0,0,cv.width,cv.height);URL.revokeObjectURL(url);
+    cv.toBlob(b=>{dl(b,name+'.png');toast('PNG téléchargé')},'image/png')};
+  img.onerror=()=>{URL.revokeObjectURL(url);toast('Export impossible')};img.src=url;
+}
+function dl(blob,fn){const a=document.createElement('a'),u=URL.createObjectURL(blob);a.href=u;a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+
+/* ---------- 4. Clonage (calculs type NEB) ---------- */
+const MW_BP=617.96,MW_END=36.04;/* ADN double brin : (pb × 617,96) + 36,04 g/mol */
+const MASSU=[{v:'ng',f:1e-9,l:'ng'},{v:'ug',f:1e-6,l:'µg'},{v:'pg',f:1e-12,l:'pg'},{v:'g',f:1,l:'g'}];
+const LENU=[{v:'bp',f:1,l:'pb'},{v:'kb',f:1000,l:'kb'}];
+const MOLU=[{v:'fmol',f:1e-15,l:'fmol'},{v:'pmol',f:1e-12,l:'pmol'},{v:'nmol',f:1e-9,l:'nmol'},{v:'mol',f:1,l:'mol'}];
+const RATIOS=[1,2,3,5,7];
+const PROTO=[
+ ['Digérer le vecteur et l\'insert','Avec les mêmes enzymes de restriction (bouts compatibles). Vérifier qu\'aucune enzyme ne coupe à l\'intérieur du fragment à conserver.'],
+ ['Déphosphoryler le vecteur (facultatif)','Phosphatase sur le vecteur linéarisé : limite sa re-circularisation sans insert.'],
+ ['Purifier les fragments','Gel d\'agarose puis extraction, ou colonne. Contrôler les tailles attendues.'],
+ ['Monter la ligature','Vecteur + insert au rapport molaire choisi (voir le calcul), T4 ADN ligase + tampon. Prévoir un témoin « vecteur seul ».'],
+ ['Incuber','Par exemple une nuit à 16 °C, ou à température ambiante selon la ligase.'],
+ ['Transformer','Bactéries compétentes (choc thermique ou électroporation), puis récupération en milieu riche.'],
+ ['Sélectionner','Étaler sur milieu avec l\'antibiotique de résistance. Criblage blanc/bleu si lacZ (X-Gal + IPTG).'],
+ ['Vérifier les clones','PCR sur colonie, digestion diagnostique, puis séquençage.']];
+let clState=JSON.parse(sto.g('bioGene_clone')||'null')||{
+  sub:'calc',
+  cv:{mass:'',massU:'ng',len:'3000',lenU:'bp'},
+  lig:{vm:'50',vmU:'ng',vl:'3000',vlU:'bp',il:'1000',ilU:'bp',ratio:'3'},
+  proto:{}};
+if(!clState.proto)clState.proto={};if(!clState.sub)clState.sub='calc';
+const saveCl=()=>sto.s('bioGene_clone',JSON.stringify(clState));
+const uLabel=(arr,v)=>(arr.find(x=>x.v===v)||arr[0]).l;
+const uFac=(arr,v)=>(arr.find(x=>x.v===v)||arr[0]).f;
+V[3]=()=>head(3,'Clonage','Convertir masse ⇄ moles d\'ADN, calculer la masse d\'insert d\'une ligature, et suivre les étapes du clonage.')+
+  `<div class="segwrap"><div class="seg" id="clSub" style="--n:2;--i:${clState.sub==='proto'?1:0}"><span class="th"></span>
+     <button data-v="calc" class="${clState.sub==='proto'?'':'on'}">Calculs</button><button data-v="proto" class="${clState.sub==='proto'?'on':''}">Protocole</button></div></div>
+   <div id="clBody"></div>`;
+V[3].bind=()=>{
+  const seg=$('clSub');seg.querySelectorAll('button').forEach(b=>b.onclick=()=>{buzz();clState.sub=b.dataset.v;saveCl();render()});
+  renderClone();
+};
+const pv=v=>parseFloat(String(v).replace(',','.'));
+function renderClone(){
+  const body=$('clBody');if(!body)return;
+  if(clState.sub==='proto'){
+    body.innerHTML=`<div class="gh">Étapes du clonage</div><div class="grp" id="protoBox">${PROTO.map((s,i)=>
+      `<button class="step${clState.proto[i]?' done':''}" data-step="${i}" type="button"><span class="stck">${svg(IC.check,'')}</span><span class="stx"><b>${i+1}. ${esc(s[0])}</b><small>${esc(s[1])}</small></span></button>`).join('')}</div>
+      <div class="btnrow"><button class="btn sec" id="protoReset">Tout décocher</button></div>
+      <div class="note">Déroulé type d'un clonage par enzymes de restriction. Adaptez enzymes, ligase et conditions à votre protocole.</div>`;
+    body.querySelectorAll('[data-step]').forEach(b=>b.onclick=()=>{buzz();const i=+b.dataset.step;clState.proto[i]=!clState.proto[i];saveCl();b.classList.toggle('done',clState.proto[i])});
+    $('protoReset').onclick=()=>{buzz();clState.proto={};saveCl();renderClone()};
+    return;
+  }
+  body.innerHTML=`<div class="wrap2"><div>
+     <div class="gh">Masse ⇄ moles (ADN double brin)</div>
+     <div class="grp">
+       <div class="row"><span class="lab">Masse d'ADN</span><div class="fld"><input class="inp" id="cvMass" type="text" inputmode="decimal" placeholder="50" value="${esc(clState.cv.mass)}"><button class="uc" data-u="cv.massU">${uLabel(MASSU,clState.cv.massU)} ${svg(IC.chev,'ch')}</button></div></div>
+       <div class="row"><span class="lab">Longueur</span><div class="fld"><input class="inp" id="cvLen" type="text" inputmode="decimal" value="${esc(clState.cv.len)}"><button class="uc" data-u="cv.lenU">${uLabel(LENU,clState.cv.lenU)} ${svg(IC.chev,'ch')}</button></div></div>
+     </div>
+     <div id="cvOut"></div>
+   </div><div>
+     <div class="gh">Ligature — masse d'insert requise</div>
+     <div class="grp">
+       <div class="row"><span class="lab">Longueur de l'insert</span><div class="fld"><input class="inp" id="lgIl" type="text" inputmode="decimal" value="${esc(clState.lig.il)}"><button class="uc" data-u="lig.ilU">${uLabel(LENU,clState.lig.ilU)} ${svg(IC.chev,'ch')}</button></div></div>
+       <div class="row"><span class="lab">Longueur du vecteur</span><div class="fld"><input class="inp" id="lgVl" type="text" inputmode="decimal" value="${esc(clState.lig.vl)}"><button class="uc" data-u="lig.vlU">${uLabel(LENU,clState.lig.vlU)} ${svg(IC.chev,'ch')}</button></div></div>
+       <div class="row"><span class="lab">Masse de vecteur</span><div class="fld"><input class="inp" id="lgVm" type="text" inputmode="decimal" value="${esc(clState.lig.vm)}"><button class="uc" data-u="lig.vmU">${uLabel(MASSU,clState.lig.vmU)} ${svg(IC.chev,'ch')}</button></div></div>
+       <div class="row"><span class="lab">Rapport personnalisé<small>insert : vecteur</small></span><div class="fld"><input class="inp" id="lgR" type="text" inputmode="decimal" value="${esc(clState.lig.ratio)}"><span class="uc flat">: 1</span></div></div>
+     </div>
+     <div id="lgOut"></div>
+   </div></div>`;
+  BG.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>{buzz();
+    const[grp,key]=b.dataset.u.split('.'),arr=key.toLowerCase().includes('mass')?MASSU:LENU;
+    openPop(b,'Unité',arr.map(x=>({v:x.v,l:x.l})),clState[grp][key],v=>{clState[grp][key]=v;saveCl();render()})});
+  ['cvMass','cvLen'].forEach(id=>$(id).addEventListener('input',()=>{clState.cv.mass=$('cvMass').value;clState.cv.len=$('cvLen').value;saveCl();renderCv()}));
+  ['lgVm','lgVl','lgIl','lgR'].forEach(id=>$(id).addEventListener('input',()=>{clState.lig.vm=$('lgVm').value;clState.lig.vl=$('lgVl').value;clState.lig.il=$('lgIl').value;clState.lig.ratio=$('lgR').value;saveCl();renderLg()}));
+  renderCv();renderLg();
+}
+function renderCv(){
+  const box=$('cvOut');if(!box)return;
+  const mass=pv(clState.cv.mass),len=pv(clState.cv.len);
+  if(!(mass>0)||!(len>0)){box.innerHTML='<div class="out"><div class="empty">Entrez une masse et une longueur.</div></div>';return}
+  const bp=len*uFac(LENU,clState.cv.lenU),g=mass*uFac(MASSU,clState.cv.massU),mw=bp*MW_BP+MW_END;
+  const mol=g/mw,pmol=mol/1e-12,fmol=mol/1e-15,molecules=mol*6.022e23;
+  const show=pmol>=1?nf(pmol,2)+' pmol':nf(fmol,1)+' fmol';
+  box.innerHTML=`<div class="out"><div class="ot">Quantité de matière<button class="cp" data-copy="${show.replace(/<[^>]+>/g,'')}">${svg(IC.copy)}</button></div>
+     <div class="stats"><span class="chip c">n = <b>${show}</b></span>
+       <span class="chip">${nf(molecules,2)} molécules</span>
+       <span class="chip">MW = <b>${nf(mw/1000,1)} kg/mol</b></span></div>
+     <div class="note">ADN double brin : <b>MW = (pb × 617,96) + 36,04 g·mol⁻¹</b>, puis n = masse ∕ MW. Pour ${bp.toLocaleString('fr-FR')} pb, 1 µg ≈ <b>${nf(1e-6/mw/1e-12,2)} pmol</b>.</div></div>`;
+}
+function ligMass(vm,il,vl,r){return vm*r*(il/vl)}
+function autoMass(g){for(const u of[{f:1e-9,l:'ng'},{f:1e-6,l:'µg'},{f:1e-3,l:'mg'}]){const v=g/u.f;if(v>=1&&v<1000)return nf(v,2)+' '+u.l}return nf(g/1e-9,2)+' ng'}
+function renderLg(){
+  const box=$('lgOut');if(!box)return;
+  const vm=pv(clState.lig.vm)*uFac(MASSU,clState.lig.vmU),vl=pv(clState.lig.vl)*uFac(LENU,clState.lig.vlU),
+        il=pv(clState.lig.il)*uFac(LENU,clState.lig.ilU),rc=pv(clState.lig.ratio);
+  if(!(vm>0)||!(vl>0)||!(il>0)){box.innerHTML='<div class="out"><div class="empty">Renseignez les longueurs et la masse de vecteur.</div></div>';return}
+  const ratios=RATIOS.concat(rc>0&&!RATIOS.includes(rc)?[rc]:[]).sort((a,b)=>a-b);
+  const rows=ratios.map(r=>{const g=ligMass(vm,il,vl,r),cust=r===rc&&!RATIOS.includes(r),m=autoMass(g);
+    return `<div class="rrow${cust?' cust':''}"><span class="rr-r">${r} : 1</span><b class="rr-m">${m}</b><button class="cp" data-copy="${m}" aria-label="Copier">${svg(IC.copy)}</button></div>`}).join('');
+  box.innerHTML=`<div class="out"><div class="ot">Masse d'insert requise</div>
+     <div class="rlist">${rows}</div>
+     <div class="note"><b>masse d'insert (g) = rapport molaire insert/vecteur × masse du vecteur (g) × (longueur insert ∕ longueur vecteur)</b>.<br>Témoin conseillé : vecteur seul (sans insert) pour estimer le bruit de fond.</div></div>`;
+}
+
+/* ---------- en-tête de vue ---------- */
+function head(i,title,sub){return `<div class="thead"><div class="rnb">${svg(IC[TABS[i].i],'')}</div><h1 class="rttl">${esc(title)}</h1></div><p class="rsub">${esc(sub)}</p>`}
+
+/* ---------- navigation ---------- */
+function render(){BG.dataset.tab=tab;const st=$('stage');st.innerHTML=V[tab]();st.querySelectorAll('.seg').forEach(seg=>{});V[tab].bind&&V[tab].bind();bindSegMode();}
+function bindSegMode(){const m=$('seqMode');if(m){m.querySelectorAll('button').forEach((b,i)=>b.onclick=()=>{buzz();m.style.setProperty('--i',i);m.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+  if(b.dataset.v==='rna'){seqState.raw=toRNA(clean(seqState.raw));}else{seqState.raw=toDNA(clean(seqState.raw))}$('seqIn').value=seqState.raw;sto.s('bioGene_seq',seqState.raw);renderSeq()})}}
+
+/* barre d'onglets */
+const nbs=TABS.map((t,i)=>{const b=document.createElement('button');b.className='nb'+(i===tab?' on':'');b.type='button';b.innerHTML=svg(IC[t.i],'')+`<span>${t.t}</span>`;return b});
+$('nav').append(...nbs);
+const navCtl=window.LiquidGlass?LiquidGlass.tabs({wrap:$('navWrap'),inner:$('nav'),indicator:$('sl'),items:nbs,onSelect:i=>setTab(i),glass:false}):null;
+function setTab(i){if(i===tab)return;const dir=i>tab?1:-1;tab=i;sto.s('bioGene_tab',i);nbs.forEach((b,k)=>b.classList.toggle('on',k===i));navCtl&&navCtl.select&&navCtl.select(i);render();window.bsEnter&&bsEnter($('stage'),dir);buzz()}
+nbs.forEach((b,i)=>b.addEventListener('click',()=>setTab(i)));
+if(navCtl&&navCtl.select)navCtl.select(tab);
+
+/* thème */
+let dark=root.dataset.theme==='dark';
+function applyTheme(){root.dataset.theme=dark?'dark':'light';document.body.classList.toggle('theme-light',!dark);document.body.classList.toggle('theme-dark',dark);
+  $('themeBtn').innerHTML=svg(dark?IC.sun:IC.moon,'');$('metaTheme').content=dark?'#000000':'#f2f2f7';
+  const h=new Date().getHours();sto.s('bioGene_theme',dark?'dark':'light');sto.s('bioGeneTheme',dark?'dark':'light');sto.s('bioGeneThemePeriod',h>=7&&h<20?'day':'night');
+  if(tab===2)drawPlasmid();}
+$('themeBtn').onclick=()=>{buzz();dark=!dark;applyTheme()};
+applyTheme();
+
+/* menu flottant */
+$('mb').innerHTML=svg(IC.menu,'');
+$('mb').addEventListener('click',()=>{buzz();let n=0;const go2=()=>typeof window.openCapsuleMenu==='function'?window.openCapsuleMenu():++n<40&&setTimeout(go2,100);go2()});
+
+/* le footer (footer-global.js) est ajouté en fin de <body> avec z-index 1000 : on le ramène dans .shell (au-dessus de la barre) pour qu'il ne recouvre plus la nav */
+function moveFooter(){const f=document.querySelector('.modern-transparent-footer');if(f&&f.parentElement!==$('shell')){$('shell').appendChild(f);return true}return!!f}
+if(!moveFooter()){let n=0;const fp=setInterval(()=>{if(moveFooter()||++n>50)clearInterval(fp)},80)}
+
+render();
+})();
+</script>
+<script src="/menu-flottant.js"></script>
+</body>
+</html>
