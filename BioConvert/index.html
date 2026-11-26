@@ -561,77 +561,66 @@ transition:transform .6s var(--spring),scale .3s var(--spring)}
 #bc .cal button{z-index:2;border-radius:999px;height:52px}
 #bc .cal button.on small{color:var(--acc-tx);font-weight:600}
 
-/* ---- Conversion v2 (nov. 2026) : deux cartes De / Vers éditables + inversion ---- */
+/* ==== Convertir v3 (nov. 2026) : Liquid Glass d'Apple ====
+   Contenu = surfaces pleines groupées (liste « inset grouped », rayon 26) ; verre réservé aux commandes qui flottent
+   (barre, boutons ronds, bouton d'inversion). Grille de 8 pt, marges 16/20, cibles >= 44 pt, coins concentriques.
+   Typo HIG : Large Title 34/41 bold, Body 17, Subheadline 15, Footnote 13. Une seule couleur : l'accent de l'onglet. */
+#bc{--brand:var(--acc-tx);--card:#fff;--rc:26px;--pad:16px;--rnd:ui-rounded,"SF Pro Rounded",-apple-system,system-ui,sans-serif;
+ --gl:rgba(255,255,255,.72);--gl-b:rgba(255,255,255,.85);--gl-sh:0 2px 6px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.08)}
+[data-theme=dark] #bc{--card:#1c1c1e;--gl:rgba(58,58,60,.62);--gl-b:rgba(255,255,255,.14);--gl-sh:0 8px 24px rgba(0,0,0,.5)}
+#bc[data-tab="0"]{--acc-tx:#c93400}#bc[data-tab="1"]{--acc-tx:#0071a4}#bc[data-tab="2"]{--acc-tx:#0062cc}#bc[data-tab="3"]{--acc-tx:#8944ab}
+[data-theme=dark] #bc[data-tab="0"]{--acc-tx:#ffb340}[data-theme=dark] #bc[data-tab="1"]{--acc-tx:#70d7ff}[data-theme=dark] #bc[data-tab="2"]{--acc-tx:#409cff}[data-theme=dark] #bc[data-tab="3"]{--acc-tx:#da8fff}
+#bc .logo i{color:var(--acc-tx);transition:color .4s}
+/* titre */
+#bc .thead{margin:8px 4px 24px;gap:12px;align-self:stretch}
+#bc .rttl.roll,#bc .rttl span{height:41px}
+#bc .rttl{font-size:clamp(28px,8.2vw,34px);line-height:41px;font-weight:700;letter-spacing:.37px}
+#bc .rnb{display:none}
+/* surfaces de contenu : pleines, sans verre ni ombre (le verre est pour les commandes) */
+#bc :is(.fold,.grp,.rg){background:var(--card)!important;border:0!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border-radius:var(--rc)}
+#bc :is(.fold,.grp,.rg)::after{display:none!important}
+#bc .gh{margin:24px 20px 8px;font-size:13px;line-height:18px;font-weight:400;letter-spacing:-.08px;text-transform:uppercase;color:var(--tx2)}
+/* « Comment ça marche ? » + « Afficher la formule » = une seule liste groupée */
+#bc .fold{margin:0;border-radius:0}
+#bc .fold.how-w{border-radius:var(--rc) var(--rc) 0 0}
+#bc .fold.how-w+.fold{border-radius:0 0 var(--rc) var(--rc);position:relative}
+#bc .fold.how-w+.fold::before{content:"";position:absolute;top:0;left:56px;right:0;height:.5px;background:var(--sep);z-index:1}
+#bc .fh{min-height:52px;padding:0 16px;gap:12px;font-size:17px;line-height:22px;font-weight:400;letter-spacing:-.43px;color:var(--tx)}
+#bc .fh>span{flex:1}
+#bc .fh .fi{width:28px;height:28px;flex:none;display:grid;place-items:center;color:var(--acc-tx)}
+#bc .fh .fi svg{width:22px;height:22px}
+#bc .fh>.ic:last-child{font-size:14px;color:var(--tx3);stroke-width:2.6}
+/* cartes Valeur / Résultat : une seule surface, deux rangées séparées par un filet */
+.grp.cvg{overflow:visible;display:block}
+.vr.big{flex-direction:column;align-items:stretch;gap:8px;padding:12px var(--pad) 16px;min-height:0}
+.vr.big+.vr.big{padding-top:20px}
+.vr.big .lb{flex:none}.vr.big .sym{display:none}
+.vr.big :is(.ln,.ls){font-size:15px;line-height:20px;font-weight:400;letter-spacing:-.23px;color:var(--tx2)}
+.vr.big .ctl{flex:none;width:100%;min-width:0;justify-content:space-between;gap:8px}
+.vr.big .val{flex:1 1 auto;min-width:0;width:auto;height:56px;padding:0 16px;font-family:var(--rnd);font-size:34px;line-height:41px;font-weight:500;letter-spacing:.2px;text-align:left;font-variant-numeric:tabular-nums;border:1px solid var(--fb);background:transparent!important}
+.vr.big .val:focus{border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 20%,transparent)}
+.vr.big[id$="-r-b"] .val{color:var(--acc-tx)}
+.vr.big .exp{height:44px;font-size:17px}
+.vr.big .sel{flex:0 0 auto;width:auto;min-width:72px;height:44px;padding:0 30px 0 16px;font-size:17px;font-weight:600;letter-spacing:-.43px}
+#bc .vr.big:focus-within{background:transparent}
+/* bouton d'inversion : commande en verre posée sur le filet, à droite comme dans les convertisseurs d'Apple */
+.swap{position:absolute;right:var(--pad);bottom:-22px;z-index:5;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;padding:0;
+ color:var(--acc-tx);background:var(--gl);border:.5px solid var(--gl-b);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),var(--gl-sh);
+ -webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);cursor:pointer;transition:transform .35s var(--spring)}
+.swap svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .45s var(--spring)}
+.swap:active{transform:scale(.88)}.swap.spin svg{transform:rotate(180deg)}
+.vr.big .ctl .sel{margin-right:0}
+.vr.big[id$="-r-a"] .ctl{padding-right:0}
+/* le filet entre les deux rangées s'arrête avant le bouton */
+.grp.cvg>.vr.big+.vr.big::before{display:block!important;left:var(--pad);right:calc(var(--pad) + 52px)}
+/* actions : bouton principal plein, secondaire gris (styles d'Apple) */
 #bc.cv #rt,#bc.cv .rv,#bc.cv #mini{display:none!important}
-#bc.cv .rg{margin-top:4px}
-.grp.cvg,#bc .grp.cvg{overflow:visible;background:none!important;box-shadow:none!important;border:0!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;display:flex;flex-direction:column;gap:10px;border-radius:0}
-.grp.cvg>.vr{background:var(--grp);border-radius:26px}
-.grp.cvg>.vr::before{display:none!important}
-.vr.big{flex-direction:column;align-items:stretch;gap:10px;padding:16px 18px 18px;min-height:0}
-.vr.big .lb{flex:none;gap:8px}
-.vr.big .sym{display:none}
-.grp.cvg::after,.grp.cvg::before{display:none!important}
-.vr.big .ctl{flex:none;width:100%;min-width:0}
-.vr.big .val{min-width:0}
-.vr.big :is(.ln,.ls){font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--tx2)}
-.vr.big .ctl{justify-content:space-between;gap:12px}
-.vr.big .val{flex:1 1 auto;width:auto;height:58px;padding:0 18px;font-size:32px;font-weight:700;text-align:left;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
-.vr.big .sel{flex:0 0 auto;width:auto;min-width:84px;height:46px;font-size:17px;font-weight:600}
-.vr.big .exp{height:46px;font-size:18px}
-#bc .vr.big:focus-within{background:var(--grp);box-shadow:0 0 0 2px color-mix(in srgb,var(--acc) 45%,transparent)}
-.vr.big[id$="-r-b"] .val{color:var(--acc-tx)}
-.swap{position:absolute;left:50%;bottom:-27px;translate:-50% 0;z-index:5;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;
-background:var(--acc);color:#fff;border:4px solid var(--bg,#f2f2f7);box-shadow:0 6px 18px color-mix(in srgb,var(--acc) 35%,transparent);cursor:pointer;transition:transform .45s var(--spring)}
-[data-theme=dark] .swap{border-color:#000}
-.swap svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.swap:active{transform:scale(.9)}.swap.spin svg{transition:rotate .45s var(--spring);rotate:180deg}
-
-/* ==== iOS 27 (nov. 2026) : profondeur, verre, typographie HIG ==== */
-#bc{--r-card:28px;--g-bg:rgba(255,255,255,.66);--g-rim:rgba(255,255,255,.9);--g-sh:0 1px 1px rgba(16,24,40,.04),0 10px 30px -8px rgba(16,24,40,.12);--g-in:inset 0 1px 0 rgba(255,255,255,.95),inset 0 -1px 0 rgba(0,0,0,.03);--rnd:ui-rounded,"SF Pro Rounded",-apple-system,system-ui,sans-serif}
-[data-theme=dark] #bc{--g-bg:rgba(36,36,40,.58);--g-rim:rgba(255,255,255,.12);--g-sh:0 12px 34px -10px rgba(0,0,0,.7);--g-in:inset 0 1px 0 rgba(255,255,255,.10),inset 0 -1px 0 rgba(0,0,0,.25)}
-[data-theme=light] #bc[data-tab="0"],#bc[data-tab="0"]{--acc-tx:#c2410c}
-[data-theme=light] #bc[data-tab="1"],#bc[data-tab="1"]{--acc-tx:#0369a1}
-[data-theme=light] #bc[data-tab="2"],#bc[data-tab="2"]{--acc-tx:#0058d0}
-[data-theme=light] #bc[data-tab="3"],#bc[data-tab="3"]{--acc-tx:#7e3bb0}
-[data-theme=dark] #bc[data-tab="0"]{--acc-tx:#ffb340}[data-theme=dark] #bc[data-tab="1"]{--acc-tx:#70d7ff}[data-theme=dark] #bc[data-tab="2"]{--acc-tx:#5cabff}[data-theme=dark] #bc[data-tab="3"]{--acc-tx:#da8fff}
-body::before{content:"";position:fixed;inset:-20%;z-index:-1;pointer-events:none;transition:background .6s;
-background:radial-gradient(40% 30% at 15% 8%,color-mix(in srgb,var(--tabc,#ff9500) 22%,transparent),transparent 70%),radial-gradient(45% 35% at 95% 40%,color-mix(in srgb,#5856d6 14%,transparent),transparent 70%),radial-gradient(50% 35% at 20% 95%,color-mix(in srgb,#32ade6 14%,transparent),transparent 70%)}
-[data-theme=dark] body::before{opacity:.55}
-/* titre : Large Title */
-#bc .thead{margin:6px 2px 22px;gap:12px;width:auto;align-self:stretch}
-#bc .rttl.roll,#bc .rttl span{height:44px}
-#bc .rttl{font-size:clamp(26px,7.4vw,34px);line-height:1.2;white-space:normal;font-weight:700;letter-spacing:.37px}
-#bc .rnb{width:44px;height:44px;border-radius:50%;background:color-mix(in srgb,var(--acc) 16%,transparent);display:grid;place-items:center;color:var(--acc-tx);flex:none}
-/* verre commun */
-#bc :is(.fold,.grp.cvg>.vr,.grp:not(.cvg)),#bc.cv .acts .ab{background:var(--g-bg)!important;border:.5px solid var(--g-rim)!important;box-shadow:var(--g-in),var(--g-sh)!important;-webkit-backdrop-filter:blur(30px) saturate(180%);backdrop-filter:blur(30px) saturate(180%)}
-#bc .fold{border-radius:22px;margin-top:10px}
-#bc .fold:first-of-type{margin-top:0}
-#bc .fh{min-height:52px;padding:0 18px;font-size:17px;font-weight:500;letter-spacing:-.4px}
-#bc .gh{margin:28px 20px 8px;font-size:13px;font-weight:500;letter-spacing:-.08px;text-transform:none;color:var(--tx2)}
-/* cartes De / Vers */
-.grp.cvg{gap:8px}
-.grp.cvg>.vr{border-radius:var(--r-card)}
-.vr.big{padding:16px 16px 18px 20px;gap:12px}
-.vr.big :is(.ln,.ls){font-size:15px;font-weight:600;letter-spacing:-.24px;text-transform:none;color:var(--tx2)}
-.vr.big .val{height:64px;padding:0 20px;font-family:var(--rnd);font-size:34px;font-weight:600;letter-spacing:.2px;border:1px solid var(--fb);background:transparent!important}
-.vr.big .val:focus{border-color:var(--acc);box-shadow:0 0 0 4px color-mix(in srgb,var(--acc) 18%,transparent)}
-.vr.big[id$="-r-b"] .val{color:var(--acc-tx)}
-.vr.big .sel{height:44px;min-width:76px;padding:0 30px 0 16px;font-size:17px;font-weight:600;letter-spacing:-.4px;background-color:var(--fill)}
-#bc .vr.big:focus-within{box-shadow:var(--g-in),var(--g-sh),0 0 0 1.5px color-mix(in srgb,var(--acc) 40%,transparent)!important}
-.swap{width:48px;height:48px;bottom:-28px;border:0;color:#fff;
-background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 82%,#fff),var(--acc));
-box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 0 0 5px var(--sw-ring,#f2f2f7),0 8px 20px -4px color-mix(in srgb,var(--acc) 55%,transparent)}
-[data-theme=dark] .swap{--sw-ring:#000}
-.swap svg{width:22px;height:22px;stroke-width:2.4}
-/* actions en capsules séparées */
-#bc.cv .rg{background:none;border:0;box-shadow:none;overflow:visible;margin-top:20px}
-#bc.cv .rg::after{display:none}
-#bc.cv .acts{border:0;gap:10px}
-#bc.cv .ab{height:52px;border-radius:999px;font-size:17px;font-weight:600;letter-spacing:-.4px}
-#bc.cv .ab+.ab{border-left:.5px solid var(--g-rim)!important}
-#bc.cv .acts .ab:first-child{background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 85%,#fff),var(--acc))!important;color:#fff!important;border-color:transparent!important}
-@media (min-width:900px){#bc.cv .stage{display:block;max-width:640px;margin-inline:auto}#bc.cv .results{margin-top:18px}#bc.cv .inputs{display:flex}#bc.cv .stage>*{width:100%;max-width:640px;margin-inline:auto}}
-#bc .tip{margin:14px 20px 0;font-size:13px;line-height:18px;letter-spacing:-.08px}
+#bc.cv .rg{background:none!important;overflow:visible;margin-top:16px}
+#bc.cv .acts{border:0;gap:12px}
+#bc.cv .acts .ab{height:50px;border-radius:999px;border:0!important;font-size:17px;font-weight:600;letter-spacing:-.43px;background:var(--fill);color:var(--acc-tx)}
+#bc.cv .acts .ab:first-child{background:var(--acc);color:#fff}
+#bc .tip{margin:12px 20px 0;font-size:13px;line-height:18px;letter-spacing:-.08px;color:var(--tx2)}
+@media (min-width:900px){#bc.cv .stage{display:block}#bc.cv .stage>*{width:100%;max-width:600px;margin-inline:auto}#bc.cv .inputs{display:flex}#bc.cv .results{margin-top:0;padding-inline:0}#bc.cv .thead{margin-left:20px}}
 </style>
 </head>
 <body>
@@ -950,7 +939,7 @@ function play(el,kf,o,done){const a=el.animate(kf,o);anims.push(a);a.onfinish=()
 function setTab(i,dir){
   const old=S.tab;if(i===old)return;
   const next=$('view'+i),prev=old>=0?$('view'+old):null,my=++tabTok;
-  dir=dir||(i>old?1:-1);S.tab=i;BC.dataset.tab=i;document.body.style.setProperty('--tabc',['#ff9500','#32ade6','#007aff','#af52de'][i]||'#ff9500');sto.s('bcv_tab',i);
+  dir=dir||(i>old?1:-1);S.tab=i;BC.dataset.tab=i;sto.s('bcv_tab',i);
   navCtl.select(i);nbs.forEach((b,k)=>b.classList.toggle('on',k===i));
   $('rn').style.transform=$('rtt').style.transform=`translateY(${-i*100/TABS.length}%)`;
   if(prev){buzz();scrollTo(0,0)}
@@ -1245,19 +1234,20 @@ const HINT={
  qty:['Choisissez en haut ce que vous cherchez : n, M ou m.','Remplissez les deux autres champs.','Le résultat s’affiche en dessous, avec sa formule.']};
 const EX={mass:{a:'2'},vol:{a:'1,5'},conc:{a:'50',M:'58,44'},qty:{n:'1',M:'58,44'}};
 /* bloc replié : titre + flèche, contenu qui se déploie en dessous */
-const foldHead=(txt,cls)=>`<button type="button" class="fh" aria-expanded="false"><span>${txt}</span>${IC.chev}</button>`;
+const FI={q:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',s:'<path d="M18 7V4H6l6 8-6 8h12v-3"/>'};
+const foldHead=(txt,k)=>`<button type="button" class="fh" aria-expanded="false"><i class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${FI[k]}</svg></i><span>${txt}</span>${IC.chev}</button>`;
 TABS.forEach((tb,i)=>{const v=$('view'+i),fl=$(tb.id+'-fml').parentNode;
  /* formule : le contenu existant est déplacé dans la zone repliée */
  const sp=$(tb.id+'-fml');fl.querySelector('small').remove();fl.classList.add('fold');
- fl.innerHTML=foldHead('Afficher la formule')+'<div class="fx"><div></div></div>';fl.querySelector('.fx>div').appendChild(sp);fl.dataset.t='la formule';
+ fl.innerHTML=foldHead('Afficher la formule','s')+'<div class="fx"><div></div></div>';fl.querySelector('.fx>div').appendChild(sp);fl.dataset.t='la formule';
  /* aide : placée en haut de l'onglet */
  const how=document.createElement('div');how.className='fold how-w';how.dataset.t='comment ça marche';
- how.innerHTML=foldHead('Comment ça marche ?')+`<div class="fx"><div><div class="hb how"><ol>${HINT[tb.id].map(x=>`<li>${x}</li>`).join('')}</ol><button type="button" class="ex" data-ex="${tb.id}">Essayer un exemple</button></div></div></div>`;
- v.insertBefore(how,v.firstChild)});
+ how.innerHTML=foldHead('Comment ça marche ?','q')+`<div class="fx"><div><div class="hb how"><ol>${HINT[tb.id].map(x=>`<li>${x}</li>`).join('')}</ol><button type="button" class="ex" data-ex="${tb.id}">Essayer un exemple</button></div></div></div>`;
+ v.insertBefore(how,v.firstChild);how.after(fl)});
 BC.addEventListener('click',e=>{
  const fh=e.target.closest('.fh');
  if(fh){const f=fh.parentNode,on=!f.classList.contains('open');buzz(8);f.classList.toggle('open',on);fh.setAttribute('aria-expanded',on);
-  const w=f.dataset.t,tx=fh.firstElementChild;tx.textContent=w==='la formule'?(on?'Masquer la formule':'Afficher la formule'):(on?'Masquer l’aide':'Comment ça marche ?')}
+  const w=f.dataset.t,tx=fh.querySelector('span');tx.textContent=w==='la formule'?(on?'Masquer la formule':'Afficher la formule'):(on?'Masquer l’aide':'Comment ça marche ?')}
  const ex=e.target.closest('[data-ex]');
  if(ex){const id=ex.dataset.ex;buzz();Object.entries(EX[id]).forEach(([k,v])=>{const el=$(`${id}-${k}`);el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}))})}});
 /* reflet du verre qui suit le doigt / la souris, aussi sur les cartes */
