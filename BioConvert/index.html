@@ -560,6 +560,31 @@ transition:transform .6s var(--spring),scale .3s var(--spring)}
 #bc .cal:active .th{scale:1.06 1.1}
 #bc .cal button{z-index:2;border-radius:999px;height:52px}
 #bc .cal button.on small{color:var(--acc-tx);font-weight:600}
+
+/* ---- Conversion v2 (nov. 2026) : deux cartes De / Vers éditables + inversion ---- */
+#bc.cv #rt,#bc.cv .rv,#bc.cv #mini{display:none!important}
+#bc.cv .rg{margin-top:4px}
+.grp.cvg,#bc .grp.cvg{overflow:visible;background:none!important;box-shadow:none!important;border:0!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;display:flex;flex-direction:column;gap:10px;border-radius:0}
+.grp.cvg>.vr{background:var(--grp);border-radius:26px}
+.grp.cvg>.vr::before{display:none!important}
+.vr.big{flex-direction:column;align-items:stretch;gap:10px;padding:16px 18px 18px;min-height:0}
+.vr.big .lb{flex:none;gap:8px}
+.vr.big .sym{display:none}
+.grp.cvg::after,.grp.cvg::before{display:none!important}
+.vr.big .ctl{flex:none;width:100%;min-width:0}
+.vr.big .val{min-width:0}
+.vr.big :is(.ln,.ls){font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--tx2)}
+.vr.big .ctl{justify-content:space-between;gap:12px}
+.vr.big .val{flex:1 1 auto;width:auto;height:58px;padding:0 18px;font-size:32px;font-weight:700;text-align:left;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+.vr.big .sel{flex:0 0 auto;width:auto;min-width:84px;height:46px;font-size:17px;font-weight:600}
+.vr.big .exp{height:46px;font-size:18px}
+#bc .vr.big:focus-within{background:var(--grp);box-shadow:0 0 0 2px color-mix(in srgb,var(--acc) 45%,transparent)}
+.vr.big[id$="-r-b"] .val{color:var(--acc-tx)}
+.swap{position:absolute;left:50%;bottom:-27px;translate:-50% 0;z-index:5;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;
+background:var(--acc);color:#fff;border:4px solid var(--bg,#f2f2f7);box-shadow:0 6px 18px color-mix(in srgb,var(--acc) 35%,transparent);cursor:pointer;transition:transform .45s var(--spring)}
+[data-theme=dark] .swap{border-color:#000}
+.swap svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.swap:active{transform:scale(.9)}.swap.spin svg{transition:rotate .45s var(--spring);rotate:180deg}
 </style>
 </head>
 <body>
@@ -789,7 +814,10 @@ $('views').innerHTML=TABS.map((tb,i)=>`<section class="view" id="view${i}">
 <div class="ctl">${field(`${tb.id}-${v.k}`,'val','v_'+v.n,'decimal',v.ph)}<span class="x10">×10</span>${field(`${tb.id}-${v.k}-e`,'exp','a_exp','text','0')}${unitCtl(`${tb.id}-${v.k}-u`,v.dim,v.u)}</div></div>`).join('')}${(tb.params||[]).filter(p=>p.main).map(p=>parRow(tb,p)).join('')}</div>
 </section>`).join('');
 /* options qui ne servent qu'à la préparation : sous le résultat, dans « Préparer au labo » */
-TABS.forEach(tb=>{if(tb.conv){const c=$(tb.id+'-cal');c.hidden=true;c.previousElementSibling.hidden=true}});
+TABS.forEach(tb=>{if(tb.conv){const c=$(tb.id+'-cal');c.hidden=true;c.previousElementSibling.hidden=true;
+  const ra=$(tb.id+'-r-a'),rb=$(tb.id+'-r-b'),g=ra.parentNode,m=$(tb.id+'-r-M');g.classList.add('cvg');ra.classList.add('big');rb.classList.add('big');
+  ra.after(rb);if(m)g.appendChild(m);
+  ra.insertAdjacentHTML('beforeend','<button type="button" class="swap" data-swap="'+tb.id+'" aria-label="Inverser les unités"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/></svg></button>')}});
 $('mPar').innerHTML=TABS.map((tb,i)=>{const ps=(tb.params||[]).filter(p=>!p.main);return ps.length?`<div class="grp mpar" data-i="${i}" hidden>${ps.map(p=>parRow(tb,p)).join('')}</div>`:''}).join('');
 $('nav').insertAdjacentHTML('beforeend',TABS.map((tb,i)=>`<button class="nb" data-tab="${i}">${IC[tb.ic]}<span></span></button>`).join(''));
 $('rn').innerHTML=TABS.map(tb=>`<span>${IC[tb.ic]}</span>`).join('');
@@ -800,11 +828,11 @@ const nbs=$$('.nb');
    son unité passe dans le résultat ; l'ancienne inconnue redevient une ligne saisissable, avec sa valeur calculée */
 const segSet=(seg,i)=>{seg.style.setProperty('--i',i);seg.querySelectorAll('button').forEach((b,j)=>{b.classList.toggle('on',j===i);b.setAttribute('aria-pressed',j===i)})};
 const home=u=>$(u.id.replace(/^(\w+)-(\w+)-u$/,'$1-r-$2')).lastElementChild;
-function dockUnit(){const tb=cur(),u=$(`${tb.id}-${S.tgt[tb.id]}-u`),ru=$('ru'),o=ru.firstElementChild;
+function dockUnit(){if(cur().conv){const o=$('ru').firstElementChild;if(o)home(o).appendChild(o);return}const tb=cur(),u=$(`${tb.id}-${S.tgt[tb.id]}-u`),ru=$('ru'),o=ru.firstElementChild;
   if(o===u)return;if(o)home(o).appendChild(o);ru.appendChild(u)}
 function setTarget(tb,k,user){
   S.tgt[tb.id]=k;segSet($(tb.id+'-cal'),tb.vars.findIndex(v=>v.k===k));
-  tb.vars.forEach(v=>{const r=$(`${tb.id}-r-${v.k}`),hide=v.k===k;
+  tb.vars.forEach(v=>{const r=$(`${tb.id}-r-${v.k}`),hide=v.k===k&&!tb.conv;
     if(user&&r.hidden&&!hide&&!RM)r.animate([{opacity:0,transform:'translateY(-6px)'},{opacity:1,transform:'none'}],{duration:350,easing:'cubic-bezier(.22,1,.36,1)'});
     r.hidden=hide});
   const fl=$(tb.id+'-fml');fl.innerHTML=tb.f[k];
@@ -843,7 +871,7 @@ function show(v,o){const ok=v!=null,was=S.ok;S.ok=ok;
 /* options d'un onglet (valeurs par défaut, puis choix mémorisés ; champs numériques en unités de base) */
 function readPar(tb){const P={...(tb.def||{}),...(S.par[tb.id]||{})};
   (tb.params||[]).filter(p=>p.t==='num').forEach(p=>{const r=readVal(tb.id,p.k);P[p.k]='v' in r&&r.v>0?r.v*fu(p.dim,$(`${tb.id}-${p.k}-u`).value):null});return P}
-function recalc(){S.rsci=isSci(cur().id,S.tgt[cur().id]);
+function recalc(){BC.classList.toggle('cv',!!cur().conv);S.rsci=isSci(cur().id,S.tgt[cur().id]);
   const tb=cur(),id=tb.id,k=S.tgt[id],kv=tb.vars.find(v=>v.k===k),un=$(`${id}-${k}-u`).value,x={},parts=[],U={};
   tb.vars.forEach(v=>U[v.k]=$(`${id}-${v.k}-u`).value);
   const sk=tb.skip?tb.skip(U):[];tb.vars.forEach(v=>$(`${id}-r-${v.k}`).classList.toggle('off',sk.includes(v.k)&&v.k!==k));
@@ -904,6 +932,7 @@ BC.addEventListener('input',e=>{const el=e.target;
   if(el.matches('.pl')){setPar(el.dataset.par,el.value);recalc();return}
   if(!el.matches('.val,.exp'))return;
   const re=el.matches('.exp')?/[^0-9+\-−]/g:/[^0-9.,eE+\-−×x^*\/:]/g;if(re.test(el.value))el.value=el.value.replace(re,'');
+  {const tb=cur(),m=tb.conv&&el.id.match(/^\w+-(a|b)(-e)?$/);if(m&&S.tgt[tb.id]===m[1])setTarget(tb,m[1]==='a'?'b':'a',false)}
   recalc();save()});
 BC.addEventListener('change',e=>{const el=e.target;
   if(el.matches('select[data-par]')){buzz();setPar(el.dataset.par,el.value);recalc();return}
@@ -912,6 +941,10 @@ BC.addEventListener('keydown',e=>{const el=e.target;if(!el.matches('.val,.exp,.p
   if(e.key==='Enter')el.blur();
   if(el.matches('.exp')&&(e.key==='ArrowUp'||e.key==='ArrowDown')){e.preventDefault();el.value=(parseInt(el.value,10)||0)+(e.key==='ArrowUp'?1:-1);el.dispatchEvent(new Event('input',{bubbles:true}))}});
 BC.addEventListener('click',e=>{
+  const sw=e.target.closest('[data-swap]');if(sw){const id=sw.dataset.swap,tb=TABS.find(x=>x.id===id),q=k=>$(id+k),ua=q('-a-u'),ub=q('-b-u'),u1=ua.value;
+    setUnit(ua,ub.value);setUnit(ub,u1);[['',''],['-e','-e']].forEach(([x])=>{const a=q('-a'+x).value;q('-a'+x).value=q('-b'+x).value;q('-b'+x).value=a});
+    const fa=FX[id+'-a'],fb=FX[id+'-b'];delete FX[id+'-a'];delete FX[id+'-b'];if(fb)FX[id+'-a']=fb;if(fa)FX[id+'-b']=fa;sto.s(FXK,JSON.stringify(FX));applyFx();
+    sw.classList.toggle('spin');buzz();setTarget(tb,'b',false);recalc();save();return}
   const pi=e.target.closest('[data-pint]');if(pi){const[path,inc]=pi.dataset.pint.split(':'),[tid,k]=path.split('.'),tb=TABS.find(x=>x.id===tid),p=tb.params.find(x=>x.k===k),cur0={...(tb.def||{}),...(S.par[tid]||{})}[k];
     const v=Math.min(p.max||99,Math.max(p.min||1,(+cur0||1)+Number(inc)));buzz(8);setPar(path,v);$(`${tid}-p-${k}`).textContent=v;recalc();return}
   const pv=e.target.closest('.pseg button');if(pv){const sg=pv.parentNode;buzz();setPar(sg.dataset.par,pv.dataset.pv);segSet(sg,[...sg.querySelectorAll('button')].indexOf(pv));recalc();return}

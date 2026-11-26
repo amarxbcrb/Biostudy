@@ -352,6 +352,7 @@ Cinq onglets :
 ## BioConvert (`/BioConvert/`) : refait sur le moteur commun (comme BioDilu)
 - Généré par un script hors dépôt (`gen_conv.py` + `conv_core.js`, base BioMicro), puis `fx/patch_engine.py` (écriture par champ, clé `bcv_fx`). Même barre d'onglets, mêmes champs, capsules d'unités, haptique, historique, thème que BioChem/BioDilu. Français seulement (l'ancienne version FR/EN est dans l'historique git).
 - 4 onglets (orange / cyan / bleu / violet) : Masse `mass`, Volume `vol` (x₁ → x₂, l'unité du résultat se choisit dans le résultat, note « Multiplier par … »), Concentration `conc` (M, mM…, %, ppm, ppb, g/L et toute unité masse/volume ; la masse molaire n'apparaît que si on passe de mol/L à g/L, `skip`), Quantité `qty` (m = n · M).
+- **Conversion v2 (nov. 2026, demande de l'utilisateur : style iOS 27, comme les convertisseurs)** : onglets `conv` (Masse, Volume, Concentration) = deux grandes cartes « Valeur / Résultat » (`.grp.cvg`, `.vr.big`, classe `cv` sur `#bc` qui masque le gros résultat et `#mini`) **toutes deux saisissables** (taper dans l'une fait de l'autre l'inconnue) + bouton rond **⇅** `.swap` (`data-swap`) qui inverse unités, valeurs et écriture. M (concentration) passe sous les deux cartes.
 - Clés : `bcv_state`, `bcv_tab`, `bcv_fx`, `bioConvertHistory`, `bioConvertTheme` + `bioConvertThemePeriod`. Tests : `BioConvert/?tests` (7).
 
 ## Pièges déjà rencontrés
