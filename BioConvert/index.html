@@ -671,6 +671,37 @@ html[data-theme=light] #bc .sl{background:rgba(0,0,0,.06)!important;box-shadow:i
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
  .lgx,#bc :is(.fold,.grp,.tools,.mb,.nav-in,.vr .exp,.vr .sel,.swap),#bc.cv .acts .ab:not(:first-child){background:rgba(30,30,30,.9)!important}
  html[data-theme=light] :is(.lgx,#bc .fold,#bc .grp,#bc .tools,#bc .mb,#bc .nav-in,#bc .vr .exp,#bc .vr .sel,#bc .swap){background:rgba(255,255,255,.95)!important}}
+
+/* ==== v5 (nov. 2026, skill design iOS 27 de l'utilisateur) ====
+   Performance : le flou (backdrop-filter) seulement sur la couche qui flotte (pilule historique/thème, menu, barre d'onglets, ⇅) ;
+   le contenu garde l'aspect verre (dégradé, liseré, reflet) sans flou, et sans verre imbriqué dans du verre.
+   Hiérarchie : ombre forte pour ce qui flotte, légère pour le contenu ; teinte = prééminence (Copier teinté, Enregistrer verre normal).
+   Interactif : les commandes en verre s'éclairent et rebondissent au toucher. Accessibilité : transparence et animations réduites, contraste accru. */
+#bc :is(.fold,.grp,.vr .exp,.vr .sel),#bc:not(.cv) .rg,#bc.cv .acts .ab:not(:first-child){-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+html{--gl-sh-c:inset 0 1px 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(255,255,255,.03),0 4px 14px rgba(0,0,0,.35)}
+html[data-theme=light]{--gl-sh-c:inset 0 1px 0 rgba(255,255,255,.9),0 1px 2px rgba(0,0,0,.04),0 4px 14px rgba(0,0,0,.05)}
+#bc :is(.fold,.grp),#bc:not(.cv) .rg{box-shadow:var(--gl-sh-c)!important}
+#bc .vr :is(.exp,.sel){background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.08)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.12)!important}
+html[data-theme=light] #bc .vr :is(.exp,.sel){background:rgba(0,0,0,.05)!important;border:1px solid rgba(0,0,0,.04)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.7)!important}
+/* commandes en verre interactives (équivalent de .glassEffect(.regular.interactive())) */
+#bc :is(.tools .tb,.mb,.swap,.acts .ab,.nb,.fh,.vr .sel){transition:transform .35s cubic-bezier(.34,1.56,.64,1),filter .2s,background-color .2s}
+#bc :is(.tools .tb,.mb,.acts .ab,.vr .sel):active{transform:scale(.94);filter:brightness(1.25)}
+#bc .swap:active{filter:brightness(1.3)}
+#bc .fh:active{background:rgba(255,255,255,.06)}
+html[data-theme=light] #bc .fh:active{background:rgba(0,0,0,.04)}
+/* cibles d'au moins 44 px */
+#bc .tools .tb{min-width:44px;min-height:44px}
+/* Enregistrer = verre normal, texte neutre ; l'orange reste pour l'action principale */
+#bc.cv .acts .ab:not(:first-child){color:var(--tx)!important}
+#bc.cv .acts .ab:not(:first-child) .ic{color:var(--acc-tx)}
+/* accessibilité */
+@media (prefers-reduced-transparency:reduce){
+ #bc :is(.tools,.mb,.nav-in,.swap){-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:#1c1c1e!important}
+ html[data-theme=light] #bc :is(.tools,.mb,.nav-in,.swap){background:#fff!important}}
+@media (prefers-contrast:more){
+ html{--gl-bd:1px solid rgba(255,255,255,.4)}html[data-theme=light]{--gl-bd:1px solid rgba(0,0,0,.35)}
+ #bc :is(.fold,.grp,.vr .val,.vr .sel,.vr .exp){border-color:currentColor!important}}
+@media (prefers-reduced-motion:reduce){#bc *,#bc *::before,#bc *::after{transition-duration:.01ms!important;animation-duration:.01ms!important}}
 </style>
 </head>
 <body>
